@@ -8,6 +8,10 @@ INSTALLATION:
 Just put the code inside the repo directory and make your webserver pointing to it.
 
 
+REMARK:
+This website don't use cookies (except the session cookie). It's tracker free.
+For the moment, it didn't use database or nosql things just files.
+
 TODO:
 
 * Filter the apps

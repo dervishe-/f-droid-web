@@ -79,13 +79,13 @@ function build_headers($title, $description=null, $favicon=null) { //{{{
 function build_footers() { //{{{
 	echo '</body></html>';
 };//}}}
-function build_lang_selector($file_lang, $lang) { //{{{
+function build_lang_selector($lang_label, $lang) { //{{{
 	echo "<dl><dt>{$lang['language']}: </dt><dd><ul>";
 	if ($dh = opendir("lang")) {
 		while (false !== ($file = readdir($dh))) {
 			if (is_file("lang".DIRECTORY_SEPARATOR.$file)) {
 				$file = substr($file, 0, 2);
-				echo ($file != $file_lang) ? "<li><a href=\"?lang={$file}\">{$file}</a></li>" : "<li>{$file}</li>";
+				echo ($file != $lang_label) ? "<li><a href=\"?lang={$file}\">{$file}</a></li>" : "<li>{$file}</li>";
 			};
 		};
 		closedir($dh);
@@ -231,17 +231,13 @@ if (!is_file(MANIFEST) || $hash != file_get_contents(MANIFEST)) {
 //}}}
 //{{{Select lang
 if (isset($_GET['lang'])) {
-	$file_lang = filter_var($_GET['lang'], FILTER_VALIDATE_REGEXP, array('options'=>array('regexp'=>'/^[a-z]{2}$/')));
-	if ($file_lang === false || !is_file('lang'.DIRECTORY_SEPARATOR."{$file_lang}.php")) {
-		$file_lang = DEFAULT_LANG;
-	} else {
-		$_SESSION['lang'] = $file_lang;
-	};
+	$lang_label = filter_var($_GET['lang'], FILTER_VALIDATE_REGEXP, array('options'=>array('regexp'=>'/^[a-z]{2}$/')));
+	if ($lang_label === false || !is_file('lang'.DIRECTORY_SEPARATOR."{$lang_label}.php")) $lang_label = DEFAULT_LANG;
+	$_SESSION['lang'] = $lang_label;
 } elseif (isset($_SESSION['lang'])) {
-	$file_lang = $_SESSION['lang'];
-	if ($file_lang === false || !is_file('lang'.DIRECTORY_SEPARATOR."{$file_lang}.php")) $file_lang = DEFAULT_LANG;
+	$lang_label = (is_file('lang'.DIRECTORY_SEPARATOR."{$_SESSION['lang']}.php")) ? $_SESSION['lang'] : DEFAULT_LANG;
 } else {
-	$file_lang = DEFAULT_LANG;
+	$lang_label = DEFAULT_LANG;
 };
 //}}}
 $liste = build_list($repos['list']);
@@ -254,9 +250,9 @@ if (isset($_GET['page'])) {
 };
 $tampon = array_slice($liste, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 //}}}
-include_once("lang/{$file_lang}.php");
+include_once("lang/{$lang_label}.php");
 build_headers($repos['name'], $repos['desc']);
-build_lang_selector($file_lang, $lang);
+build_lang_selector($lang_label, $lang);
 build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
 foreach($tampon as $app) {
 	build_app($app, $lang);
