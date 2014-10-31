@@ -19,9 +19,9 @@ define('CACHE', 'cache');
 define('CATEGORIES', 'categories.txt');
 define('DATA', 'index.xml');
 define('REPOS_FILE', CACHE.DIRECTORY_SEPARATOR.'repository');
-define('CAT_FILE', CACHE.DIRECTORY_SEPARATOR.'categories');
-define('REL_FILE', CACHE.DIRECTORY_SEPARATOR.'relations');
-define('MANIFEST', CACHE.DIRECTORY_SEPARATOR.'Manifest');
+define('CAT_FILE', CACHE.DIRECTORY_SEPARATOR.'categories'); // store categories as an array
+define('REL_FILE', CACHE.DIRECTORY_SEPARATOR.'relations'); // store relations between categories and apps as an array
+define('MANIFEST', CACHE.DIRECTORY_SEPARATOR.'Manifest'); // store index.xml hash
 // PARAMETERS
 define('HASH_ALGO', 'whirlpool');
 define('USE_QRCODE', true);
@@ -179,8 +179,10 @@ function build_app($app, $lang) { //{{{
 </fieldset>";
 };
 //}}}
-function build_list($data, $param=null) { //{{{
-	if (is_null($param)) return $data;
+function build_list($data, $params=null) { //{{{
+	if (isset($params['categories'])) {
+		
+	};
 	return $data;
 };//}}}
 function init($hash) { //{{{
@@ -196,14 +198,19 @@ function init($hash) { //{{{
 //}}}
 //}}}
 libxml_use_internal_errors(true);
-if (!is_file(DATA) || simplexml_load_file(DATA) === false) {
-	build_headers('Error', "Ooops, this repository is temporarily unavailable. We're sorry. Re-try latter please.");
-	build_footers();
-	exit;
+if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false) {
+	if (!is_file(MANIFEST)) {
+		build_headers('Error', "Ooops, this repository is temporarily unavailable. We're sorry. Re-try latter please.");
+		build_footers();
+		exit;
+	} else {		// Fallback if DATA is not existing or not readable or not well formed
+		$hash = file_get_contents(MANIFEST);
+	};
+} else {
+	$hash = hash_file(HASH_ALGO, DATA);
 };
 //{{{ Retrieve data from cache
-$hash = hash_file(HASH_ALGO, DATA);
-if (!is_file(MANIFEST) || $hash != file_get_contents(MANIFEST)) {
+if ($hash != file_get_contents(MANIFEST)) {
 	$data = init($hash);
 	$repos = $data['repos'];
 	$categories = $data['cat'];
@@ -211,9 +218,13 @@ if (!is_file(MANIFEST) || $hash != file_get_contents(MANIFEST)) {
 } else {
 	if (is_file(REPOS_FILE)) {
 		$repos = unserialize(file_get_contents(REPOS_FILE));
-	} else {
+	} elseif (is_file(DATA) && is_readable(DATA) || simplexml_load_file(DATA) !== false) {
 		$repos = build_structure(simplexml_load_file(DATA));
 		file_put_contents(REPOS_FILE, serialize($repos));
+	} else {
+		build_headers('Error', "Ooops, this repository is temporarily unavailable. We're sorry. Re-try latter please.");
+		build_footers();
+		exit;
 	};
 	if (is_file(CAT_FILE)) {
 		$categories = unserialize(file_get_contents(CAT_FILE));

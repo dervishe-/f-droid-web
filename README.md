@@ -17,6 +17,7 @@ TODO:
 * Filter the apps
 * Search apps on summary, name and desc
 * Stylization (CSS)
+* JSONification 
 * UI dynamization (JS)
 * Add other languages (german, spanish, ...)
 * WCAG2.0 AAA + Section 508 validations
