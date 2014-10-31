@@ -100,8 +100,22 @@ function build_pager($page_number, $max) { //{{{
 	echo "</ul></dd></dl>";
 };//}}}
 function build_categories() { //{{{
-	$cat = file(CATEGORIES, FILE_SKIP_EMPTY_LINES);
-	sort($cat);
+	if (is_file(CATEGORIES) && is_readable(CATEGORIES)) {
+		$cat = array_flip(file(CATEGORIES, FILE_SKIP_EMPTY_LINES));
+	} else {	// Fallback if CATEGORIES isn't present we get the categories from DATA
+		$data = simplexml_load_file(DATA);
+		if ($data !== false) {
+			$cat = array();
+			foreach ($data->application as $app) {
+				$ls_cat = explode(',', (string) $app->categories);
+				foreach ($ls_cat as $ct) { if (!isset($cat[$ct])) $cat[] = $ct; };
+			};
+		} else {
+			$cat = null;
+		};
+	};
+	if (is_null($cat)) return false;
+	ksort($cat);
 	return $cat;
 };
 //}}}
@@ -181,16 +195,25 @@ function build_app($app, $lang) { //{{{
 //}}}
 function build_list($data, $params=null) { //{{{
 	if (isset($params['categories'])) {
-		
+		$list = array();
+		foreach ($params['relations'][$params['categories']] as $app) {
+			$list[] = $data[$app];
+		};
+	} else {
+		$list = $data;
 	};
-	return $data;
+	return $list;
 };//}}}
 function init($hash) { //{{{
 	file_put_contents(MANIFEST, $hash);
 	$repos = build_structure(simplexml_load_file(DATA));
 	file_put_contents(REPOS_FILE, serialize($repos));
 	$cat = build_categories();
-	file_put_contents(CAT_FILE, serialize($cat));
+	if ($cat !== false) {
+		file_put_contents(CAT_FILE, serialize($cat));
+	} else {
+		$cat = array();
+	};
 	$rel = build_relations();
 	file_put_contents(REL_FILE, serialize($rel));
 	return array('repos'=>$repos, "cat"=>$cat, 'rel'=>$rel);
@@ -208,6 +231,7 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 	};
 } else {
 	$hash = hash_file(HASH_ALGO, DATA);
+	if (!is_file(MANIFEST)) file_put_contents(MANIFEST, $hash);
 };
 //{{{ Retrieve data from cache
 if ($hash != file_get_contents(MANIFEST)) {
@@ -230,10 +254,10 @@ if ($hash != file_get_contents(MANIFEST)) {
 		$categories = unserialize(file_get_contents(CAT_FILE));
 	} else {
 		$categories = build_categories();
-		file_put_contents(CAT_FILE, serialize($categories));
+		if ($categories !== false) file_put_contents(CAT_FILE, serialize($categories));
 	};
 	if (is_file(REL_FILE)) {
-		$relations = unserialize(file_get_contents(CAT_FILE));
+		$relations = unserialize(file_get_contents(REL_FILE));
 	} else {
 		$relations = build_relations();
 		file_put_contents(REL_FILE, serialize($relations));
