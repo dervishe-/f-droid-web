@@ -3,7 +3,13 @@ f-droid-web
 
 A simple and lightweight webpage which aims is to present the apps stored in a f-droid repository
 
-Todo:
+INSTALLATION:
+
+Just put the code inside the repo directory and make your webserver pointing to it.
+
+
+TODO:
+
 * Filter the apps
 * Search apps on summary, name and desc
 * Stylization (CSS)

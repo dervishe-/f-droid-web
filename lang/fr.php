@@ -4,12 +4,14 @@ $lang = array(
 	'version' => 'Version',
 	'added' => 'Ajouté le',
 	'size' => 'Taille',
+	'desc' => 'Description',
 	'license' => 'License',
 	'categories' => 'Catégories',
 	'updated' => 'Modifié le',
 	'summary' => 'Description',
 	'permissions' => 'Permissions',
 	'download' => 'Télécharger',
+	'requirements' => 'Exigences',
 	'ACCESS_NETWORK_STATE' => "Accès à l'état du réseau",
 	'WRITE_EXTERNAL_STORAGE' => "Ecriture sur le stockage extérieur",
 	'VIBRATE' => 'Accès au vibreur',
@@ -18,6 +20,7 @@ $lang = array(
 	'READ_PHONE_STATE' => "Lecture de l'état du téléphone",
 	'READ_EXTERNAL_STORAGE' => "Lecture sur le stockage externe",
 	'READ_FRAME_BUFFER' => "Accès au frame buffer",
-	'CAMERA' => "Accès à la caméra"
+	'CAMERA' => "Accès à la caméra",
+	'ACCESS_SUPERUSER' => "Demande les droits 'super utilisateur'"
 );
 ?>

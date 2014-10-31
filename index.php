@@ -3,7 +3,7 @@
  *	vim: foldmarker{{{,}}}
  *
  *	@author A. Keledjian	<dervishe@yahoo.fr>
- *	@license GNU LEsser General Public License
+ *	@license http://opensource.org/licenses/LGPL-3.0 GNU Public License
  *	@version 1.0
  *
  *	Lightweight website for f-droid server
@@ -11,14 +11,19 @@
  */
 session_start();
 //{{{ Configuration
-$data = "index.xml";
-$cache = "cache";
-$icons_dir = "icons-480";
-$qrcodes_dir = "qrcodes";
-$manifest = $cache.DIRECTORY_SEPARATOR."Manifest";
-$repos_file = $cache.DIRECTORY_SEPARATOR."repository";
-$hash_algo = "whirlpool";
-
+// DIRECTORIES
+define('ICONS_DIR', 'icons-480');
+define('QRCODES_DIR', 'qrcodes');
+define('CACHE', 'cache');
+// FILES
+define('CATEGORIES', 'categories.txt');
+define('DATA', 'index.xml');
+define('REPOS_FILE', CACHE.DIRECTORY_SEPARATOR.'repository');
+define('CAT_FILE', CACHE.DIRECTORY_SEPARATOR.'categories');
+define('REL_FILE', CACHE.DIRECTORY_SEPARATOR.'relations');
+define('MANIFEST', CACHE.DIRECTORY_SEPARATOR.'Manifest');
+// PARAMETERS
+define('HASH_ALGO', 'whirlpool');
 define('USE_QRCODE', true);
 define('RECORDS_PER_PAGE',  3);
 define('DEFAULT_LANG', 'fr');
@@ -44,6 +49,7 @@ function build_structure($_xml) { //{{{
 		$application['category'] = (string) $app->category;
 		$application['web'] = (string) $app->web;
 		$application['source'] = (string) $app->source;
+		$application['requirements'] = (string) $app->requirements;
 		$package = array();
 		$package['version'] = (string) $app->package->version;
 		$package['apkname'] = (string) $app->package->apkname;
@@ -93,15 +99,34 @@ function build_pager($page_number, $max) { //{{{
 	for ($i = $page_number + 1; $i <= $max; $i++) { echo "<li><a href=\"?page={$i}\">{$i}</a></li>"; };
 	echo "</ul></dd></dl>";
 };//}}}
+function build_categories() { //{{{
+	$cat = file(CATEGORIES, FILE_SKIP_EMPTY_LINES);
+	sort($cat);
+	return $cat;
+};
+//}}}
+function build_relations() { //{{{
+	$data = simplexml_load_file(DATA);
+	$rel = array();
+	foreach ($data->application as $app) {
+		$ls_cat = explode(',', (string) $app->categories);
+		foreach ($ls_cat as $cat) {
+			if (!isset($rel[$cat])) $rel[$cat] = array();
+			$rel[$cat][] = (string) $app->id;
+		};
+	};
+	return $rel;
+};
+//}}}
 function translate($item) { //{{{
 	global $lang;
 	return ($lang[$item]) ? $lang[$item] : $item;
 };
 //}}}
-function build_app($app, $qrcodes_dir, $icons_dir, $lang) { //{{{
+function build_app($app, $lang) { //{{{
 	if (USE_QRCODE) {
 		include_once('phpqrcode/phpqrcode.php');
-		$qrcode = $qrcodes_dir.DIRECTORY_SEPARATOR.$app['id'].".png";
+		$qrcode = QRCODES_DIR.DIRECTORY_SEPARATOR.$app['id'].".png";
 		if (!is_file($qrcode)) {
 			QRCode::png("https://{$_SERVER['SERVER_NAME']}/{$app['package']['apkname']}", $qrcode);
 		};
@@ -111,12 +136,13 @@ function build_app($app, $qrcodes_dir, $icons_dir, $lang) { //{{{
 	} else {
 		$tag_qrcode = "<dt><a href=\"{$app['package']['apkname']}\">{$lang['download']}</a></dt>";
 	};
-	$icon = $icons_dir.DIRECTORY_SEPARATOR.$app['icon'];
+	$icon = ICONS_DIR.DIRECTORY_SEPARATOR.$app['icon'];
 	$version = "<dt>{$lang['version']}:</dt><dd>{$app['package']['version']} - {$lang['added']}: {$app['updated']}</dd>";
 	$license = ($app['license'] != 'Unknown') ? "<dt>{$lang['license']}:</dt><dd>{$app['license']}</dd>" : '';
 	$updated = "<dt>{$lang['updated']}:</dt><dd>{$app['updated']}</dd>";
 	$summary = "<dt>{$lang['summary']}:</dt><dd>{$app['summary']}</dd>";
-	
+	$desc = "<dt>{$lang['desc']}:</dt><dd>{$app['desc']}</dd>";
+	$requirements = (strlen($app['requirements']) > 0) ? "<dt>{$lang['requirements']}:</dt><dd>{$app['requirements']}</dd>" : '';
 	$size = $app['package']['size'];
 	if (($size / 1048572) > 1) {
 		$size /= 1048572;
@@ -146,40 +172,63 @@ function build_app($app, $qrcodes_dir, $icons_dir, $lang) { //{{{
 		".(($cats != '') ? $categories : '')."
 		{$license}
 		".(($perms != '') ? $permissions : '')."
+		{$desc}
+		{$requirements}
 		{$tag_qrcode}
 	</dl>
 </fieldset>";
 };
 //}}}
 function build_list($data, $param=null) { //{{{
-	if (is_null($data)) return $data;
+	if (is_null($param)) return $data;
 	return $data;
 };//}}}
-//}}}
-if (!is_dir($cache)) {
-	mkdir($cache);
-	file_put_contents($cache.DIRECTORY_SEPARATOR.".htaccess", 'deny from all');
+function init($hash) { //{{{
+	file_put_contents(MANIFEST, $hash);
+	$repos = build_structure(simplexml_load_file(DATA));
+	file_put_contents(REPOS_FILE, serialize($repos));
+	$cat = build_categories();
+	file_put_contents(CAT_FILE, serialize($cat));
+	$rel = build_relations();
+	file_put_contents(REL_FILE, serialize($rel));
+	return array('repos'=>$repos, "cat"=>$cat, 'rel'=>$rel);
 };
+//}}}
+//}}}
 libxml_use_internal_errors(true);
-if (!is_file($data) || simplexml_load_file($data) === false) {
+if (!is_file(DATA) || simplexml_load_file(DATA) === false) {
 	build_headers('Error', "Ooops, this repository is temporarily unavailable. We're sorry. Re-try latter please.");
 	build_footers();
 	exit;
 };
-
-$hash = hash_file($hash_algo, $data);
-if (!is_file($manifest) || $hash != file_get_contents($manifest)) {
-	file_put_contents($manifest, $hash);
-	$repos = build_structure(simplexml_load_file($data));
-	file_put_contents($repos_file, serialize($repos));
+//{{{ Retrieve data from cache
+$hash = hash_file(HASH_ALGO, DATA);
+if (!is_file(MANIFEST) || $hash != file_get_contents(MANIFEST)) {
+	$data = init($hash);
+	$repos = $data['repos'];
+	$categories = $data['cat'];
+	$relations = $data['rel'];
 } else {
-	if (is_file($repos_file)) {
-		$repos = unserialize(file_get_contents($repos_file));
+	if (is_file(REPOS_FILE)) {
+		$repos = unserialize(file_get_contents(REPOS_FILE));
 	} else {
-		$repos = build_structure(simplexml_load_file($data));
-		file_put_contents($repos_file, serialize($repos));
+		$repos = build_structure(simplexml_load_file(DATA));
+		file_put_contents(REPOS_FILE, serialize($repos));
+	};
+	if (is_file(CAT_FILE)) {
+		$categories = unserialize(file_get_contents(CAT_FILE));
+	} else {
+		$categories = build_categories();
+		file_put_contents(CAT_FILE, serialize($categories));
+	};
+	if (is_file(REL_FILE)) {
+		$relations = unserialize(file_get_contents(CAT_FILE));
+	} else {
+		$relations = build_relations();
+		file_put_contents(REL_FILE, serialize($relations));
 	};
 };
+//}}}
 //{{{Select lang
 if (isset($_GET['lang'])) {
 	$file_lang = filter_var($_GET['lang'], FILTER_VALIDATE_REGEXP, array('options'=>array('regexp'=>'/^[a-z]{2}$/')));
@@ -210,7 +259,7 @@ build_headers($repos['name'], $repos['desc']);
 build_lang_selector($file_lang, $lang);
 build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
 foreach($tampon as $app) {
-	build_app($app, $qrcodes_dir, $icons_dir, $lang);
+	build_app($app, $lang);
 };
 build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
 build_footers();
