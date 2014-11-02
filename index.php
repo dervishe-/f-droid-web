@@ -59,6 +59,7 @@ function build_structure($_xml) { //{{{
 		$application['package'] = $package;
 		$repos['list'][] = $application;
 	};
+	file_put_contents(REPOS_FILE, serialize($repos));
 	return $repos;
 };//}}}
 function build_headers($title, $description=null, $favicon=null) { //{{{
@@ -99,36 +100,48 @@ function build_pager($page_number, $max) { //{{{
 	for ($i = $page_number + 1; $i <= $max; $i++) { echo "<li><a href=\"?page={$i}\">{$i}</a></li>"; };
 	echo "</ul></dd></dl>";
 };//}}}
-function build_categories() { //{{{
+function build_categories($repos) { //{{{
+	$cat = array();
 	if (is_file(CATEGORIES) && is_readable(CATEGORIES)) {
 		$cat = array_flip(file(CATEGORIES, FILE_SKIP_EMPTY_LINES));
-	} else {	// Fallback if CATEGORIES isn't present we get the categories from DATA
-		$data = simplexml_load_file(DATA);
-		if ($data !== false) {
-			$cat = array();
+	} else {	// Fallback: if CATEGORIES isn't present we get the categories from DATA or from $repos structure
+		if (($data = simplexml_load_file(DATA)) !== false) {
 			foreach ($data->application as $app) {
 				$ls_cat = explode(',', (string) $app->categories);
 				foreach ($ls_cat as $ct) { if (!isset($cat[$ct])) $cat[] = $ct; };
 			};
-		} else {
-			$cat = null;
+		} elseif (count($repos) > 0) {		// Fallback: if DATA is not present, then we use $repos structure
+			foreach ($repos as $app) {
+				$ls_cat = explode(',', $app['categories']);
+				foreach ($ls_cat as $ct) { if (!isset($cat[$ct])) $cat[] = $ct; };
+			};
 		};
 	};
-	if (is_null($cat)) return false;
 	ksort($cat);
+	if (count($cat) > 0) file_put_contents(CAT_FILE, serialize($cat));
 	return $cat;
 };
 //}}}
-function build_relations() { //{{{
-	$data = simplexml_load_file(DATA);
+function build_relations($repos) { //{{{
 	$rel = array();
-	foreach ($data->application as $app) {
-		$ls_cat = explode(',', (string) $app->categories);
-		foreach ($ls_cat as $cat) {
-			if (!isset($rel[$cat])) $rel[$cat] = array();
-			$rel[$cat][] = (string) $app->id;
+	if (is_file(DATA) && is_readable(DATA) && ($data = simplexml_load_file(DATA)) !== false) {
+		foreach ($data->application as $app) {
+			$ls_cat = explode(',', (string) $app->categories);
+			foreach ($ls_cat as $cat) {
+				if (!isset($rel[$cat])) $rel[$cat] = array();
+				$rel[$cat][] = (string) $app->id;
+			};
+		};
+	} elseif (count($repos) > 0) {		// Fallback: if DATA is not present, then we use $repos structure
+		foreach ($repos as $app) {
+			$ls_cat = explode(',', $app['categories']);
+			foreach ($ls_cat as $cat) {
+				if (!isset($rel[$cat])) $rel[$cat] = array();
+				$rel[$cat][] = $app['id'];
+			};
 		};
 	};
+	if (count($rel) > 0) file_put_contents(REL_FILE, serialize($rel));
 	return $rel;
 };
 //}}}
@@ -204,63 +217,39 @@ function build_list($data, $params=null) { //{{{
 	};
 	return $list;
 };//}}}
-function init($hash) { //{{{
+function build_cache_data($hash) { //{{{
 	file_put_contents(MANIFEST, $hash);
 	$repos = build_structure(simplexml_load_file(DATA));
-	file_put_contents(REPOS_FILE, serialize($repos));
-	$cat = build_categories();
-	if ($cat !== false) {
-		file_put_contents(CAT_FILE, serialize($cat));
-	} else {
-		$cat = array();
-	};
-	$rel = build_relations();
-	file_put_contents(REL_FILE, serialize($rel));
+	$cat = build_categories($repos['list']);
+	$rel = build_relations($repos['list']);
 	return array('repos'=>$repos, "cat"=>$cat, 'rel'=>$rel);
 };
 //}}}
 //}}}
+//{{{ Retrieve data from cache
 libxml_use_internal_errors(true);
 if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false) {
-	if (!is_file(MANIFEST)) {
+	if (!is_file(REPOS_FILE)) {
 		build_headers('Error', "Ooops, this repository is temporarily unavailable. We're sorry. Re-try latter please.");
 		build_footers();
 		exit;
-	} else {		// Fallback if DATA is not existing or not readable or not well formed
-		$hash = file_get_contents(MANIFEST);
+	} else {
+		$repos = unserialize(file_get_contents(REPOS_FILE));
+		$categories = (is_file(CAT_FILE)) ? unserialize(file_get_contents(CAT_FILE)) : build_categories($repos['list']);
+		$relations = (is_file(REL_FILE)) ? unserialize(file_get_contents(REL_FILE)) : build_relations($repos['list']);
 	};
 } else {
 	$hash = hash_file(HASH_ALGO, DATA);
-	if (!is_file(MANIFEST)) file_put_contents(MANIFEST, $hash);
-};
-//{{{ Retrieve data from cache
-if ($hash != file_get_contents(MANIFEST)) {
-	$data = init($hash);
-	$repos = $data['repos'];
-	$categories = $data['cat'];
-	$relations = $data['rel'];
-} else {
-	if (is_file(REPOS_FILE)) {
+	if ((is_file(MANIFEST) && $hash != file_get_contents(MANIFEST)) || !is_file(REPOS_FILE)) {
+		$data = build_cache_data($hash);
+		$repos = $data['repos'];
+		$categories = $data['cat'];
+		$relations = $data['rel'];
+	} else {
+		file_put_contents(MANIFEST, $hash);
 		$repos = unserialize(file_get_contents(REPOS_FILE));
-	} elseif (is_file(DATA) && is_readable(DATA) || simplexml_load_file(DATA) !== false) {
-		$repos = build_structure(simplexml_load_file(DATA));
-		file_put_contents(REPOS_FILE, serialize($repos));
-	} else {
-		build_headers('Error', "Ooops, this repository is temporarily unavailable. We're sorry. Re-try latter please.");
-		build_footers();
-		exit;
-	};
-	if (is_file(CAT_FILE)) {
-		$categories = unserialize(file_get_contents(CAT_FILE));
-	} else {
-		$categories = build_categories();
-		if ($categories !== false) file_put_contents(CAT_FILE, serialize($categories));
-	};
-	if (is_file(REL_FILE)) {
-		$relations = unserialize(file_get_contents(REL_FILE));
-	} else {
-		$relations = build_relations();
-		file_put_contents(REL_FILE, serialize($relations));
+		$categories = (is_file(CAT_FILE)) ? unserialize(file_get_contents(CAT_FILE)) : build_categories($repos['list']);
+		$relations = (is_file(REL_FILE)) ? unserialize(file_get_contents(REL_FILE)) : build_relations($repos['list']);
 	};
 };
 //}}}
