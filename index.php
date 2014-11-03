@@ -12,12 +12,13 @@
 session_start();
 //{{{ Configuration
 // DIRECTORIES
-define('ICONS_DIR', 'icons-480');
+define('ROOT', dirname(__FILE__));
+define('ICONS_DIR', ROOT.DIRECTORY_SEPARATOR.'icons-480');
 define('QRCODES_DIR', 'qrcodes');
-define('CACHE', 'cache');
+define('CACHE', ROOT.DIRECTORY_SEPARATOR.'cache');
 // FILES
-define('CATEGORIES', 'categories.txt');
-define('DATA', 'index.xml');
+define('CATEGORIES', ROOT.DIRECTORY_SEPARATOR.'categories.txt');
+define('DATA', ROOT.DIRECTORY_SEPARATOR.'index.xml');
 define('REPOS_FILE', CACHE.DIRECTORY_SEPARATOR.'repository');
 define('CAT_FILE', CACHE.DIRECTORY_SEPARATOR.'categories'); // store categories as an array
 define('REL_FILE', CACHE.DIRECTORY_SEPARATOR.'relations'); // store relations between categories and apps as an array
@@ -82,7 +83,7 @@ function build_footers() { //{{{
 	echo '</body></html>';
 };//}}}
 function build_lang_selector($lang_label, $lang) { //{{{
-	echo "<dl><dt>{$lang['iface']['language']}: </dt><dd><ul>";
+	echo "<dl><dt>".translate('iface', 'language', $lang).": </dt><dd><ul>";
 	if ($dh = opendir("lang")) {
 		while (false !== ($file = readdir($dh))) {
 			if (is_file("lang".DIRECTORY_SEPARATOR.$file)) {
@@ -156,6 +157,10 @@ function translate_cat($item) { //{{{
 	return (isset($lang['cat'][$item])) ? $lang['cat'][$item] : $item;
 };
 //}}}
+function translate($cat, $item, $lang) { //{{{
+	return (isset($lang[$cat][$item])) ? $lang[$cat][$item] : $item;
+};
+//}}}
 function decore_app($app, $lang) { //{{{
 	if (USE_QRCODE) {
 		include_once('phpqrcode/phpqrcode.php');
@@ -165,36 +170,36 @@ function decore_app($app, $lang) { //{{{
 		};
 		$tag_qrcode = "
 		<dt><img src=\"{$qrcode}\" alt=\"QR-Code {$app['name']}\" title=\"QR-Code {$app['name']}\" /></dt>
-		<dd><a href=\"{$app['package']['apkname']}\">{$lang['iface']['download']}</a></dd>";
+		<dd><a href=\"{$app['package']['apkname']}\">".translate('iface', 'download', $lang)."</a></dd>";
 	} else {
-		$tag_qrcode = "<dt><a href=\"{$app['package']['apkname']}\">{$lang['iface']['download']}</a></dt>";
+		$tag_qrcode = "<dt><a href=\"{$app['package']['apkname']}\">".translate('iface', 'download', $lang)."</a></dt>";
 	};
 	$icon = ICONS_DIR.DIRECTORY_SEPARATOR.$app['icon'];
-	$version = "<dt>{$lang['iface']['version']}:</dt><dd>{$app['package']['version']} - {$lang['iface']['added']}: {$app['updated']}</dd>";
-	$license = ($app['license'] != 'Unknown') ? "<dt>{$lang['iface']['license']}:</dt><dd>{$app['license']}</dd>" : '';
-	$updated = "<dt>{$lang['iface']['updated']}:</dt><dd>{$app['updated']}</dd>";
-	$summary = "<dt>{$lang['iface']['summary']}:</dt><dd>{$app['summary']}</dd>";
-	$desc = "<dt>{$lang['iface']['desc']}:</dt><dd>{$app['desc']}</dd>";
-	$requirements = (strlen($app['requirements']) > 0) ? "<dt>{$lang['iface']['requirements']}:</dt><dd>{$app['requirements']}</dd>" : '';
+	$version = "<dt>".translate('iface', 'version', $lang).":</dt><dd>{$app['package']['version']} - ".translate('iface', 'added', $lang).": {$app['updated']}</dd>";
+	$license = ($app['license'] != 'Unknown') ? "<dt>".translate('iface', 'license', $lang).":</dt><dd>{$app['license']}</dd>" : '';
+	$updated = "<dt>".translate('iface', 'updated', $lang).":</dt><dd>{$app['updated']}</dd>";
+	$summary = "<dt>".translate('iface', 'summary', $lang).":</dt><dd>{$app['summary']}</dd>";
+	$desc = "<dt>".translate('iface', 'desc', $lang).":</dt><dd>{$app['desc']}</dd>";
+	$requirements = (strlen($app['requirements']) > 0) ? "<dt>".translate('iface', 'requirements', $lang).":</dt><dd>{$app['requirements']}</dd>" : '';
 	$size = $app['package']['size'];
 	if (($size / 1048572) > 1) {
 		$size /= 1048572;
-		$size = "<dt>{$lang['iface']['size']}:</dt><dd>".round($size, 2)." MB</dd>";
+		$size = "<dt>".translate('iface', 'size', $lang).":</dt><dd>".round($size, 2)." MB</dd>";
 	} else {
 		$size /= 1024;
-		$size = "<dt>{$lang['iface']['size']}:</dt><dd>".round($size, 2)." kB</dd>";
+		$size = "<dt>".translate('iface', 'size', $lang).":</dt><dd>".round($size, 2)." kB</dd>";
 	};
 	
 	$categories = $app['categories'];
 	$cats = (strlen($categories) > 0 && $categories != 'None') ? "<ul><li>".implode('</li><li>', array_map('translate_cat', explode(',', $categories)))."</li></ul>" : '';
-	$categories = "<dt>{$lang['iface']['categories']}:</dt><dd>{$cats}</dd>";
+	$categories = "<dt>".translate('iface', 'categories', $lang).":</dt><dd>{$cats}</dd>";
 	
 	
 	$permissions = $app['package']['permissions'];
 	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_perm', explode(',', $permissions)))."</li></ul>" : '';
-	$permissions = "<dt>{$lang['iface']['permissions']}:</dt><dd>{$perms}</dd>";
+	$permissions = "<dt>".translate('iface', 'permissions', $lang).":</dt><dd>{$perms}</dd>";
 	
-	echo "<fieldset id=\"{$app['id']}\">
+	echo "<li><fieldset id=\"{$app['id']}\">
 	<legend>{$app['name']}</legend>
 	<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
 	<dl>
@@ -209,7 +214,14 @@ function decore_app($app, $lang) { //{{{
 		{$requirements}
 		{$tag_qrcode}
 	</dl>
-</fieldset>";
+</fieldset></li>";
+};
+//}}}
+function decore_applist($tampon, $lang) { //{{{
+	echo "<a href=\"#menu\">".translate('iface', 'menu', $lang)."</a>";
+	echo "<ul id=\"applist\">";
+	foreach($tampon as $app) { decore_app($app, $lang); };
+	echo "</ul>";
 };
 //}}}
 function build_list($data, $params=null) { //{{{
@@ -253,17 +265,27 @@ function apply_filters($relations, $categories) { //{{{
 //}}}
 function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
 	if (count($relations) > 0) {
-		echo "<fieldset><legend>{$lang['iface']['categories']}:</legend><ul>";
-		echo "<li><a href=\"?\" title=\"{$lang['iface']['all_categories']}\">{$lang['iface']['all_categories']}</a><span> ({$nbr_apps})</span></li>";
+		echo "<fieldset id=\"categories\"><legend>".translate('iface', 'categories', $lang).": <a href=\"#menu\">".translate('iface', 'menu', $lang)."</a></legend><ul>";
+		$lab_all_cat = translate('iface', 'all_categories', $lang);
+		echo "<li><a href=\"?\" title=\"{$lab_all_cat}\">{$lab_all_cat}</a><span> ({$nbr_apps})</span></li>";
 		reset($relations);
 		while (false !== ($cat = current($relations))) {
-			$name_cat = (isset($lang['cat'][key($relations)])) ? $lang['cat'][key($relations)] : key($relations);
-			echo "<li><a href=\"?prop=cat&amp;val=".key($relations)."\" title=\"{$lang['iface']['alt_cat_link']} {$name_cat}\">{$name_cat}</a><span> (".count($cat).")</span></li>";
+			$name_cat = translate('cat', key($relations), $lang);
+			echo "<li>
+					<a href=\"?prop=cat&amp;val=".key($relations)."\" title=\"".translate('iface', 'alt_cat_link', $lang)." {$name_cat}\">{$name_cat}</a>
+					<span> (".count($cat).")</span></li>";
 			next($relations);
 		};
 		echo "</ul></fieldset>";
 	};
 };	
+//}}}
+function build_menu($lang) { //{{{
+	echo "<fieldset id=\"menu\"><legend>".translate('iface', 'menu', $lang)."</legend><ul>";
+	echo "<li><a href=\"#categories\">".translate('iface', 'categories', $lang)."</a></li>";
+	echo "<li><a href=\"#applist\">".translate('iface', 'applist', $lang)."</a></li>";
+	echo "</ul></fieldset>";
+};
 //}}}
 //}}}
 //{{{Select lang
@@ -282,7 +304,7 @@ include_once("lang/{$lang_label}.php");
 libxml_use_internal_errors(true);
 if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false) {
 	if (!is_file(REPOS_FILE)) {
-		build_headers($lang['iface']['error_label'], $lang['iface']['error_message']);
+		build_headers(translate('iface', 'error_label', $lang), translate('iface', 'error_message', $lang));
 		build_footers();
 		exit;
 	} else {
@@ -317,11 +339,10 @@ $tampon = array_slice($liste, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 //}}}
 build_headers($repos['name'], $repos['desc']);
 build_lang_selector($lang_label, $lang);
+build_menu($lang);
 build_tagcloud_categories($relations, $lang, $repos['nbr']);
 build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
-foreach($tampon as $app) {
-	decore_app($app, $lang);
-};
+decore_applist($tampon, $lang);
 build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
 build_footers();
 ?>
