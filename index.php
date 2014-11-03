@@ -59,6 +59,7 @@ function build_structure($_xml) { //{{{
 		$application['package'] = $package;
 		$repos['list'][(string) $app->id] = $application;
 	};
+	$repos['nbr'] = count($repos['list']);
 	file_put_contents(REPOS_FILE, serialize($repos));
 	return $repos;
 };//}}}
@@ -108,12 +109,12 @@ function build_categories($repos) { //{{{
 		if (($data = simplexml_load_file(DATA)) !== false) {
 			foreach ($data->application as $app) {
 				$ls_cat = explode(',', (string) $app->categories);
-				foreach ($ls_cat as $ct) { if (!isset($cat[$ct])) $cat[] = $ct; };
+				foreach ($ls_cat as $ct) { if (!isset($cat[$ct])) $cat[$ct] = 1; };
 			};
 		} elseif (count($repos) > 0) {		// Fallback: if DATA is not present, then we use $repos structure
 			foreach ($repos as $app) {
 				$ls_cat = explode(',', $app['categories']);
-				foreach ($ls_cat as $ct) { if (!isset($cat[$ct])) $cat[] = $ct; };
+				foreach ($ls_cat as $ct) { if (!isset($cat[$ct])) $cat[$ct] = 1; };
 			};
 		};
 	};
@@ -147,12 +148,12 @@ function build_relations($repos) { //{{{
 //}}}
 function translate_perm($item) { //{{{
 	global $lang;
-	return ($lang['perms'][$item]) ? $lang['perms'][$item] : $item;
+	return (isset($lang['perms'][$item])) ? $lang['perms'][$item] : $item;
 };
 //}}}
 function translate_cat($item) { //{{{
 	global $lang;
-	return ($lang['cat'][$item]) ? $lang['cat'][$item] : $item;
+	return (isset($lang['cat'][$item])) ? $lang['cat'][$item] : $item;
 };
 //}}}
 function decore_app($app, $lang) { //{{{
@@ -233,11 +234,11 @@ function build_cache_data($hash) { //{{{
 };
 //}}}
 function apply_filters($relations, $categories) { //{{{
-	if (!isset($_REQUEST['property'])) return null;
-	$property = $_REQUEST['property'];
+	if (!isset($_REQUEST['prop'])) return null;
+	$property = $_REQUEST['prop'];
 	if ($property == 'cat') {
-		if (!isset($_REQUEST['value'])) return null;
-		$value = $_REQUEST['value'];
+		if (!isset($_REQUEST['val'])) return null;
+		$value = $_REQUEST['val'];
 		if (isset($categories[$value])) {
 			return array('categories'=>$relations[$value]);
 		} else {
@@ -249,6 +250,20 @@ function apply_filters($relations, $categories) { //{{{
 		return null;
 	};
 };
+//}}}
+function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
+	if (count($relations) > 0) {
+		echo "<fieldset><label>{$lang['iface']['categories']}:</label><ul>";
+		echo "<li><a href=\"?\" title=\"{$lang['iface']['all_categories']}\">{$lang['iface']['all_categories']}</a><span> ({$nbr_apps})</span></li>";
+		reset($relations);
+		while (false !== ($cat = current($relations))) {
+			$name_cat = (isset($lang['cat'][key($relations)])) ? $lang['cat'][key($relations)] : key($relations);
+			echo "<li><a href=\"?prop=cat&val=".key($relations)."\" title=\"{$lang['iface']['alt_cat_link']} {$name_cat}\">{$name_cat}</a><span> (".count($cat).")</span></li>";
+			next($relations);
+		};
+		echo "</ul></fieldset>";
+	};
+};	
 //}}}
 //}}}
 //{{{Select lang
@@ -302,6 +317,7 @@ $tampon = array_slice($liste, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 //}}}
 build_headers($repos['name'], $repos['desc']);
 build_lang_selector($lang_label, $lang);
+build_tagcloud_categories($relations, $lang, $repos['nbr']);
 build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
 foreach($tampon as $app) {
 	decore_app($app, $lang);
