@@ -57,7 +57,7 @@ function build_structure($_xml) { //{{{
 		$package['permissions'] = (string) $app->package->permissions;
 		$package['sdkver'] = (string) $app->package->sdkver;
 		$application['package'] = $package;
-		$repos['list'][] = $application;
+		$repos['list'][(string) $app->id] = $application;
 	};
 	file_put_contents(REPOS_FILE, serialize($repos));
 	return $repos;
@@ -81,7 +81,7 @@ function build_footers() { //{{{
 	echo '</body></html>';
 };//}}}
 function build_lang_selector($lang_label, $lang) { //{{{
-	echo "<dl><dt>{$lang['language']}: </dt><dd><ul>";
+	echo "<dl><dt>{$lang['iface']['language']}: </dt><dd><ul>";
 	if ($dh = opendir("lang")) {
 		while (false !== ($file = readdir($dh))) {
 			if (is_file("lang".DIRECTORY_SEPARATOR.$file)) {
@@ -103,7 +103,7 @@ function build_pager($page_number, $max) { //{{{
 function build_categories($repos) { //{{{
 	$cat = array();
 	if (is_file(CATEGORIES) && is_readable(CATEGORIES)) {
-		$cat = array_flip(file(CATEGORIES, FILE_SKIP_EMPTY_LINES));
+		$cat = array_flip(file(CATEGORIES, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
 	} else {	// Fallback: if CATEGORIES isn't present we get the categories from DATA or from $repos structure
 		if (($data = simplexml_load_file(DATA)) !== false) {
 			foreach ($data->application as $app) {
@@ -145,12 +145,17 @@ function build_relations($repos) { //{{{
 	return $rel;
 };
 //}}}
-function translate($item) { //{{{
+function translate_perm($item) { //{{{
 	global $lang;
-	return ($lang[$item]) ? $lang[$item] : $item;
+	return ($lang['perms'][$item]) ? $lang['perms'][$item] : $item;
 };
 //}}}
-function build_app($app, $lang) { //{{{
+function translate_cat($item) { //{{{
+	global $lang;
+	return ($lang['cat'][$item]) ? $lang['cat'][$item] : $item;
+};
+//}}}
+function decore_app($app, $lang) { //{{{
 	if (USE_QRCODE) {
 		include_once('phpqrcode/phpqrcode.php');
 		$qrcode = QRCODES_DIR.DIRECTORY_SEPARATOR.$app['id'].".png";
@@ -159,34 +164,34 @@ function build_app($app, $lang) { //{{{
 		};
 		$tag_qrcode = "
 		<dt><img src=\"{$qrcode}\" alt=\"QR-Code {$app['name']}\" title=\"QR-Code {$app['name']}\" /></dt>
-		<dd><a href=\"{$app['package']['apkname']}\">{$lang['download']}</a></dd>";
+		<dd><a href=\"{$app['package']['apkname']}\">{$lang['iface']['download']}</a></dd>";
 	} else {
-		$tag_qrcode = "<dt><a href=\"{$app['package']['apkname']}\">{$lang['download']}</a></dt>";
+		$tag_qrcode = "<dt><a href=\"{$app['package']['apkname']}\">{$lang['iface']['download']}</a></dt>";
 	};
 	$icon = ICONS_DIR.DIRECTORY_SEPARATOR.$app['icon'];
-	$version = "<dt>{$lang['version']}:</dt><dd>{$app['package']['version']} - {$lang['added']}: {$app['updated']}</dd>";
-	$license = ($app['license'] != 'Unknown') ? "<dt>{$lang['license']}:</dt><dd>{$app['license']}</dd>" : '';
-	$updated = "<dt>{$lang['updated']}:</dt><dd>{$app['updated']}</dd>";
-	$summary = "<dt>{$lang['summary']}:</dt><dd>{$app['summary']}</dd>";
-	$desc = "<dt>{$lang['desc']}:</dt><dd>{$app['desc']}</dd>";
-	$requirements = (strlen($app['requirements']) > 0) ? "<dt>{$lang['requirements']}:</dt><dd>{$app['requirements']}</dd>" : '';
+	$version = "<dt>{$lang['iface']['version']}:</dt><dd>{$app['package']['version']} - {$lang['iface']['added']}: {$app['updated']}</dd>";
+	$license = ($app['license'] != 'Unknown') ? "<dt>{$lang['iface']['license']}:</dt><dd>{$app['license']}</dd>" : '';
+	$updated = "<dt>{$lang['iface']['updated']}:</dt><dd>{$app['updated']}</dd>";
+	$summary = "<dt>{$lang['iface']['summary']}:</dt><dd>{$app['summary']}</dd>";
+	$desc = "<dt>{$lang['iface']['desc']}:</dt><dd>{$app['desc']}</dd>";
+	$requirements = (strlen($app['requirements']) > 0) ? "<dt>{$lang['iface']['requirements']}:</dt><dd>{$app['requirements']}</dd>" : '';
 	$size = $app['package']['size'];
 	if (($size / 1048572) > 1) {
 		$size /= 1048572;
-		$size = "<dt>{$lang['size']}:</dt><dd>".round($size, 2)." MB</dd>";
+		$size = "<dt>{$lang['iface']['size']}:</dt><dd>".round($size, 2)." MB</dd>";
 	} else {
 		$size /= 1024;
-		$size = "<dt>{$lang['size']}:</dt><dd>".round($size, 2)." kB</dd>";
+		$size = "<dt>{$lang['iface']['size']}:</dt><dd>".round($size, 2)." kB</dd>";
 	};
 	
 	$categories = $app['categories'];
-	$cats = (strlen($categories) > 0 && $categories != 'None') ? "<ul><li>".implode('</li><li>', explode(',', $categories))."</li></ul>" : '';
-	$categories = "<dt>{$lang['categories']}:</dt><dd>{$cats}</dd>";
+	$cats = (strlen($categories) > 0 && $categories != 'None') ? "<ul><li>".implode('</li><li>', array_map('translate_cat', explode(',', $categories)))."</li></ul>" : '';
+	$categories = "<dt>{$lang['iface']['categories']}:</dt><dd>{$cats}</dd>";
 	
 	
 	$permissions = $app['package']['permissions'];
-	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate', explode(',', $permissions)))."</li></ul>" : '';
-	$permissions = "<dt>{$lang['permissions']}:</dt><dd>{$perms}</dd>";
+	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_perm', explode(',', $permissions)))."</li></ul>" : '';
+	$permissions = "<dt>{$lang['iface']['permissions']}:</dt><dd>{$perms}</dd>";
 	
 	echo "<fieldset id=\"{$app['id']}\">
 	<legend>{$app['name']}</legend>
@@ -209,9 +214,11 @@ function build_app($app, $lang) { //{{{
 function build_list($data, $params=null) { //{{{
 	if (isset($params['categories'])) {
 		$list = array();
-		foreach ($params['relations'][$params['categories']] as $app) {
+		foreach ($params['categories'] as $app) {
 			$list[] = $data[$app];
 		};
+	} elseif (isset($params['search'])) {
+		$list = $data;
 	} else {
 		$list = $data;
 	};
@@ -225,12 +232,42 @@ function build_cache_data($hash) { //{{{
 	return array('repos'=>$repos, "cat"=>$cat, 'rel'=>$rel);
 };
 //}}}
+function apply_filters($relations, $categories) { //{{{
+	if (!isset($_REQUEST['property'])) return null;
+	$property = $_REQUEST['property'];
+	if ($property == 'cat') {
+		if (!isset($_REQUEST['value'])) return null;
+		$value = $_REQUEST['value'];
+		if (isset($categories[$value])) {
+			return array('categories'=>$relations[$value]);
+		} else {
+			return null;
+		};
+	} elseif ($predicate == 'desc') {
+		// search
+	} else {
+		return null;
+	};
+};
+//}}}
+//}}}
+//{{{Select lang
+if (isset($_GET['lang'])) {
+	$lang_label = filter_var($_GET['lang'], FILTER_VALIDATE_REGEXP, array('options'=>array('regexp'=>'/^[a-z]{2}$/')));
+	if ($lang_label === false || !is_file('lang'.DIRECTORY_SEPARATOR."{$lang_label}.php")) $lang_label = DEFAULT_LANG;
+	$_SESSION['lang'] = $lang_label;
+} elseif (isset($_SESSION['lang'])) {
+	$lang_label = (is_file('lang'.DIRECTORY_SEPARATOR."{$_SESSION['lang']}.php")) ? $_SESSION['lang'] : DEFAULT_LANG;
+} else {
+	$lang_label = DEFAULT_LANG;
+};
+include_once("lang/{$lang_label}.php");
 //}}}
 //{{{ Retrieve data from cache
 libxml_use_internal_errors(true);
 if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false) {
 	if (!is_file(REPOS_FILE)) {
-		build_headers('Error', "Ooops, this repository is temporarily unavailable. We're sorry. Re-try latter please.");
+		build_headers($lang['iface']['error_label'], $lang['iface']['error_message']);
 		build_footers();
 		exit;
 	} else {
@@ -253,18 +290,7 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 	};
 };
 //}}}
-//{{{Select lang
-if (isset($_GET['lang'])) {
-	$lang_label = filter_var($_GET['lang'], FILTER_VALIDATE_REGEXP, array('options'=>array('regexp'=>'/^[a-z]{2}$/')));
-	if ($lang_label === false || !is_file('lang'.DIRECTORY_SEPARATOR."{$lang_label}.php")) $lang_label = DEFAULT_LANG;
-	$_SESSION['lang'] = $lang_label;
-} elseif (isset($_SESSION['lang'])) {
-	$lang_label = (is_file('lang'.DIRECTORY_SEPARATOR."{$_SESSION['lang']}.php")) ? $_SESSION['lang'] : DEFAULT_LANG;
-} else {
-	$lang_label = DEFAULT_LANG;
-};
-//}}}
-$liste = build_list($repos['list']);
+$liste = build_list($repos['list'], apply_filters($relations, $categories));
 //{{{Select page
 if (isset($_GET['page'])) {
 	$page = filter_var($_GET['page'], FILTER_VALIDATE_INT);
@@ -274,12 +300,11 @@ if (isset($_GET['page'])) {
 };
 $tampon = array_slice($liste, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 //}}}
-include_once("lang/{$lang_label}.php");
 build_headers($repos['name'], $repos['desc']);
 build_lang_selector($lang_label, $lang);
 build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
 foreach($tampon as $app) {
-	build_app($app, $lang);
+	decore_app($app, $lang);
 };
 build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
 build_footers();
