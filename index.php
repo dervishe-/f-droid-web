@@ -199,7 +199,7 @@ function decore_app($app, $lang) { //{{{
 	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_perm', explode(',', $permissions)))."</li></ul>" : '';
 	$permissions = "<dt>".translate('iface', 'permissions', $lang).":</dt><dd>{$perms}</dd>";
 	
-	echo "<li><fieldset id=\"{$app['id']}\">
+	echo "<fieldset id=\"{$app['id']}\">
 	<legend>{$app['name']}</legend>
 	<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
 	<dl>
@@ -214,7 +214,8 @@ function decore_app($app, $lang) { //{{{
 		{$requirements}
 		{$tag_qrcode}
 	</dl>
-</fieldset></li>";
+	<a href=\"\" alt=\"".translate('iface', 'back', $lang)."\">".translate('iface', 'back', $lang)."</a>
+</fieldset>";
 };
 //}}}
 function decore_app_light($app, $lang) { //{{{
@@ -253,15 +254,22 @@ function decore_applist($tampon, $lang) { //{{{
 //}}}
 function build_list($data, $params=null) { //{{{
 	if (isset($params['categories'])) {
+		unset($_SESSION['list']);
 		$list = array();
 		foreach ($params['categories'] as $app) {
 			$list[] = $data[$app];
 		};
 	} elseif (isset($params['search'])) {
+		unset($_SESSION['list']);
 		$list = $data;
 	} else {
-		$list = $data;
+		if (isset($_SESSION['list'])) {
+			$list = $_SESSION['list'];
+		} else {
+			$list = $data;
+		};
 	};
+	$_SESSION['list'] = $list;
 	return $list;
 };//}}}
 function build_cache_data($hash) { //{{{
@@ -279,13 +287,18 @@ function apply_filters($relations, $categories) { //{{{
 		if (!isset($_REQUEST['val'])) return null;
 		$value = $_REQUEST['val'];
 		if (isset($categories[$value])) {
+			$_SESSION['cat'] = $value;
 			return array('categories'=>$relations[$value]);
 		} else {
+			unset($_SESSION['cat']);
 			return null;
 		};
-	} elseif ($predicate == 'desc') {
+	} elseif ($property == 'desc') {
+		unset($_SESSION['cat']);
 		// search
 	} else {
+		unset($_SESSION['cat']);
+		unset($_SESSION['list']);
 		return null;
 	};
 };
@@ -294,13 +307,21 @@ function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
 	if (count($relations) > 0) {
 		echo "<fieldset id=\"categories\"><legend>".translate('iface', 'categories', $lang).": <a href=\"#menu\">".translate('iface', 'menu', $lang)."</a></legend><ul>";
 		$lab_all_cat = translate('iface', 'all_categories', $lang);
-		echo "<li><a href=\"?\" title=\"{$lab_all_cat}\">{$lab_all_cat}</a><span> ({$nbr_apps})</span></li>";
+		if (!isset($_SESSION['cat'])) {
+			echo "<li><b>{$lab_all_cat}<span> ({$nbr_apps})</span></b></li>";
+		} else {
+			echo "<li><a href=\"?prop=init\" title=\"{$lab_all_cat}\">{$lab_all_cat}</a><span> ({$nbr_apps})</span></li>";
+		};
 		reset($relations);
 		while (false !== ($cat = current($relations))) {
 			$name_cat = translate('cat', key($relations), $lang);
-			echo "<li>
-					<a href=\"?prop=cat&amp;val=".key($relations)."\" title=\"".translate('iface', 'alt_cat_link', $lang)." {$name_cat}\">{$name_cat}</a>
-					<span> (".count($cat).")</span></li>";
+			echo "<li>";
+			if (isset($_SESSION['cat']) && key($relations) == $_SESSION['cat']) {
+				echo "<b>{$name_cat}<span> (".count($cat).")</span></b>";
+			} else {
+				echo "<a href=\"?prop=cat&amp;val=".key($relations)."\" title=\"".translate('iface', 'alt_cat_link', $lang)." {$name_cat}\">{$name_cat}</a><span> (".count($cat).")</span>";
+			};
+			echo "</li>";
 			next($relations);
 		};
 		echo "</ul></fieldset>";
