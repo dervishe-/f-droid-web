@@ -17,6 +17,7 @@ $lang = array(
 		'all_categories' => 'Todas',
 		'menu' => 'Menu',
 		'applist' => 'Aplicaciones',
+		'sheet' => 'Informativa',
 		'error_label' => 'Error',
 		'error_message' => "Ooops, este depósito de aplicaciónes no está disponible temporalmente. Lo sentimos, por favor, inténtalo de nuevo más tarde..."),
 	'perms' => array(

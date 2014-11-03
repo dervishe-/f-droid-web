@@ -13,7 +13,8 @@ session_start();
 //{{{ Configuration
 // DIRECTORIES
 define('ROOT', dirname(__FILE__));
-define('ICONS_DIR', ROOT.DIRECTORY_SEPARATOR.'icons-480');
+define('ICONS_DIR', 'icons-480');
+define('ICONS_DIR_LIGHT', 'icons-240');
 define('QRCODES_DIR', 'qrcodes');
 define('CACHE', ROOT.DIRECTORY_SEPARATOR.'cache');
 // FILES
@@ -194,7 +195,6 @@ function decore_app($app, $lang) { //{{{
 	$cats = (strlen($categories) > 0 && $categories != 'None') ? "<ul><li>".implode('</li><li>', array_map('translate_cat', explode(',', $categories)))."</li></ul>" : '';
 	$categories = "<dt>".translate('iface', 'categories', $lang).":</dt><dd>{$cats}</dd>";
 	
-	
 	$permissions = $app['package']['permissions'];
 	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_perm', explode(',', $permissions)))."</li></ul>" : '';
 	$permissions = "<dt>".translate('iface', 'permissions', $lang).":</dt><dd>{$perms}</dd>";
@@ -217,10 +217,37 @@ function decore_app($app, $lang) { //{{{
 </fieldset></li>";
 };
 //}}}
+function decore_app_light($app, $lang) { //{{{
+	$icon = ICONS_DIR_LIGHT.DIRECTORY_SEPARATOR.$app['icon'];
+	$version = "<dt>".translate('iface', 'version', $lang).":</dt><dd>{$app['package']['version']} - ".translate('iface', 'added', $lang).": {$app['updated']}</dd>";
+	$updated = "<dt>".translate('iface', 'updated', $lang).":</dt><dd>{$app['updated']}</dd>";
+	$summary = "<dt>".translate('iface', 'summary', $lang).":</dt><dd>{$app['summary']}</dd>";
+	$size = $app['package']['size'];
+	if (($size / 1048572) > 1) {
+		$size /= 1048572;
+		$size = "<dt>".translate('iface', 'size', $lang).":</dt><dd>".round($size, 2)." MB</dd>";
+	} else {
+		$size /= 1024;
+		$size = "<dt>".translate('iface', 'size', $lang).":</dt><dd>".round($size, 2)." kB</dd>";
+	};
+	echo "<li><fieldset id=\"{$app['id']}\">
+	<legend>{$app['name']}</legend>
+	<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
+	<dl>
+		{$size}
+		{$version}
+		{$updated}
+		{$summary}
+	</dl>
+	<a href=\"{$app['package']['apkname']}\" alt=\"".translate('iface', 'download', $lang)."\">".translate('iface', 'download', $lang)."</a>
+	<a href=\"?getFiche={$app['id']}\" alt=\"".translate('iface', 'sheet', $lang)."\">".translate('iface', 'sheet', $lang)."</a>
+</fieldset></li>";
+};
+//}}}
 function decore_applist($tampon, $lang) { //{{{
 	echo "<a href=\"#menu\">".translate('iface', 'menu', $lang)."</a>";
 	echo "<ul id=\"applist\">";
-	foreach($tampon as $app) { decore_app($app, $lang); };
+	foreach($tampon as $app) { decore_app_light($app, $lang); };
 	echo "</ul>";
 };
 //}}}

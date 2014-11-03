@@ -17,6 +17,7 @@ $lang = array(
 		'all_categories' => 'All',
 		'menu' => 'Menu',
 		'applist' => 'Apps',
+		'sheet' => 'Factsheet',
 		'error_label' => 'Error',
 		'error_message' => "Ooops, this repository is temporarily unavailable. We're sorry. Re-try latter please."),
 	'perms' => array(

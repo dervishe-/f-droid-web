@@ -17,6 +17,7 @@ $lang = array(
 		'all_categories' => 'Toutes',
 		'menu' => 'Menu',
 		'applist' => 'Applications',
+		'sheet' => 'Fiche descriptive',
 		'error_label' => 'Erreur',
 		'error_message' => "Ooops, ce dépot d'applications est temporairement indisponible. Nous en sommes désolé, veuillez ré-essayer plus tard..."),
 	'perms' => array(
