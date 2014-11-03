@@ -253,12 +253,12 @@ function apply_filters($relations, $categories) { //{{{
 //}}}
 function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
 	if (count($relations) > 0) {
-		echo "<fieldset><label>{$lang['iface']['categories']}:</label><ul>";
+		echo "<fieldset><legend>{$lang['iface']['categories']}:</legend><ul>";
 		echo "<li><a href=\"?\" title=\"{$lang['iface']['all_categories']}\">{$lang['iface']['all_categories']}</a><span> ({$nbr_apps})</span></li>";
 		reset($relations);
 		while (false !== ($cat = current($relations))) {
 			$name_cat = (isset($lang['cat'][key($relations)])) ? $lang['cat'][key($relations)] : key($relations);
-			echo "<li><a href=\"?prop=cat&val=".key($relations)."\" title=\"{$lang['iface']['alt_cat_link']} {$name_cat}\">{$name_cat}</a><span> (".count($cat).")</span></li>";
+			echo "<li><a href=\"?prop=cat&amp;val=".key($relations)."\" title=\"{$lang['iface']['alt_cat_link']} {$name_cat}\">{$name_cat}</a><span> (".count($cat).")</span></li>";
 			next($relations);
 		};
 		echo "</ul></fieldset>";
