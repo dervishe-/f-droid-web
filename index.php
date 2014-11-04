@@ -37,33 +37,37 @@ function build_structure($_xml) { //{{{
 	$repos['icon'] = (string) $_xml->repo['icon'];
 	$repos['desc'] = (string) $_xml->repo->description;
 	$repos['list'] = array();
-	foreach($_xml->application as $app) {
-		$application = array();
-		$application['id'] = (string) $app->id;
-		$application['added'] = (string) $app->added;
-		$application['updated'] = (string) $app->lastupdated;
-		$application['name'] = (string) $app->name;
-		$application['summary'] = (string) $app->summary;
-		$application['icon'] = (string) $app->icon;
-		$application['desc'] = (string) $app->desc;
-		$application['license'] = (string) $app->license;
-		$application['categories'] = (string) $app->categories;
-		$application['category'] = (string) $app->category;
-		$application['web'] = (string) $app->web;
-		$application['source'] = (string) $app->source;
-		$application['requirements'] = (string) $app->requirements;
-		$package = array();
-		$package['version'] = (string) $app->package->version;
-		$package['apkname'] = (string) $app->package->apkname;
-		$package['size'] = (int) $app->package->size;
-		$package['permissions'] = (string) $app->package->permissions;
-		$package['sdkver'] = (string) $app->package->sdkver;
-		$application['package'] = $package;
-		$repos['list'][(string) $app->id] = $application;
-	};
+	foreach($_xml->application as $app) { $repos['list'][] = (string) $app->id; };
 	$repos['nbr'] = count($repos['list']);
 	file_put_contents(REPOS_FILE, serialize($repos));
 	return $repos;
+};//}}}
+function build_app($_xml, $id_app) { //{{{
+	$app = $_xml->xpath("application[@id='$id_app']");
+	$app = $app[0];
+	$application = array();
+	$application['id'] = (string) $app->id;
+	$application['added'] = (string) $app->added;
+	$application['updated'] = (string) $app->lastupdated;
+	$application['name'] = (string) $app->name;
+	$application['summary'] = (string) $app->summary;
+	$application['icon'] = (string) $app->icon;
+	$application['desc'] = (string) $app->desc;
+	$application['license'] = (string) $app->license;
+	$application['categories'] = (string) $app->categories;
+	$application['category'] = (string) $app->category;
+	$application['web'] = (string) $app->web;
+	$application['source'] = (string) $app->source;
+	$application['requirements'] = (string) $app->requirements;
+	$package = array();
+	$package['version'] = (string) $app->package->version;
+	$package['apkname'] = (string) $app->package->apkname;
+	$package['size'] = (int) $app->package->size;
+	$package['permissions'] = (string) $app->package->permissions;
+	$package['sdkver'] = (string) $app->package->sdkver;
+	$application['package'] = $package;
+	file_put_contents(CACHE.DIRECTORY_SEPARATOR.$application['id'], serialize($application));
+	return $application;
 };//}}}
 function build_headers($title, $description=null, $favicon=null) { //{{{
 	echo "<!DOCTYPE html>
@@ -107,16 +111,19 @@ function build_categories($repos) { //{{{
 	$cat = array();
 	if (is_file(CATEGORIES) && is_readable(CATEGORIES)) {
 		$cat = array_flip(file(CATEGORIES, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
-	} else {	// Fallback: if CATEGORIES isn't present we get the categories from DATA or from $repos structure
+	} else {	// Fallback: if CATEGORIES isn't present we get the categories from DATA or app file stored in cache
 		if (($data = simplexml_load_file(DATA)) !== false) {
 			foreach ($data->application as $app) {
 				$ls_cat = explode(',', (string) $app->categories);
 				foreach ($ls_cat as $ct) { if (!isset($cat[$ct])) $cat[$ct] = 1; };
 			};
-		} elseif (count($repos) > 0) {		// Fallback: if DATA is not present, then we use $repos structure
+		} elseif (count($repos) > 0) {		// Fallback: if DATA is not present, then we use app file stored in cache
 			foreach ($repos as $app) {
-				$ls_cat = explode(',', $app['categories']);
-				foreach ($ls_cat as $ct) { if (!isset($cat[$ct])) $cat[$ct] = 1; };
+				if (is_file(CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app)) {
+					$app = unserialize(file_get_contents($app));
+					$ls_cat = explode(',', $app['categories']);
+					foreach ($ls_cat as $ct) { if (!isset($cat[$ct])) $cat[$ct] = 1; };
+				};
 			};
 		};
 	};
@@ -135,12 +142,15 @@ function build_relations($repos) { //{{{
 				$rel[$cat][] = (string) $app->id;
 			};
 		};
-	} elseif (count($repos) > 0) {		// Fallback: if DATA is not present, then we use $repos structure
+	} elseif (count($repos) > 0) {		// Fallback: if DATA is not present, then we use app file stored in cache
 		foreach ($repos as $app) {
-			$ls_cat = explode(',', $app['categories']);
-			foreach ($ls_cat as $cat) {
-				if (!isset($rel[$cat])) $rel[$cat] = array();
-				$rel[$cat][] = $app['id'];
+			if (is_file(CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app)) {
+				$app = unserialize(file_get_contents($app));
+				$ls_cat = explode(',', $app['categories']);
+				foreach ($ls_cat as $cat) {
+					if (!isset($rel[$cat])) $rel[$cat] = array();
+					$rel[$cat][] = $app['id'];
+				};
 			};
 		};
 	};
@@ -162,7 +172,17 @@ function translate($cat, $item, $lang) { //{{{
 	return (isset($lang[$cat][$item])) ? $lang[$cat][$item] : $item;
 };
 //}}}
-function decore_app($app, $lang) { //{{{
+function decore_app($app_id, $lang) { //{{{
+	if (is_file(CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app_id)) {
+		$app = unserialize(file_get_contents(CACHE.DIRECTORY_SEPARATOR.$app_id));
+	} else {
+		if (($data = simplexml_load_file(DATA)) !== false) {
+			$app = build_app($data, $app_id);
+			$data = null;
+		} else {
+			return false;
+		};
+	};
 	if (USE_QRCODE) {
 		include_once('phpqrcode/phpqrcode.php');
 		$qrcode = QRCODES_DIR.DIRECTORY_SEPARATOR.$app['id'].".png";
@@ -177,7 +197,7 @@ function decore_app($app, $lang) { //{{{
 	};
 	$icon = ICONS_DIR.DIRECTORY_SEPARATOR.$app['icon'];
 	$version = "<dt>".translate('iface', 'version', $lang).":</dt><dd>{$app['package']['version']} - ".translate('iface', 'added', $lang).": {$app['updated']}</dd>";
-	$license = ($app['license'] != 'Unknown') ? "<dt>".translate('iface', 'license', $lang).":</dt><dd>{$app['license']}</dd>" : '';
+	$license = ($app['license'] != 'Unknown') ? "<dt>".translate('iface', 'license', $lang).":</dt><dd>".transalte('lic', $app['license'], $lang)."</dd>" : '';
 	$updated = "<dt>".translate('iface', 'updated', $lang).":</dt><dd>{$app['updated']}</dd>";
 	$summary = "<dt>".translate('iface', 'summary', $lang).":</dt><dd>{$app['summary']}</dd>";
 	$desc = "<dt>".translate('iface', 'desc', $lang).":</dt><dd>{$app['desc']}</dd>";
@@ -218,7 +238,17 @@ function decore_app($app, $lang) { //{{{
 </fieldset>";
 };
 //}}}
-function decore_app_light($app, $lang) { //{{{
+function decore_app_light($app_id, $lang) { //{{{
+	if (is_file(CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app_id)) {
+		$app = unserialize(file_get_contents(CACHE.DIRECTORY_SEPARATOR.$app_id));
+	} else {
+		if (($data = simplexml_load_file(DATA)) !== false) {
+			$app = build_app($data, $app_id);
+			$data = null;
+		} else {
+			return false;
+		};
+	};
 	$icon = ICONS_DIR_LIGHT.DIRECTORY_SEPARATOR.$app['icon'];
 	$version = "<dt>".translate('iface', 'version', $lang).":</dt><dd>{$app['package']['version']} - ".translate('iface', 'added', $lang).": {$app['updated']}</dd>";
 	$updated = "<dt>".translate('iface', 'updated', $lang).":</dt><dd>{$app['updated']}</dd>";
@@ -255,10 +285,7 @@ function decore_applist($tampon, $lang) { //{{{
 function build_list($data, $params=null) { //{{{
 	if (isset($params['categories'])) {
 		unset($_SESSION['list']);
-		$list = array();
-		foreach ($params['categories'] as $app) {
-			$list[] = $data[$app];
-		};
+		$list = $params['categories'];
 	} elseif (isset($params['search'])) {
 		unset($_SESSION['list']);
 		$list = $data;
@@ -273,6 +300,11 @@ function build_list($data, $params=null) { //{{{
 	return $list;
 };//}}}
 function build_cache_data($hash) { //{{{
+	$dh = opendir(CACHE);
+	while (false !== ($file = readdir($dh))) {
+		if (is_file(CACHE.DIRECTORY_SEPARATOR.$file) && $file != '.htaccess') unlink(CACHE.DIRECTORY_SEPARATOR.$file);
+	};
+	closedir($dh);
 	file_put_contents(MANIFEST, $hash);
 	$repos = build_structure(simplexml_load_file(DATA));
 	$cat = build_categories($repos['list']);
