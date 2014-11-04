@@ -242,7 +242,7 @@ function decore_app($app_id, $lang) { //{{{
 	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_perm', explode(',', $permissions)))."</li></ul>" : '';
 	$permissions = "<dt>".translate('iface', 'permissions', $lang).":</dt><dd>{$perms}</dd>";
 	
-	echo "<fieldset id=\"{$app['id']}\">
+	echo "<fieldset id=\"".str_replace(array('.', ' '), '_', $app['id'])."\">
 	<legend>{$app['name']}</legend>
 	<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
 	<dl>
@@ -257,7 +257,7 @@ function decore_app($app_id, $lang) { //{{{
 		{$requirements}
 		{$tag_qrcode}
 	</dl>
-	<a href=\"\" alt=\"".translate('iface', 'back', $lang)."\">".translate('iface', 'back', $lang)."</a>
+	<a href=\"\" title=\"".translate('iface', 'back', $lang)."\">".translate('iface', 'back', $lang)."</a>
 </fieldset>";
 };
 //}}}
@@ -284,7 +284,7 @@ function decore_app_light($app_id, $lang) { //{{{
 		$size /= 1024;
 		$size = "<dt>".translate('iface', 'size', $lang).":</dt><dd>".round($size, 2)." kB</dd>";
 	};
-	echo "<li><fieldset id=\"{$app['id']}\">
+	echo "<li><fieldset id=\"".str_replace(array('.', ' '), '_', $app['id'])."\">
 	<legend>{$app['name']}</legend>
 	<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
 	<dl>
@@ -293,8 +293,8 @@ function decore_app_light($app_id, $lang) { //{{{
 		{$updated}
 		{$summary}
 	</dl>
-	<a href=\"{$app['package']['apkname']}\" alt=\"".translate('iface', 'download', $lang)."\">".translate('iface', 'download', $lang)."</a>
-	<a href=\"?getFiche={$app['id']}\" alt=\"".translate('iface', 'sheet', $lang)."\">".translate('iface', 'sheet', $lang)."</a>
+	<a href=\"{$app['package']['apkname']}\" title=\"".translate('iface', 'download', $lang)."\">".translate('iface', 'download', $lang)."</a>
+	<a href=\"?getFiche={$app['id']}\" title=\"".translate('iface', 'sheet', $lang)."\">".translate('iface', 'sheet', $lang)."</a>
 </fieldset></li>";
 };
 //}}}
