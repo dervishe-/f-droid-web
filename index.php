@@ -299,7 +299,7 @@ function decore_app_light($app_id, $lang) { //{{{
 };
 //}}}
 function decore_applist($tampon, $lang) { //{{{
-	echo "<a href=\"#menu\">".translate('iface', 'menu', $lang)."</a>";
+	echo "<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a>";
 	echo "<ul id=\"applist\">";
 	foreach($tampon as $app) { decore_app_light($app, $lang); };
 	echo "</ul>";
@@ -379,7 +379,7 @@ function apply_filters($relations, $categories, $licenses) { //{{{
 //}}}
 function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
 	if (count($relations) > 0) {
-		echo "<fieldset id=\"categories\"><legend>".translate('iface', 'categories', $lang).": <a href=\"#menu\">".translate('iface', 'menu', $lang)."</a></legend><ul>";
+		echo "<fieldset id=\"categories\"><legend>".translate('iface', 'categories', $lang).": <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend><ul>";
 		$lab_all_cat = translate('iface', 'all_categories', $lang);
 		if (!isset($_SESSION['cat'])) {
 			echo "<li><b>{$lab_all_cat}<span> ({$nbr_apps})</span></b></li>";
@@ -404,7 +404,7 @@ function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
 //}}}
 function build_tagcloud_licenses($licenses, $lang, $nbr_apps) { //{{{
 	if (count($licenses) > 0) {
-		echo "<fieldset id=\"licenses\"><legend>".translate('iface', 'license', $lang).": <a href=\"#menu\">".translate('iface', 'menu', $lang)."</a></legend><ul>";
+		echo "<fieldset id=\"licenses\"><legend>".translate('iface', 'license', $lang).": <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend><ul>";
 		$lab_all_lic = translate('iface', 'all_licenses', $lang);
 		if (!isset($_SESSION['lic'])) {
 			echo "<li><b>{$lab_all_lic}<span> ({$nbr_apps})</span></b></li>";
@@ -429,9 +429,9 @@ function build_tagcloud_licenses($licenses, $lang, $nbr_apps) { //{{{
 //}}}
 function build_menu($lang) { //{{{
 	echo "<fieldset id=\"menu\"><legend>".translate('iface', 'menu', $lang)."</legend><ul>";
-	echo "<li><a href=\"#categories\">".translate('iface', 'categories', $lang)."</a></li>";
-	echo "<li><a href=\"#licenses\">".translate('iface', 'license', $lang)."</a></li>";
-	echo "<li><a href=\"#applist\">".translate('iface', 'applist', $lang)."</a></li>";
+	echo "<li><a href=\"#categories\" title=\"".translate('iface', 'browse_cat', $lang)."\">".translate('iface', 'categories', $lang)."</a></li>";
+	echo "<li><a href=\"#licenses\" title=\"".translate('iface', 'browse_lic', $lang)."\">".translate('iface', 'license', $lang)."</a></li>";
+	echo "<li><a href=\"#applist\" title=\"".translate('iface', 'access_applist', $lang)."\">".translate('iface', 'applist', $lang)."</a></li>";
 	echo "</ul></fieldset>";
 };
 //}}}
