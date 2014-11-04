@@ -13,8 +13,10 @@ $lang = array(
 		'permissions' => 'Permisos',
 		'download' => 'Descargar',
 		'requirements' => 'Requisitos',
-		'alt_cat_link' => 'Seleccione una aplicación de la categoría:',
+		'alt_cat_link' => 'Seleccione una aplicación de la categoría',
 		'all_categories' => 'Todas',
+		'alt_lic_link' => 'Seleccione una aplicación con la licencia',
+		'all_licenses' => 'Todas',
 		'menu' => 'Menu',
 		'applist' => 'Aplicaciones',
 		'sheet' => 'Informativa',
@@ -42,7 +44,18 @@ $lang = array(
 		'Son' => 'Sonido',
 		'Sciencetour' => 'Sciencetour',
 		'Parcours' => 'Cursos',
-		'Démarche expérimentale' => 'Enfoque experimental'
-	)
+		'Démarche expérimentale' => 'Enfoque experimental'),
+	'lic' => array(
+		'Unknown' => "Ninguna licencia especificada",
+		'GPLv2' => "GNU GPL versión 2",
+		'GPLv2+' => "GNU GPL versión 2 o mas alta",
+		'GPLv3' => "GNU GPL versión 3",
+		'GPLv3+' => "GNU GPL versión 3 o mas alta",
+		'GPL' => "GPL versión no especificada",
+		'AGPL' => "Afferro GPL versión 3",
+		'Apache2' => "Apache 2",
+		'MIT' => "MIT X11 licencia",
+		'BSD' => "BSD licencia - versión original '4-cláusulas'",
+		'NewBSD' => "BSD licencia - Nueva versión o versión modificada")
 );
 ?>

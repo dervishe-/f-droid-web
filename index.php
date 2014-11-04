@@ -23,6 +23,7 @@ define('DATA', ROOT.DIRECTORY_SEPARATOR.'index.xml');
 define('REPOS_FILE', CACHE.DIRECTORY_SEPARATOR.'repository');
 define('CAT_FILE', CACHE.DIRECTORY_SEPARATOR.'categories'); // store categories as an array
 define('REL_FILE', CACHE.DIRECTORY_SEPARATOR.'relations'); // store relations between categories and apps as an array
+define('LIC_FILE', CACHE.DIRECTORY_SEPARATOR.'license'); // store used licenses as an array
 define('MANIFEST', CACHE.DIRECTORY_SEPARATOR.'Manifest'); // store index.xml hash
 // PARAMETERS
 define('HASH_ALGO', 'whirlpool');
@@ -107,7 +108,7 @@ function build_pager($page_number, $max) { //{{{
 	for ($i = $page_number + 1; $i <= $max; $i++) { echo "<li><a href=\"?page={$i}\">{$i}</a></li>"; };
 	echo "</ul></dd></dl>";
 };//}}}
-function build_categories($repos) { //{{{
+function cache_categories($repos) { //{{{
 	$cat = array();
 	if (is_file(CATEGORIES) && is_readable(CATEGORIES)) {
 		$cat = array_flip(file(CATEGORIES, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
@@ -132,7 +133,7 @@ function build_categories($repos) { //{{{
 	return $cat;
 };
 //}}}
-function build_relations($repos) { //{{{
+function cache_relations($repos) { //{{{
 	$rel = array();
 	if (is_file(DATA) && is_readable(DATA) && ($data = simplexml_load_file(DATA)) !== false) {
 		foreach ($data->application as $app) {
@@ -156,6 +157,28 @@ function build_relations($repos) { //{{{
 	};
 	if (count($rel) > 0) file_put_contents(REL_FILE, serialize($rel));
 	return $rel;
+};
+//}}}
+function cache_licenses($repos) { //{{{
+	$lic = array();
+	if (is_file(DATA) && is_readable(DATA) && ($data = simplexml_load_file(DATA)) !== false) {
+		foreach ($data->application as $app) {
+			$idx = (string) $app->license;
+			if (!isset($lic[$idx])) $lic[$idx] = array();
+			$lic[$idx][] = (string) $app->id;
+		};
+	} elseif (count($repos) > 0) {		// Fallback: if DATA is not present, then we use app file stored in cache
+		foreach ($repos as $app) {
+			if (is_file(CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app)) {
+				$app = unserialize(file_get_contents($app));
+				$idx = $app['license'];
+				if (!isset($lic[$idx])) $lic[$idx] = array();
+				$lic[$idx][] = $app['id'];
+			};
+		};
+	};
+	if (count($lic) > 0) file_put_contents(LIC_FILE, serialize($lic));
+	return $lic;
 };
 //}}}
 function translate_perm($item) { //{{{
@@ -197,7 +220,7 @@ function decore_app($app_id, $lang) { //{{{
 	};
 	$icon = ICONS_DIR.DIRECTORY_SEPARATOR.$app['icon'];
 	$version = "<dt>".translate('iface', 'version', $lang).":</dt><dd>{$app['package']['version']} - ".translate('iface', 'added', $lang).": {$app['updated']}</dd>";
-	$license = ($app['license'] != 'Unknown') ? "<dt>".translate('iface', 'license', $lang).":</dt><dd>".transalte('lic', $app['license'], $lang)."</dd>" : '';
+	$license = "<dt>".translate('iface', 'license', $lang).":</dt><dd>".transalte('lic', $app['license'], $lang)."</dd>";
 	$updated = "<dt>".translate('iface', 'updated', $lang).":</dt><dd>{$app['updated']}</dd>";
 	$summary = "<dt>".translate('iface', 'summary', $lang).":</dt><dd>{$app['summary']}</dd>";
 	$desc = "<dt>".translate('iface', 'desc', $lang).":</dt><dd>{$app['desc']}</dd>";
@@ -286,6 +309,9 @@ function build_list($data, $params=null) { //{{{
 	if (isset($params['categories'])) {
 		unset($_SESSION['list']);
 		$list = $params['categories'];
+	} elseif (isset($params['licenses'])) {
+		unset($_SESSION['list']);
+		$list = $params['licenses'];
 	} elseif (isset($params['search'])) {
 		unset($_SESSION['list']);
 		$list = $data;
@@ -307,15 +333,17 @@ function build_cache_data($hash) { //{{{
 	closedir($dh);
 	file_put_contents(MANIFEST, $hash);
 	$repos = build_structure(simplexml_load_file(DATA));
-	$cat = build_categories($repos['list']);
-	$rel = build_relations($repos['list']);
-	return array('repos'=>$repos, "cat"=>$cat, 'rel'=>$rel);
+	$cat = cache_categories($repos['list']);
+	$rel = cache_relations($repos['list']);
+	$lic = cache_licenses($repos['list']);
+	return array('repos'=>$repos, "cat"=>$cat, 'rel'=>$rel, 'lic'=>$lic);
 };
 //}}}
-function apply_filters($relations, $categories) { //{{{
+function apply_filters($relations, $categories, $licenses) { //{{{
 	if (!isset($_REQUEST['prop'])) return null;
 	$property = $_REQUEST['prop'];
-	if ($property == 'cat') {
+	if ($property == 'cat') { //{{{
+		unset($_SESSION['lic']);
 		if (!isset($_REQUEST['val'])) return null;
 		$value = $_REQUEST['val'];
 		if (isset($categories[$value])) {
@@ -324,12 +352,26 @@ function apply_filters($relations, $categories) { //{{{
 		} else {
 			unset($_SESSION['cat']);
 			return null;
-		};
-	} elseif ($property == 'desc') {
+		}; //}}}
+	} elseif ($property == 'lic') { //{{{
 		unset($_SESSION['cat']);
+		if (!isset($_REQUEST['val'])) return null;
+		$value = $_REQUEST['val'];
+		if (isset($licenses[$value])) {
+			$_SESSION['lic'] = $value;
+			return array('licenses'=>$licenses[$value]);
+		} else {
+			unset($_SESSION['lic']);
+			return null;
+		}; //}}}
+	} elseif ($property == 'desc') { //{{{
+		unset($_SESSION['cat']);
+		unset($_SESSION['lic']);
 		// search
+		 // }}}
 	} else {
 		unset($_SESSION['cat']);
+		unset($_SESSION['lic']);
 		unset($_SESSION['list']);
 		return null;
 	};
@@ -342,7 +384,7 @@ function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
 		if (!isset($_SESSION['cat'])) {
 			echo "<li><b>{$lab_all_cat}<span> ({$nbr_apps})</span></b></li>";
 		} else {
-			echo "<li><a href=\"?prop=init\" title=\"{$lab_all_cat}\">{$lab_all_cat}</a><span> ({$nbr_apps})</span></li>";
+			echo "<li><a href=\"?prop=init\" title=\"".translate('iface', 'alt_cat_link', $lang).": {$lab_all_cat}\">{$lab_all_cat}</a><span> ({$nbr_apps})</span></li>";
 		};
 		reset($relations);
 		while (false !== ($cat = current($relations))) {
@@ -351,7 +393,7 @@ function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
 			if (isset($_SESSION['cat']) && key($relations) == $_SESSION['cat']) {
 				echo "<b>{$name_cat}<span> (".count($cat).")</span></b>";
 			} else {
-				echo "<a href=\"?prop=cat&amp;val=".key($relations)."\" title=\"".translate('iface', 'alt_cat_link', $lang)." {$name_cat}\">{$name_cat}</a><span> (".count($cat).")</span>";
+				echo "<a href=\"?prop=cat&amp;val=".urlencode(key($relations))."\" title=\"".translate('iface', 'alt_cat_link', $lang).": {$name_cat}\">{$name_cat}</a><span> (".count($cat).")</span>";
 			};
 			echo "</li>";
 			next($relations);
@@ -360,9 +402,35 @@ function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
 	};
 };	
 //}}}
+function build_tagcloud_licenses($licenses, $lang, $nbr_apps) { //{{{
+	if (count($licenses) > 0) {
+		echo "<fieldset id=\"licenses\"><legend>".translate('iface', 'license', $lang).": <a href=\"#menu\">".translate('iface', 'menu', $lang)."</a></legend><ul>";
+		$lab_all_lic = translate('iface', 'all_licenses', $lang);
+		if (!isset($_SESSION['lic'])) {
+			echo "<li><b>{$lab_all_lic}<span> ({$nbr_apps})</span></b></li>";
+		} else {
+			echo "<li><a href=\"?prop=init\" title=\"".translate('iface', 'alt_lic_link', $lang).": {$lab_all_lic}\">{$lab_all_lic}</a><span> ({$nbr_apps})</span></li>";
+		};
+		reset($licenses);
+		while (false !== ($lic = current($licenses))) {
+			$name_lic = translate('lic', key($licenses), $lang);
+			echo "<li>";
+			if (isset($_SESSION['lic']) && key($licenses) == $_SESSION['lic']) {
+				echo "<b>{$name_lic}<span> (".count($lic).")</span></b>";
+			} else {
+				echo "<a href=\"?prop=lic&amp;val=".urlencode(key($licenses))."\" title=\"".translate('iface', 'alt_lic_link', $lang).": {$name_lic}\">{$name_lic}</a><span> (".count($lic).")</span>";
+			};
+			echo "</li>";
+			next($licenses);
+		};
+		echo "</ul></fieldset>";
+	};
+};	
+//}}}
 function build_menu($lang) { //{{{
 	echo "<fieldset id=\"menu\"><legend>".translate('iface', 'menu', $lang)."</legend><ul>";
 	echo "<li><a href=\"#categories\">".translate('iface', 'categories', $lang)."</a></li>";
+	echo "<li><a href=\"#licenses\">".translate('iface', 'license', $lang)."</a></li>";
 	echo "<li><a href=\"#applist\">".translate('iface', 'applist', $lang)."</a></li>";
 	echo "</ul></fieldset>";
 };
@@ -389,8 +457,9 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 		exit;
 	} else {
 		$repos = unserialize(file_get_contents(REPOS_FILE));
-		$categories = (is_file(CAT_FILE)) ? unserialize(file_get_contents(CAT_FILE)) : build_categories($repos['list']);
-		$relations = (is_file(REL_FILE)) ? unserialize(file_get_contents(REL_FILE)) : build_relations($repos['list']);
+		$categories = (is_file(CAT_FILE)) ? unserialize(file_get_contents(CAT_FILE)) : cache_categories($repos['list']);
+		$relations = (is_file(REL_FILE)) ? unserialize(file_get_contents(REL_FILE)) : cache_relations($repos['list']);
+		$licenses = (is_file(LIC_FILE)) ? unserialize(file_get_contents(LIC_FILE)) : cache_licenses($repos['list']);
 	};
 } else {
 	$hash = hash_file(HASH_ALGO, DATA);
@@ -399,15 +468,17 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 		$repos = $data['repos'];
 		$categories = $data['cat'];
 		$relations = $data['rel'];
+		$licenses = $data['lic'];
 	} else {
 		file_put_contents(MANIFEST, $hash);
 		$repos = unserialize(file_get_contents(REPOS_FILE));
-		$categories = (is_file(CAT_FILE)) ? unserialize(file_get_contents(CAT_FILE)) : build_categories($repos['list']);
-		$relations = (is_file(REL_FILE)) ? unserialize(file_get_contents(REL_FILE)) : build_relations($repos['list']);
+		$categories = (is_file(CAT_FILE)) ? unserialize(file_get_contents(CAT_FILE)) : cache_categories($repos['list']);
+		$relations = (is_file(REL_FILE)) ? unserialize(file_get_contents(REL_FILE)) : cache_relations($repos['list']);
+		$licenses = (is_file(LIC_FILE)) ? unserialize(file_get_contents(LIC_FILE)) : cache_licenses($repos['list']);
 	};
 };
 //}}}
-$liste = build_list($repos['list'], apply_filters($relations, $categories));
+$liste = build_list($repos['list'], apply_filters($relations, $categories, $licenses));
 //{{{Select page
 if (isset($_GET['page'])) {
 	$page = filter_var($_GET['page'], FILTER_VALIDATE_INT);
@@ -421,6 +492,7 @@ build_headers($repos['name'], $repos['desc']);
 build_lang_selector($lang_label, $lang);
 build_menu($lang);
 build_tagcloud_categories($relations, $lang, $repos['nbr']);
+build_tagcloud_licenses($licenses, $lang, $repos['nbr']);
 build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
 decore_applist($tampon, $lang);
 build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
