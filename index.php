@@ -94,18 +94,18 @@ function build_lang_selector($lang_label, $lang) { //{{{
 		while (false !== ($file = readdir($dh))) {
 			if (is_file("lang".DIRECTORY_SEPARATOR.$file)) {
 				$file = substr($file, 0, 2);
-				echo ($file != $lang_label) ? "<li><a href=\"?lang={$file}\">{$file}</a></li>" : "<li>{$file}</li>";
+				echo ($file != $lang_label) ? "<li><a href=\"?lang={$file}\" title=\"".translate('lang', $file, $lang)."\">{$file}</a></li>" : "<li>{$file}</li>";
 			};
 		};
 		closedir($dh);
 	};
 	echo '</ul></dd></dl>';
 };//}}}
-function build_pager($page_number, $max) { //{{{
-	echo "<dl><dt>Pages:</dt><dd><ul>";
-	for ($i = 1; $i < $page_number; $i++) { echo "<li><a href=\"?page={$i}\">{$i}</a></li>"; };
+function build_pager($page_number, $max, $lang) { //{{{
+	echo "<dl><dt>".translate('iface', 'page', $lang).":</dt><dd><ul>";
+	for ($i = 1; $i < $page_number; $i++) { echo "<li><a href=\"?page={$i}\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">{$i}</a></li>"; };
 	echo "<li>{$page_number}</li>";
-	for ($i = $page_number + 1; $i <= $max; $i++) { echo "<li><a href=\"?page={$i}\">{$i}</a></li>"; };
+	for ($i = $page_number + 1; $i <= $max; $i++) { echo "<li><a href=\"?page={$i}\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">{$i}</a></li>"; };
 	echo "</ul></dd></dl>";
 };//}}}
 function cache_categories($repos) { //{{{
@@ -503,9 +503,9 @@ if (isset($_REQUEST['getSheet'])) {
 	build_menu($lang);
 	build_tagcloud_categories($relations, $lang, $repos['nbr']);
 	build_tagcloud_licenses($licenses, $lang, $repos['nbr']);
-	build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
+	build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE), $lang);
 	decore_applist($tampon, $lang);
-	build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
+	build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE), $lang);
 };
 build_footers();
 ?>
