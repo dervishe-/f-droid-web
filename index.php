@@ -220,7 +220,7 @@ function decore_app($app_id, $lang) { //{{{
 	};
 	$icon = ICONS_DIR.DIRECTORY_SEPARATOR.$app['icon'];
 	$version = "<dt>".translate('iface', 'version', $lang).":</dt><dd>{$app['package']['version']} - ".translate('iface', 'added', $lang).": {$app['updated']}</dd>";
-	$license = "<dt>".translate('iface', 'license', $lang).":</dt><dd>".transalte('lic', $app['license'], $lang)."</dd>";
+	$license = "<dt>".translate('iface', 'license', $lang).":</dt><dd>".translate('lic', $app['license'], $lang)."</dd>";
 	$updated = "<dt>".translate('iface', 'updated', $lang).":</dt><dd>{$app['updated']}</dd>";
 	$summary = "<dt>".translate('iface', 'summary', $lang).":</dt><dd>{$app['summary']}</dd>";
 	$desc = "<dt>".translate('iface', 'desc', $lang).":</dt><dd>{$app['desc']}</dd>";
@@ -244,6 +244,7 @@ function decore_app($app_id, $lang) { //{{{
 	
 	echo "<fieldset id=\"".str_replace(array('.', ' '), '_', $app['id'])."\">
 	<legend>{$app['name']}</legend>
+	<a href=\"index.php\" title=\"".translate('iface', 'back', $lang)."\">".translate('iface', 'back', $lang)."</a>
 	<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
 	<dl>
 		{$size}
@@ -257,7 +258,7 @@ function decore_app($app_id, $lang) { //{{{
 		{$requirements}
 		{$tag_qrcode}
 	</dl>
-	<a href=\"\" title=\"".translate('iface', 'back', $lang)."\">".translate('iface', 'back', $lang)."</a>
+	<a href=\"index.php\" title=\"".translate('iface', 'back', $lang)."\">".translate('iface', 'back', $lang)."</a>
 </fieldset>";
 };
 //}}}
@@ -294,7 +295,7 @@ function decore_app_light($app_id, $lang) { //{{{
 		{$summary}
 	</dl>
 	<a href=\"{$app['package']['apkname']}\" title=\"".translate('iface', 'download', $lang)."\">".translate('iface', 'download', $lang)."</a>
-	<a href=\"?getFiche={$app['id']}\" title=\"".translate('iface', 'sheet', $lang)."\">".translate('iface', 'sheet', $lang)."</a>
+	<a href=\"?getSheet={$app['id']}\" title=\"".translate('iface', 'sheet', $lang)."\">".translate('iface', 'sheet', $lang)."</a>
 </fieldset></li>";
 };
 //}}}
@@ -490,11 +491,21 @@ $tampon = array_slice($liste, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 //}}}
 build_headers($repos['name'], $repos['desc']);
 build_lang_selector($lang_label, $lang);
-build_menu($lang);
-build_tagcloud_categories($relations, $lang, $repos['nbr']);
-build_tagcloud_licenses($licenses, $lang, $repos['nbr']);
-build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
-decore_applist($tampon, $lang);
-build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
+if (isset($_REQUEST['getSheet'])) {
+	$sheet = $_REQUEST['getSheet'];
+	if (in_array($sheet, $repos['list'])) {
+		decore_app($sheet, $lang);
+	} else {
+		echo "<fieldset><legend>".translate('iface', 'error_label', $lang)."</legend>";
+		echo translate('iface', 'error_message', $lang)."</fieldset>";
+	};
+} else {
+	build_menu($lang);
+	build_tagcloud_categories($relations, $lang, $repos['nbr']);
+	build_tagcloud_licenses($licenses, $lang, $repos['nbr']);
+	build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
+	decore_applist($tampon, $lang);
+	build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE));
+};
 build_footers();
 ?>
