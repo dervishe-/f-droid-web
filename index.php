@@ -17,13 +17,15 @@ define('ICONS_DIR', 'icons-480');
 define('ICONS_DIR_LIGHT', 'icons-240');
 define('QRCODES_DIR', 'qrcodes');
 define('CACHE', ROOT.DIRECTORY_SEPARATOR.'cache');
+define('APP_CACHE', CACHE.DIRECTORY_SEPARATOR.'app_files');
 // FILES
 define('CATEGORIES', ROOT.DIRECTORY_SEPARATOR.'categories.txt');
 define('DATA', ROOT.DIRECTORY_SEPARATOR.'index.xml');
 define('REPOS_FILE', CACHE.DIRECTORY_SEPARATOR.'repository');
 define('CAT_FILE', CACHE.DIRECTORY_SEPARATOR.'categories'); // store categories as an array
 define('REL_FILE', CACHE.DIRECTORY_SEPARATOR.'relations'); // store relations between categories and apps as an array
-define('LIC_FILE', CACHE.DIRECTORY_SEPARATOR.'license'); // store used licenses as an array
+define('LIC_FILE', CACHE.DIRECTORY_SEPARATOR.'licenses'); // store used licenses as an array
+define('WORD_FILE', CACHE.DIRECTORY_SEPARATOR.'words'); // store used words as an array
 define('MANIFEST', CACHE.DIRECTORY_SEPARATOR.'Manifest'); // store index.xml hash
 // PARAMETERS
 define('HASH_ALGO', 'whirlpool');
@@ -67,7 +69,7 @@ function build_app($_xml, $id_app) { //{{{
 	$package['permissions'] = (string) $app->package->permissions;
 	$package['sdkver'] = (string) $app->package->sdkver;
 	$application['package'] = $package;
-	file_put_contents(CACHE.DIRECTORY_SEPARATOR.$application['id'], serialize($application));
+	file_put_contents(APP_CACHE.DIRECTORY_SEPARATOR.$application['id'], serialize($application));
 	return $application;
 };//}}}
 function build_headers($title, $description=null, $favicon=null) { //{{{
@@ -196,8 +198,8 @@ function translate($cat, $item, $lang) { //{{{
 };
 //}}}
 function decore_app($app_id, $lang) { //{{{
-	if (is_file(CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app_id)) {
-		$app = unserialize(file_get_contents(CACHE.DIRECTORY_SEPARATOR.$app_id));
+	if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app_id)) {
+		$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app_id));
 	} else {
 		if (($data = simplexml_load_file(DATA)) !== false) {
 			$app = build_app($data, $app_id);
@@ -329,7 +331,7 @@ function build_list($data, $params=null) { //{{{
 function build_cache_data($hash) { //{{{
 	$dh = opendir(CACHE);
 	while (false !== ($file = readdir($dh))) {
-		if (is_file(CACHE.DIRECTORY_SEPARATOR.$file) && $file != '.htaccess') unlink(CACHE.DIRECTORY_SEPARATOR.$file);
+		if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$file) && $file != '.htaccess') unlink(APP_CACHE.DIRECTORY_SEPARATOR.$file);
 	};
 	closedir($dh);
 	file_put_contents(MANIFEST, $hash);
