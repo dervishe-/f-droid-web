@@ -16,6 +16,8 @@ define('ROOT', dirname(__FILE__));
 define('ICONS_DIR', 'icons-480');
 define('ICONS_DIR_LIGHT', 'icons-240');
 define('QRCODES_DIR', 'qrcodes');
+define('LANG', 'lang');
+define('DICT', LANG.DIRECTORY_SEPARATOR.'dict');
 define('CACHE', ROOT.DIRECTORY_SEPARATOR.'cache');
 define('APP_CACHE', CACHE.DIRECTORY_SEPARATOR.'app_files');
 // FILES
@@ -32,6 +34,7 @@ define('HASH_ALGO', 'whirlpool');
 define('USE_QRCODE', true);
 define('RECORDS_PER_PAGE',  3);
 define('DEFAULT_LANG', 'fr');
+define('LOCALIZATION', 'fr');
 //}}}
 //{{{ Library
 function build_structure($_xml) { //{{{
@@ -92,11 +95,11 @@ function build_footers() { //{{{
 };//}}}
 function build_lang_selector($lang_label, $lang) { //{{{
 	echo "<dl><dt>".translate('iface', 'language', $lang).": </dt><dd><ul>";
-	if ($dh = opendir("lang")) {
+	if ($dh = opendir(LANG)) {
 		while (false !== ($file = readdir($dh))) {
-			if (is_file("lang".DIRECTORY_SEPARATOR.$file)) {
+			if (is_file(LANG.DIRECTORY_SEPARATOR.$file)) {
 				$file = substr($file, 0, 2);
-				echo ($file != $lang_label) ? "<li><a href=\"?lang={$file}\" title=\"".translate('lang', $file, $lang)."\">{$file}</a></li>" : "<li>{$file}</li>";
+				echo ($file != $lang_label) ? "<li><a href=\"?lang={$file}\" title=\"".translate('lang', $file, $lang)."\">{$file}</a></li>" : "<li><b>{$file}</b></li>";
 			};
 		};
 		closedir($dh);
@@ -313,7 +316,7 @@ function decore_applist($tampon, $lang) { //{{{
 	echo "<fieldset id=\"applist\"><legend>".translate('iface', 'applist', $lang).": <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend>";
 	echo "<ul id=\"applist\">";
 	foreach($tampon as $app) { decore_app_light($app, $lang); };
-	echo "</ul>i</fieldset>";
+	echo "</ul></fieldset>";
 };
 //}}}
 function build_list($data, $params=null) { //{{{
@@ -450,10 +453,10 @@ function build_menu($lang) { //{{{
 //{{{Select lang
 if (isset($_GET['lang'])) {
 	$lang_label = filter_var($_GET['lang'], FILTER_VALIDATE_REGEXP, array('options'=>array('regexp'=>'/^[a-z]{2}$/')));
-	if ($lang_label === false || !is_file('lang'.DIRECTORY_SEPARATOR."{$lang_label}.php")) $lang_label = DEFAULT_LANG;
+	if ($lang_label === false || !is_file(LANG.DIRECTORY_SEPARATOR."{$lang_label}.php")) $lang_label = DEFAULT_LANG;
 	$_SESSION['lang'] = $lang_label;
 } elseif (isset($_SESSION['lang'])) {
-	$lang_label = (is_file('lang'.DIRECTORY_SEPARATOR."{$_SESSION['lang']}.php")) ? $_SESSION['lang'] : DEFAULT_LANG;
+	$lang_label = (is_file(LANG.DIRECTORY_SEPARATOR."{$_SESSION['lang']}.php")) ? $_SESSION['lang'] : DEFAULT_LANG;
 } else {
 	$lang_label = DEFAULT_LANG;
 };
