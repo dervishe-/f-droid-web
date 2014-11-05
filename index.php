@@ -3,6 +3,7 @@
  *	vim: foldmarker{{{,}}}
  *
  *	@author A. Keledjian	<dervishe@yahoo.fr>
+ *	@copyright Association Française des Petits Débrouillards
  *	@license http://opensource.org/licenses/LGPL-3.0 GNU Public License
  *	@version 1.0
  *
@@ -109,7 +110,7 @@ function build_lang_selector($lang_label, $lang) { //{{{
 function build_pager($page_number, $max, $lang) { //{{{
 	echo "<dl><dt>".translate('iface', 'page', $lang).":</dt><dd><ul>";
 	for ($i = 1; $i < $page_number; $i++) { echo "<li><a href=\"?page={$i}\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">{$i}</a></li>"; };
-	echo "<li>{$page_number}</li>";
+	echo "<li><b>{$page_number}</b></li>";
 	for ($i = $page_number + 1; $i <= $max; $i++) { echo "<li><a href=\"?page={$i}\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">{$i}</a></li>"; };
 	echo "</ul></dd></dl>";
 };//}}}
@@ -192,6 +193,40 @@ function cache_licenses($repos) { //{{{
 	};
 	if (count($lic) > 0) file_put_contents(LIC_FILE, serialize($lic));
 	return $lic;
+};
+//}}}
+function cache_words($repos) { //{{{	Fields to search: name, summary, description
+	$wd = array();
+	if (is_file(DATA) && is_readable(DATA) && ($data = simplexml_load_file(DATA)) !== false) {
+		include_once(DICT.DIRECTORY_SEPARATOR.LOCALIZATION.".st.php"); // $stopwords loading
+		foreach ($data->application as $app) {
+			$name = (string) $app->name;
+			$summary = (string) $app->summary;
+			$desc = (string) $app->desc;
+			$dico = sanitize($name.' '.$summary.' '.$desc, $stopwords);
+			foreach ($dico as $word) {
+				if (!isset($wd[$word])) $wd[$word] = array();
+				$wd[$word][] = (string) $app->id;
+			};
+		};
+	} elseif (count($repos) > 0) {		// Fallback: if DATA is not present, then we use app file stored in cache
+		include_once(DICT.DIRECTORY_SEPARATOR.LOCALIZATION.".st.php"); // $stopwords loading
+		foreach ($repos as $app) {
+			if (is_file(CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app)) {
+				$app = unserialize(file_get_contents($app));
+				$name = $app['name'];
+				$summary = $app['summary'];
+				$desc = $app['desc'];
+				$dico = sanitize($name.' '.$summary.' '.$desc, $stopwords);
+				foreach ($dico as $word) {
+					if (!isset($wd[$word])) $wd[$word] = array();
+					$wd[$word][] = (string) $app->id;
+				};
+			};
+		};
+	};
+	if (count($wd) > 0) file_put_contents(WORD_FILE, serialize($wd));
+	return $wd;
 };
 //}}}
 function translate_perm($item) { //{{{
@@ -346,11 +381,13 @@ function build_cache_data($hash) { //{{{
 	};
 	closedir($dh);
 	file_put_contents(MANIFEST, $hash);
-	$repos = build_structure(simplexml_load_file(DATA));
+	$_xml = simplexml_load_file(DATA);
+	$repos = build_structure($_xml);
+	$words = cache_words($repos['list']);
 	$cat = cache_categories($repos['list']);
 	$rel = cache_relations($repos['list']);
 	$lic = cache_licenses($repos['list']);
-	return array('repos'=>$repos, "cat"=>$cat, 'rel'=>$rel, 'lic'=>$lic);
+	return array('repos'=>$repos, 'cat'=>$cat, 'rel'=>$rel, 'lic'=>$lic, 'wd'=>$words);
 };
 //}}}
 function apply_filters($relations, $categories, $licenses) { //{{{
