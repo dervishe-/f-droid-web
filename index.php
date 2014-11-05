@@ -110,6 +110,9 @@ function build_pager($page_number, $max, $lang) { //{{{
 	for ($i = $page_number + 1; $i <= $max; $i++) { echo "<li><a href=\"?page={$i}\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">{$i}</a></li>"; };
 	echo "</ul></dd></dl>";
 };//}}}
+function build_form($lang) { //{{{
+	echo "<form method=\"POST\" action=\"?prop=search\"><input type=\"text\" name=\"value\" /><input type=\"submit\" value=\"".translate('iface', 'form_val', $lang)."\" /></form>";
+};//}}}
 function cache_categories($repos) { //{{{
 	$cat = array();
 	if (is_file(CATEGORIES) && is_readable(CATEGORIES)) {
@@ -367,10 +370,9 @@ function apply_filters($relations, $categories, $licenses) { //{{{
 			unset($_SESSION['lic']);
 			return null;
 		}; //}}}
-	} elseif ($property == 'desc') { //{{{
+	} elseif ($property == 'search') { //{{{
 		unset($_SESSION['cat']);
 		unset($_SESSION['lic']);
-		// search
 		 // }}}
 	} else {
 		unset($_SESSION['cat']);
@@ -507,6 +509,7 @@ if (isset($_REQUEST['getSheet'])) {
 	};
 } else {
 	build_menu($lang);
+	build_form($lang);
 	build_tagcloud_categories($relations, $lang, $repos['nbr']);
 	build_tagcloud_licenses($licenses, $lang, $repos['nbr']);
 	build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE), $lang);

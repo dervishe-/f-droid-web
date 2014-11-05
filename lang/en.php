@@ -17,6 +17,7 @@ $lang = array(
 		'all_categories' => 'All',
 		'alt_lic_link' => 'Select apps with the license',
 		'all_licenses' => 'All',
+		'form_val' => 'Search',
 		'menu' => 'Menu',
 		'page' => 'Pages',
 		'go_to_page' => 'Go page',
