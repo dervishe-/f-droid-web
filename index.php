@@ -486,6 +486,10 @@ $liste = build_list($repos['list'], apply_filters($relations, $categories, $lice
 if (isset($_GET['page'])) {
 	$page = filter_var($_GET['page'], FILTER_VALIDATE_INT);
 	if ($page === false || ((int) $page - 1) * RECORDS_PER_PAGE > count($liste)) $page = 1;
+	$_SESSION['page'] = $page;
+} elseif (isset($_SESSION['page']) && !isset($_REQUEST['getSheet'])) {
+	$page = $_SESSION['page'];
+	unset($_SESSION['page']);
 } else {
 	$page = 1;
 };
