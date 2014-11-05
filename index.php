@@ -111,7 +111,12 @@ function build_pager($page_number, $max, $lang) { //{{{
 	echo "</ul></dd></dl>";
 };//}}}
 function build_form($lang) { //{{{
-	echo "<form method=\"POST\" action=\"?prop=search\"><input type=\"text\" name=\"value\" /><input type=\"submit\" value=\"".translate('iface', 'form_val', $lang)."\" /></form>";
+	echo "<fieldset id=\"search\">
+	<legend>".translate('iface', 'form_val', $lang).": <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend>
+	<form method=\"POST\" action=\"?prop=search\" id=\"search_form\">
+		<input type=\"text\" name=\"value\" title=\"".translate('iface', 'form_field', $lang)."\" />
+		<input type=\"submit\" value=\"".translate('iface', 'form_val', $lang)."\" title=\"".translate('iface', 'form_val', $lang)."\" />
+	</form></fieldset>";
 };//}}}
 function cache_categories($repos) { //{{{
 	$cat = array();
@@ -305,10 +310,10 @@ function decore_app_light($app_id, $lang) { //{{{
 };
 //}}}
 function decore_applist($tampon, $lang) { //{{{
-	echo "<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a>";
+	echo "<fieldset id=\"applist\"><legend>".translate('iface', 'applist', $lang).": <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend>";
 	echo "<ul id=\"applist\">";
 	foreach($tampon as $app) { decore_app_light($app, $lang); };
-	echo "</ul>";
+	echo "</ul>i</fieldset>";
 };
 //}}}
 function build_list($data, $params=null) { //{{{
@@ -436,6 +441,7 @@ function build_menu($lang) { //{{{
 	echo "<fieldset id=\"menu\"><legend>".translate('iface', 'menu', $lang)."</legend><ul>";
 	echo "<li><a href=\"#categories\" title=\"".translate('iface', 'browse_cat', $lang)."\">".translate('iface', 'categories', $lang)."</a></li>";
 	echo "<li><a href=\"#licenses\" title=\"".translate('iface', 'browse_lic', $lang)."\">".translate('iface', 'license', $lang)."</a></li>";
+	echo "<li><a href=\"#search\" title=\"".translate('iface', 'access_form_val', $lang)."\">".translate('iface', 'form_val', $lang)."</a></li>";
 	echo "<li><a href=\"#applist\" title=\"".translate('iface', 'access_applist', $lang)."\">".translate('iface', 'applist', $lang)."</a></li>";
 	echo "</ul></fieldset>";
 };
@@ -509,9 +515,9 @@ if (isset($_REQUEST['getSheet'])) {
 	};
 } else {
 	build_menu($lang);
-	build_form($lang);
 	build_tagcloud_categories($relations, $lang, $repos['nbr']);
 	build_tagcloud_licenses($licenses, $lang, $repos['nbr']);
+	build_form($lang);
 	build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE), $lang);
 	decore_applist($tampon, $lang);
 	build_pager($page, ceil(count($liste) / RECORDS_PER_PAGE), $lang);
