@@ -76,7 +76,7 @@ function build_app($_xml, $id_app) { //{{{
 	file_put_contents(APP_CACHE.DIRECTORY_SEPARATOR.$application['id'], serialize($application));
 	return $application;
 };//}}}
-function build_headers($title, $description=null, $favicon=null) { //{{{
+function build_headers($title, $lang_label, $lang, $description=null, $favicon=null) { //{{{
 	echo "<!DOCTYPE html>
 <html lang=\"fr\">
 	<head>
@@ -87,9 +87,12 @@ function build_headers($title, $description=null, $favicon=null) { //{{{
 		<script src=\"deco/action.js\" type=\"text/javascript\">-->
 	</head>
 	<body>
-		<h1>{$title}</h1>
-		<img src=\"icons/fdroid-icon.png\" alt=\"logo\" /><div>$description</div>
-	";
+		<div id=\"header\">
+			<img src=\"icons/fdroid-icon.png\" alt=\"logo\" />
+			<h1>{$title}</h1>
+			<div>$description</div>";
+	build_lang_selector($lang_label, $lang);
+	echo "</div>";
 };//}}}
 function build_footers() { //{{{
 	echo '</body></html>';
@@ -200,11 +203,19 @@ function build_tagcloud_licenses($licenses, $lang, $nbr_apps) { //{{{
 //}}}
 function build_menu($lang) { //{{{
 	echo "<fieldset id=\"menu\"><legend>".translate('iface', 'menu', $lang)."</legend><ul>";
+	echo "<li><a href=\"#search\" title=\"".translate('iface', 'access_form_val', $lang)."\">".translate('iface', 'form_val', $lang)."</a></li>";
 	echo "<li><a href=\"#categories\" title=\"".translate('iface', 'browse_cat', $lang)."\">".translate('iface', 'categories', $lang)."</a></li>";
 	echo "<li><a href=\"#licenses\" title=\"".translate('iface', 'browse_lic', $lang)."\">".translate('iface', 'license', $lang)."</a></li>";
-	echo "<li><a href=\"#search\" title=\"".translate('iface', 'access_form_val', $lang)."\">".translate('iface', 'form_val', $lang)."</a></li>";
 	echo "<li><a href=\"#applist\" title=\"".translate('iface', 'access_applist', $lang)."\">".translate('iface', 'applist', $lang)."</a></li>";
 	echo "</ul></fieldset>";
+};
+//}}}
+function build_tools($relations, $licenses, $lang, $nbr) { //{{{
+	echo "<div id=\"tools\">";
+	build_form($lang);
+	build_tagcloud_categories($relations, $lang, $nbr);
+	build_tagcloud_licenses($licenses, $lang, $nbr);
+	echo "</div>";
 };
 //}}}
 function cache_categories($repos) { //{{{
@@ -432,11 +443,14 @@ function decore_app_light($app_id, $lang) { //{{{
 </fieldset></li>";
 };
 //}}}
-function decore_applist($tampon, $lang, $nbr_app) { //{{{
+function decore_applist($tampon, $lang, $nbr_app, $page) { //{{{
 	echo "<fieldset id=\"applist\"><legend>".translate('iface', 'applist', $lang).": <b title=\"".translate('iface', 'nbr_result', $lang).": {$nbr_app}\">({$nbr_app})</b><a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend>";
+	build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang);
 	echo "<ul id=\"applist\">";
 	foreach($tampon as $app) { decore_app_light($app, $lang); };
-	echo "</ul></fieldset>";
+	echo "</ul>";
+	build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang);
+	echo "</fieldset>";
 };
 //}}}
 function apply_filters($relations, $licenses, $words, $repos) { //{{{
@@ -556,7 +570,6 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 	};
 };
 //}}}
-
 $list = apply_filters($relations, $licenses, $words, $repos['list']);
 $nbr_app = count($list);
 //{{{Select page
@@ -572,8 +585,7 @@ if (isset($_GET['page'])) {
 };
 $tampon = array_slice($list, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 //}}}
-build_headers($repos['name'], $repos['desc']);
-build_lang_selector($lang_label, $lang);
+build_headers($repos['name'], $lang_label, $lang, $repos['desc']);
 if (isset($_REQUEST['getSheet'])) { //{{{ 
 	$sheet = $_REQUEST['getSheet'];
 	if (in_array($sheet, $repos['list'])) {
@@ -584,12 +596,8 @@ if (isset($_REQUEST['getSheet'])) { //{{{
 	};
 } else {
 	build_menu($lang);
-	build_tagcloud_categories($relations, $lang, $repos['nbr']);
-	build_tagcloud_licenses($licenses, $lang, $repos['nbr']);
-	build_form($lang);
-	build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang);
-	decore_applist($tampon, $lang, $nbr_app);
-	build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang);
+	build_tools($relations, $licenses, $lang, $repos['nbr']);
+	decore_applist($tampon, $lang, $nbr_app, $page);
 }; //}}}
 build_footers();
 ?>
