@@ -83,14 +83,14 @@ function build_headers($title, $lang_label, $lang, $description=null, $favicon=n
 		<meta charset=\"UTF-8\">
 		<title>{$title}</title>
 		".((!is_null($favicon)) ? "<link type=\"image/png\" rel=\"icon\" href=\"{favicon}\">" : '')."
-		<!--<link type=\"text/css\" rel=\"stylesheet\" href=\"deco/style.css\">
-		<script src=\"deco/action.js\" type=\"text/javascript\">-->
+		<link type=\"text/css\" rel=\"stylesheet\" href=\"deco/default.css\" />
+		<!--<script src=\"deco/action.js\" type=\"text/javascript\">-->
 	</head>
 	<body>
 		<div id=\"header\">
 			<img src=\"icons/fdroid-icon.png\" alt=\"logo\" />
-			<h1>{$title}</h1>
-			<div>$description</div>";
+			<h1 id=\"label_titre\">{$title}</h1>
+			<div id=\"desc_repos\">$description</div>";
 	build_lang_selector($lang_label, $lang);
 	echo "</div>";
 };//}}}
@@ -98,37 +98,62 @@ function build_footers() { //{{{
 	echo '</body></html>';
 };//}}}
 function build_lang_selector($lang_label, $lang) { //{{{
-	echo "<dl><dt>".translate('iface', 'language', $lang).": </dt><dd><ul>";
+	echo "<dl id=\"lang\"><dt>".translate('iface', 'language', $lang).": </dt><dd><ul>";
 	if ($dh = opendir(LANG)) {
 		while (false !== ($file = readdir($dh))) {
 			if (is_file(LANG.DIRECTORY_SEPARATOR.$file)) {
 				$file = substr($file, 0, 2);
-				echo ($file != $lang_label) ? "<li><a href=\"?lang={$file}\" title=\"".translate('lang', $file, $lang)."\">{$file}</a></li>" : "<li><b>{$file}</b></li>";
+				echo ($file != $lang_label) ? 
+					"<li>
+						<a href=\"?lang={$file}\" title=\"".translate('lang', $file, $lang)."\">
+							{$file}
+						</a>
+					</li>" : "<li><b>{$file}</b></li>";
 			};
 		};
 		closedir($dh);
 	};
 	echo '</ul></dd></dl>';
 };//}}}
-function build_pager($page_number, $max, $lang) { //{{{
-	echo "<dl><dt>".translate('iface', 'page', $lang).":</dt><dd><ul>";
-	for ($i = 1; $i < $page_number; $i++) { echo "<li><a href=\"?page={$i}\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">{$i}</a></li>"; };
+function build_pager($page_number, $max, $lang, $id) { //{{{
+	echo "<dl id=\"{$id}\"><dt>".translate('iface', 'page', $lang).":</dt><dd><ul>";
+	for ($i = 1; $i < $page_number; $i++) { 
+		echo "
+		<li>
+			<a href=\"?page={$i}#applist\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">
+				{$i}
+			</a>
+		</li>";
+	};
 	echo "<li><b>{$page_number}</b></li>";
-	for ($i = $page_number + 1; $i <= $max; $i++) { echo "<li><a href=\"?page={$i}\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">{$i}</a></li>"; };
+	for ($i = $page_number + 1; $i <= $max; $i++) { 
+		echo "
+			<li>
+				<a href=\"?page={$i}#applist\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">
+				{$i}
+				</a>
+			</li>";
+	};
 	echo "</ul></dd></dl>";
 };//}}}
-function build_form($lang) { //{{{
+function build_form_search($lang) { //{{{
 	echo "<fieldset id=\"search\">
-	<legend>".translate('iface', 'form_val', $lang).": <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend>
+	<legend>".translate('iface', 'form_val', $lang).": 
+		<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
+			translate('iface', 'menu', $lang).
+		"</a>
+	</legend>
 	<form method=\"POST\" action=\"?prop=search\" id=\"search_form\">
 		<input type=\"text\" name=\"val\" title=\"".translate('iface', 'form_field', $lang)."\" />
 		<input type=\"submit\" value=\"".translate('iface', 'form_val', $lang)."\" title=\"".translate('iface', 'form_val', $lang)."\" />
-	</form></fieldset>";
+	</form>
+	</fieldset>";
 };//}}}
 function build_cache_data($hash) { //{{{
 	$dh = opendir(CACHE);
 	while (false !== ($file = readdir($dh))) {
-		if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$file) && $file != '.htaccess') unlink(APP_CACHE.DIRECTORY_SEPARATOR.$file);
+		if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$file) && $file != '.htaccess')
+			unlink(APP_CACHE.DIRECTORY_SEPARATOR.$file);
 	};
 	closedir($dh);
 	file_put_contents(MANIFEST, $hash);
@@ -143,61 +168,81 @@ function build_cache_data($hash) { //{{{
 //}}}
 function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
 	if (count($relations) > 0) {
-		echo "<fieldset id=\"categories\"><legend>".translate('iface', 'categories', $lang).": <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend><ul>";
+		echo "
+		<fieldset id=\"categories\">
+			<legend>".translate('iface', 'categories', $lang).": 
+				<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
+					translate('iface', 'menu', $lang).
+				"</a>
+			</legend>
+			<form method=\"POST\" action=\"index.php#applist\" id=\"categories_form\">
+				<ul>";
 		$lab_all_cat = translate('iface', 'all_categories', $lang);
-		if (!isset($_SESSION['categories'])) {
-			echo "<li><b>{$lab_all_cat}<span> ({$nbr_apps})</span></b></li>";
-		} else {
-			echo "<li><a href=\"?cat=all\" title=\"".translate('iface', 'alt_cat_link', $lang).": {$lab_all_cat}\">{$lab_all_cat}</a><span> ({$nbr_apps})</span></li>";
-		};
+		$flagCheck = (!isset($_SESSION['categories'])) ? "checked=\"checked\"" : '';
+		echo "
+		<li>
+			<input type=\"checkbox\" name=\"cat[]\" value=\"all\" {$flagCheck} title=\"".translate('iface', 'alt_cat_link', $lang).": {$lab_all_cat}\" />
+			<label>{$lab_all_cat} ({$nbr_apps})</label>
+		</li>";
 		$tab_relations = array();
 		$recorded_cats = (isset($_SESSION['categories'])) ? array_flip($_SESSION['categories']) : array();
 		reset($relations);
 		while (false !== ($cat = current($relations))) {
 			$name_cat = translate('cat', key($relations), $lang);
-			$str = "<li>";
-			if (isset($recorded_cats[key($relations)])) {
-				$str .= "<b>{$name_cat}<span> (".count($cat).")</span></b>";
-			} else {
-				$str .= "<a href=\"?cat=".urlencode(key($relations))."\" title=\"".translate('iface', 'alt_cat_link', $lang).": {$name_cat}\">{$name_cat}</a><span> (".count($cat).")</span>";
-			};
-			$str .= "</li>";
+			$flagCheck = (isset($recorded_cats[key($relations)])) ? "checked=\"checked\"" : '';
+			$str = "
+			<li>
+				<input type=\"checkbox\" name=\"cat[]\" value=\"".key($relations)."\" {$flagCheck} title=\"".translate('iface', 'alt_cat_link', $lang).": {$name_cat}\" />
+				<label>{$name_cat} (".count($cat).")</label>
+			</li>
+			";
 			$tab_relations[$name_cat] = $str;
 			next($relations);
 		};
 		ksort($tab_relations);
 		echo implode('', $tab_relations);
-		echo "</ul></fieldset>";
+		echo "<li><input type=\"submit\" value=\"".translate('iface', 'form_val', $lang)."\" title=\"".translate('iface', 'form_val', $lang)."\" /></li>";
+		echo "</ul></form></fieldset>";
 	};
 };	
 //}}}
 function build_tagcloud_licenses($licenses, $lang, $nbr_apps) { //{{{
 	if (count($licenses) > 0) {
-		echo "<fieldset id=\"licenses\"><legend>".translate('iface', 'license', $lang).": <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend><ul>";
+		echo "
+		<fieldset id=\"licenses\">
+			<legend>".translate('iface', 'license', $lang).": 
+				<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
+					translate('iface', 'menu', $lang).
+				"</a>
+			</legend>
+			<form method=\"POST\" action=\"index.php#applist\" id=\"licenses_form\">
+		<ul>";
 		$lab_all_lic = translate('iface', 'all_licenses', $lang);
-		if (!isset($_SESSION['licenses'])) {
-			echo "<li><b>{$lab_all_lic}<span> ({$nbr_apps})</span></b></li>";
-		} else {
-			echo "<li><a href=\"?lic=all\" title=\"".translate('iface', 'alt_lic_link', $lang).": {$lab_all_lic}\">{$lab_all_lic}</a><span> ({$nbr_apps})</span></li>";
-		};
+		$flagCheck = (!isset($_SESSION['licenses'])) ? "checked=\"checked\"" : '';
+		echo "
+		<li>
+			<input type=\"checkbox\" name=\"lic[]\" value=\"all\" {$flagCheck} title=\"".translate('iface', 'alt_lic_link', $lang).": {$lab_all_lic}\" />
+			<label>{$lab_all_lic} ({$nbr_apps})</label>
+		</li>";
 		$tab_licenses = array();
 		$recorded_lics = (isset($_SESSION['licenses'])) ? array_flip($_SESSION['licenses']) : array();
 		reset($licenses);
 		while (false !== ($lic = current($licenses))) {
 			$name_lic = translate('lic', key($licenses), $lang);
-			$str = "<li>";
-			if (isset($recorded_lics[key($licenses)])) {
-				$str .= "<b>{$name_lic}<span> (".count($lic).")</span></b>";
-			} else {
-				$str .= "<a href=\"?lic=".urlencode(key($licenses))."\" title=\"".translate('iface', 'alt_lic_link', $lang).": {$name_lic}\">{$name_lic}</a><span> (".count($lic).")</span>";
-			};
-			$str .= "</li>";
+			$flagCheck = (isset($recorded_lics[key($licenses)])) ? "checked=\"checked\"" : '';
+			$str = "
+			<li>
+				<input type=\"checkbox\" name=\"lic[]\" value=\"".key($licenses)."\" {$flagCheck} title=\"".translate('iface', 'alt_lic_link', $lang).": {$name_lic}\" />
+				<label>{$name_lic} (".count($lic).")</label>
+			</li>
+			";
 			$tab_licenses[$name_lic] = $str;
 			next($licenses);
 		};
 		ksort($tab_licenses);
 		echo implode('', $tab_licenses);
-		echo "</ul></fieldset>";
+		echo "<li><input type=\"submit\" value=\"".translate('iface', 'form_val', $lang)."\" title=\"".translate('iface', 'form_val', $lang)."\" /></li>";
+		echo "</ul></form></fieldset>";
 	};
 };	
 //}}}
@@ -212,7 +257,7 @@ function build_menu($lang) { //{{{
 //}}}
 function build_tools($relations, $licenses, $lang, $nbr) { //{{{
 	echo "<div id=\"tools\">";
-	build_form($lang);
+	build_form_search($lang);
 	build_tagcloud_categories($relations, $lang, $nbr);
 	build_tagcloud_licenses($licenses, $lang, $nbr);
 	echo "</div>";
@@ -445,11 +490,11 @@ function decore_app_light($app_id, $lang) { //{{{
 //}}}
 function decore_applist($tampon, $lang, $nbr_app, $page) { //{{{
 	echo "<fieldset id=\"applist\"><legend>".translate('iface', 'applist', $lang).": <b title=\"".translate('iface', 'nbr_result', $lang).": {$nbr_app}\">({$nbr_app})</b><a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend>";
-	build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang);
-	echo "<ul id=\"applist\">";
+	build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_head');
+	echo "<ul>";
 	foreach($tampon as $app) { decore_app_light($app, $lang); };
 	echo "</ul>";
-	build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang);
+	build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_foot');
 	echo "</fieldset>";
 };
 //}}}
