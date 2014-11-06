@@ -30,6 +30,7 @@ $lang = array(
 		'browse_lic' => "Accès au filtre par licence",
 		'browse_cat' => "Accès au filtre par catégories",
 		'sheet' => 'Fiche descriptive',
+		'nbr_result' => 'Nombre de résultats',
 		'error_label' => 'Erreur',
 		'error_message' => "Ooops, ce dépot d'applications est temporairement indisponible. Nous en sommes désolé, veuillez ré-essayer plus tard...",
 		'error_message_sheet' => "Ooops, la fiche de l'application demandée n'existe pas..."),

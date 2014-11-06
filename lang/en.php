@@ -30,6 +30,7 @@ $lang = array(
 		'browse_lic' => "Browse apps by licenses",
 		'browse_cat' => "Browse apps by categories",
 		'sheet' => 'Factsheet',
+		'nbr_result' => 'Number of results',
 		'error_label' => 'Error',
 		'error_message' => "Ooops, this repository is temporarily unavailable. We're sorry. Re-try latter please.",
 		'error_message_sheet' => "Ooops, the app's sheet you requested doesn't exists..."),
