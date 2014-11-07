@@ -132,7 +132,7 @@ $stopwords = array( //{{{
 ); //}}}
 function sanitize($text, $stopwords) { //{{{
 	$pattern_markup = "/<\/?[^>]*>/";
-	$pattern = "/[^a-z]+/";
+	$pattern = "/[^üößa-z]+/";
 	$result = preg_split($pattern, preg_replace($pattern_markup, '', strtolower($text)));
 	return array_unique(array_diff($result, $stopwords));
 };//}}}

@@ -16,6 +16,7 @@ session_start();
 define('ROOT', dirname(__FILE__));
 define('ICONS_DIR', 'icons-480');
 define('ICONS_DIR_LIGHT', 'icons-240');
+define('ICONS_DIR_ABSTRACT', 'icons-120');
 define('QRCODES_DIR', 'qrcodes');
 define('LANG', 'lang');
 define('DICT', LANG.DIRECTORY_SEPARATOR.'dict');
@@ -28,12 +29,14 @@ define('REPOS_FILE', CACHE.DIRECTORY_SEPARATOR.'repository');
 define('CAT_FILE', CACHE.DIRECTORY_SEPARATOR.'categories'); // store categories as an array
 define('REL_FILE', CACHE.DIRECTORY_SEPARATOR.'relations'); // store relations between categories and apps as an array
 define('LIC_FILE', CACHE.DIRECTORY_SEPARATOR.'licenses'); // store used licenses as an array
+define('LAST_FILE', CACHE.DIRECTORY_SEPARATOR.'last_apps'); // store last apps id as an array
 define('WORD_FILE', CACHE.DIRECTORY_SEPARATOR.'words'); // store used words as an array
 define('MANIFEST', CACHE.DIRECTORY_SEPARATOR.'Manifest'); // store index.xml hash
 // PARAMETERS
 define('HASH_ALGO', 'whirlpool');
 define('USE_QRCODE', true);
-define('RECORDS_PER_PAGE',  3);
+define('NUMBER_LAST_APP', 4);
+define('RECORDS_PER_PAGE', 3);
 define('DEFAULT_LANG', 'fr');
 define('LOCALIZATION', 'fr');
 //}}}
@@ -163,7 +166,8 @@ function build_cache_data($hash) { //{{{
 	$cat = cache_categories($repos['list']);
 	$rel = cache_relations($repos['list']);
 	$lic = cache_licenses($repos['list']);
-	return array('repos'=>$repos, 'cat'=>$cat, 'rel'=>$rel, 'lic'=>$lic, 'wrd'=>$words);
+	$lst = cache_lastapps($repos['list']);
+	return array('repos'=>$repos, 'cat'=>$cat, 'rel'=>$rel, 'lic'=>$lic, 'wrd'=>$words, 'lst'=>$lst);
 };
 //}}}
 function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
@@ -252,6 +256,7 @@ function build_menu($lang) { //{{{
 	echo "<li><a href=\"#categories\" title=\"".translate('iface', 'browse_cat', $lang)."\">".translate('iface', 'categories', $lang)."</a></li>";
 	echo "<li><a href=\"#licenses\" title=\"".translate('iface', 'browse_lic', $lang)."\">".translate('iface', 'license', $lang)."</a></li>";
 	echo "<li><a href=\"#applist\" title=\"".translate('iface', 'access_applist', $lang)."\">".translate('iface', 'applist', $lang)."</a></li>";
+	echo "<li><a href=\"#lastapplist\" title=\"".translate('iface', 'access_lastapplist', $lang)."\">".translate('iface', 'lastapplist', $lang)."</a></li>";
 	echo "</ul></fieldset>";
 };
 //}}}
@@ -334,6 +339,38 @@ function cache_licenses($repos) { //{{{
 	};
 	if (count($lic) > 0) file_put_contents(LIC_FILE, serialize($lic));
 	return $lic;
+};
+//}}}
+function cache_lastapps($repos) { //{{{
+	$last = array();
+	if (is_file(DATA) && is_readable(DATA) && ($data = simplexml_load_file(DATA)) !== false) {
+		foreach ($data->application as $app) {
+			$idx = (string) $app->lastupdated;
+			if (!isset($last[$idx])) $last[$idx] = array();
+			$last[$idx][] = (string) $app->id;
+		};
+	} elseif (count($repos) > 0) {		// Fallback: if DATA is not present, then we use app file stored in cache
+		foreach ($repos as $app) {
+			if (is_file(CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app)) {
+				$app = unserialize(file_get_contents($app));
+				$idx = $app['updated'];
+				if (!isset($last[$idx])) $last[$idx] = array();
+				$last[$idx][] = $app['id'];
+			};
+		};
+	};
+	$result = array();
+	if (count($last) > 0) {
+		krsort($last);
+		reset($last);
+		while (count($result) <= 10 && current($last)) {
+			$result = array_merge($result, current($last));
+			next($last);
+		};
+		$result = array_slice($result, 0, NUMBER_LAST_APP);
+	};
+	if (count($result) > 0) file_put_contents(LAST_FILE, serialize($result));
+	return $result;
 };
 //}}}
 function cache_words($repos) { //{{{	Fields to search: name, summary, description
@@ -488,6 +525,35 @@ function decore_app_light($app_id, $lang) { //{{{
 </fieldset></li>";
 };
 //}}}
+function decore_app_abstract($app_id, $lang) { //{{{
+	if (is_file(CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app_id)) {
+		$app = unserialize(file_get_contents(CACHE.DIRECTORY_SEPARATOR.$app_id));
+	} else {
+		if (($data = simplexml_load_file(DATA)) !== false) {
+			$app = build_app($data, $app_id);
+			$data = null;
+		} else {
+			return false;
+		};
+	};
+	$icon = ICONS_DIR_ABSTRACT.DIRECTORY_SEPARATOR.$app['icon'];
+	$license = "
+	<div title=\"".translate('iface', 'license', $lang)."\">
+		<span>".translate('iface', 'license', $lang).": </span>
+		<span>{$app['license']}</span>
+	</div>";
+	echo "
+	<li>
+		<div id=\"last_".str_replace(array('.', ' '), '_', $app['id'])."\">
+			<label>
+				<a href=\"?getSheet={$app['id']}\" title=\"".translate('iface', 'sheet', $lang).": {$app['name']}\">{$app['name']}</a>
+			</label>
+			<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
+			{$license}
+		</div>
+	</li>";
+};
+//}}}
 function decore_applist($tampon, $lang, $nbr_app, $page) { //{{{
 	echo "<fieldset id=\"applist\"><legend>".translate('iface', 'applist', $lang).": <b title=\"".translate('iface', 'nbr_result', $lang).": {$nbr_app}\">({$nbr_app})</b><a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend>";
 	if ($nbr_app > 0) {
@@ -498,6 +564,18 @@ function decore_applist($tampon, $lang, $nbr_app, $page) { //{{{
 		build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_foot');
 	} else {
 		echo '<p>'.translate('iface', 'no_result', $lang).'</p>';
+	};
+	echo "</fieldset>";
+};
+//}}}
+function decore_lastapplist($list, $lang) { //{{{
+	echo "<fieldset id=\"lastapplist\"><legend>".translate('iface', 'lastapplist', $lang).": <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend>";
+	if (count($list) > 0) {
+		echo "<ul>";
+		foreach($list as $app) { decore_app_abstract($app, $lang); };
+		echo "</ul>";
+	} else {
+		echo '<p>'.translate('iface', 'no_apps', $lang).'</p>';
 	};
 	echo "</fieldset>";
 };
@@ -599,6 +677,7 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 		$relations = (is_file(REL_FILE)) ? unserialize(file_get_contents(REL_FILE)) : cache_relations($repos['list']);
 		$licenses = (is_file(LIC_FILE)) ? unserialize(file_get_contents(LIC_FILE)) : cache_licenses($repos['list']);
 		$words = (is_file(WORD_FILE)) ? unserialize(file_get_contents(WORD_FILE)) : cache_words($repos['list']);
+		$last_apps = (is_file(LAST_FILE)) ? unserialize(file_get_contents(LAST_FILE)) : cache_lastapps($repos['list']);
 	};
 } else {
 	$hash = hash_file(HASH_ALGO, DATA);
@@ -609,6 +688,7 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 		$relations = $data['rel'];
 		$licenses = $data['lic'];
 		$words = $data['wrd'];
+		$last_apps = $data['lst'];
 	} else {
 		file_put_contents(MANIFEST, $hash);
 		$repos = unserialize(file_get_contents(REPOS_FILE));
@@ -616,6 +696,7 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 		$relations = (is_file(REL_FILE)) ? unserialize(file_get_contents(REL_FILE)) : cache_relations($repos['list']);
 		$licenses = (is_file(LIC_FILE)) ? unserialize(file_get_contents(LIC_FILE)) : cache_licenses($repos['list']);
 		$words = (is_file(WORD_FILE)) ? unserialize(file_get_contents(WORD_FILE)) : cache_words($repos['list']);
+		$last_apps = (is_file(LAST_FILE)) ? unserialize(file_get_contents(LAST_FILE)) : cache_lastapps($repos['list']);
 	};
 };
 //}}}
@@ -647,6 +728,7 @@ if (isset($_REQUEST['getSheet'])) { //{{{
 	build_menu($lang);
 	build_tools($relations, $licenses, $lang, $repos['nbr']);
 	decore_applist($tampon, $lang, $nbr_app, $page);
+	decore_lastapplist($last_apps, $lang);
 }; //}}}
 build_footers();
 ?>
