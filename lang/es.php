@@ -31,6 +31,7 @@ $lang = array(
 		'browse_cat' => "Acceso al Filtró por categorías",
 		'sheet' => 'Ficha de información',
 		'nbr_result' => 'Número de resultados',
+		'no_result' => "No aplicación se ha encontrado con los criterios que usted ha elegido.",
 		'error_label' => 'Error',
 		'error_message' => "Ooops, este depósito de aplicaciónes no está disponible temporalmente. Lo sentimos, por favor, inténtalo de nuevo más tarde...",
 		'error_message_sheet' => "Ooops, la ficha de la aplicación que ha solicitado no existe..."),

@@ -490,11 +490,15 @@ function decore_app_light($app_id, $lang) { //{{{
 //}}}
 function decore_applist($tampon, $lang, $nbr_app, $page) { //{{{
 	echo "<fieldset id=\"applist\"><legend>".translate('iface', 'applist', $lang).": <b title=\"".translate('iface', 'nbr_result', $lang).": {$nbr_app}\">({$nbr_app})</b><a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend>";
-	build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_head');
-	echo "<ul>";
-	foreach($tampon as $app) { decore_app_light($app, $lang); };
-	echo "</ul>";
-	build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_foot');
+	if ($nbr_app > 0) {
+		build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_head');
+		echo "<ul>";
+		foreach($tampon as $app) { decore_app_light($app, $lang); };
+		echo "</ul>";
+		build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_foot');
+	} else {
+		echo '<p>'.translate('iface', 'no_result', $lang).'</p>';
+	};
 	echo "</fieldset>";
 };
 //}}}

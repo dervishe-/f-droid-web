@@ -31,6 +31,7 @@ $lang = array(
 		'browse_cat' => "Browse apps by categories",
 		'sheet' => 'Factsheet',
 		'nbr_result' => 'Number of results',
+		'no_result' => "No app has been found with the criteria you choose.",
 		'error_label' => 'Error',
 		'error_message' => "Ooops, this repository is temporarily unavailable. We're sorry. Re-try latter please.",
 		'error_message_sheet' => "Ooops, the app's sheet you requested doesn't exists..."),

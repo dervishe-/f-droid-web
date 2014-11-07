@@ -31,6 +31,7 @@ $lang = array(
 		'browse_cat' => "Accès au filtre par catégories",
 		'sheet' => 'Fiche descriptive',
 		'nbr_result' => 'Nombre de résultats',
+		'no_result' => "Aucune application n'a été trouvée avec les critères que vous avez choisis.",
 		'error_label' => 'Erreur',
 		'error_message' => "Ooops, ce dépot d'applications est temporairement indisponible. Nous en sommes désolé, veuillez ré-essayer plus tard...",
 		'error_message_sheet' => "Ooops, la fiche de l'application demandée n'existe pas..."),
