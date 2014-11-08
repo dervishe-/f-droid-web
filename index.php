@@ -20,6 +20,7 @@ define('ICONS_DIR_ABSTRACT', 'icons-120');
 define('QRCODES_DIR', 'qrcodes');
 define('LANG', 'lang');
 define('DICT', LANG.DIRECTORY_SEPARATOR.'dict');
+define('FLAGS', LANG.DIRECTORY_SEPARATOR.'flag');
 define('CACHE', ROOT.DIRECTORY_SEPARATOR.'cache');
 define('APP_CACHE', CACHE.DIRECTORY_SEPARATOR.'app_files');
 // FILES
@@ -90,8 +91,10 @@ function build_headers($title, $lang_label, $lang, $description=null, $favicon=n
 	</head>
 	<body>
 		<div id=\"header\">
-			<img src=\"icons/fdroid-icon.png\" alt=\"logo\" />
-			<h1 id=\"label_titre\">{$title}</h1>
+			<div>
+				<img src=\"Media/images/logo.png\" alt=\"logo\" />
+				<h1 id=\"label_titre\">{$title}</h1>
+			</div>
 			<div id=\"desc_repos\">$description</div>";
 	build_lang_selector($lang_label, $lang);
 	echo "</div><div id=\"body\">";
@@ -108,9 +111,9 @@ function build_lang_selector($lang_label, $lang) { //{{{
 				echo ($file != $lang_label) ? 
 					"<li>
 						<a href=\"?lang={$file}\" title=\"".translate('lang', $file, $lang)."\">
-							{$file}
+							<img alt=\"{$file}\" src=\"".FLAGS.DIRECTORY_SEPARATOR.$file.".png\" />
 						</a>
-					</li>" : "<li><b>{$file}</b></li>";
+					</li>" : "<li><b><img alt=\"{$file}\" src=\"".FLAGS.DIRECTORY_SEPARATOR.$file.".png\" /></b></li>";
 			};
 		};
 		closedir($dh);
@@ -562,7 +565,6 @@ function decore_app_abstract($app_id, $lang) { //{{{
 //}}}
 function decore_applist($tampon, $lang, $nbr_app, $page) { //{{{
 	echo "<div id=\"applist\">";
-	if ($nbr_app > 0) build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_head');
 	echo "
 	<fieldset>
 		<legend>".translate('iface', 'applist', $lang).
@@ -572,14 +574,15 @@ function decore_applist($tampon, $lang, $nbr_app, $page) { //{{{
 			translate('iface', 'menu', $lang)."</a>
 		</legend>";
 	if ($nbr_app > 0) {
+		build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_head');
 		echo "<ul id=\"list_sheets\">";
 		foreach($tampon as $app) { decore_app_light($app, $lang); };
 		echo "</ul>";
+		build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_foot');
 	} else {
 		echo '<p>'.translate('iface', 'no_result', $lang).'</p>';
 	};
 	echo "</fieldset>";
-	if ($nbr_app > 0) build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_foot');
 	echo "</div>";
 };
 //}}}
