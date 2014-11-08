@@ -65,16 +65,16 @@ $lang = array(
 		'Parcours' => 'Recorridos',
 		'Démarche expérimentale' => 'Proceso experimental'),
 	'lic' => array(
-		'Unknown' => "Ninguna licencia especificada",
-		'GPLv2' => "GNU GPL versión 2",
-		'GPLv2+' => "GNU GPL versión 2 o mas alta",
-		'GPLv3' => "GNU GPL versión 3",
-		'GPLv3+' => "GNU GPL versión 3 o mas alta",
-		'GPL' => "GPL versión no especificada",
+		'Unknown' => "No especificada",
+		'GPLv2' => "GNU GPL v2",
+		'GPLv2+' => "GNU GPL v2 o mas",
+		'GPLv3' => "GNU GPL v3",
+		'GPLv3+' => "GNU GPL v3 o mas",
+		'GPL' => "GPL no especificada",
 		'AGPL' => "Afferro GPL versión 3",
 		'Apache2' => "Apache 2",
-		'MIT' => "MIT X11 licencia",
-		'BSD' => "BSD licencia - versión original '4-cláusulas'",
-		'NewBSD' => "BSD licencia - Nueva versión o versión modificada")
+		'MIT' => "Licencia MIT X11",
+		'BSD' => "Licencia BSD orig.",
+		'NewBSD' => "Licencia BSD nueva")
 );
 ?>

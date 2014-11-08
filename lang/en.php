@@ -66,15 +66,15 @@ $lang = array(
 		'Démarche expérimentale' => 'Experimental approach'),
 	'lic' => array(
 		'Unknown' => "Unknown",
-		'GPLv2' => "GNU GPL version 2",
-		'GPLv2+' => "GNU GPL version 2 or later",
-		'GPLv3' => "GNU GPL version 3",
-		'GPLv3+' => "GNU GPL version 3 or later",
+		'GPLv2' => "GNU GPL v2",
+		'GPLv2+' => "GNU GPL v2 or later",
+		'GPLv3' => "GNU GPL v3",
+		'GPLv3+' => "GNU GPL v3 or later",
 		'GPL' => "Unspecified GPL version",
 		'AGPL' => "Afferro GPL version 3",
 		'Apache2' => "Apache 2",
 		'MIT' => "MIT X11 license",
-		'BSD' => "BSD license - the original ’4-clause’ version",
-		'NewBSD' => "BSD license - the new, or modified, version")
+		'BSD' => "BSD license orig.",
+		'NewBSD' => "BSD license new")
 );
 ?>

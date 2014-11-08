@@ -502,7 +502,7 @@ function decore_app_light($app_id, $lang) { //{{{
 		};
 	};
 	$icon = ICONS_DIR_ABSTRACT.DIRECTORY_SEPARATOR.$app['icon'];
-	$version = "<li><label>".translate('iface', 'version', $lang).":</label><span>{$app['package']['version']} - ".translate('iface', 'added', $lang).": {$app['updated']}</span></li>";
+	$version = "<li><label>".translate('iface', 'version', $lang).":</label><span>{$app['package']['version']}</span> - <label>".translate('iface', 'added', $lang).":</label> <span>{$app['updated']}</span></li>";
 	$updated = "<li><label>".translate('iface', 'updated', $lang).":</label><span>{$app['updated']}</span></li>";
 	$summary = "<li><label>".translate('iface', 'summary', $lang).":</label><span>{$app['summary']}</span></li>";
 	$size = $app['package']['size'];
@@ -527,8 +527,8 @@ function decore_app_light($app_id, $lang) { //{{{
 					"</a>
 				</div>
 			<ul>
-			{$size}
 			{$version}
+			{$size}
 			{$updated}
 			{$summary}
 			</ul>
