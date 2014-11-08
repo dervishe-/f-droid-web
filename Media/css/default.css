@@ -1,0 +1,229 @@
+/*{{{ Default*/
+* {
+	margin: 0em; 
+	padding: 0em;
+	font-family: arial,tahoma,sans-serif;
+}
+
+#body {
+	margin-left:auto;
+	margin-right:auto;
+	margin-top: 1.6em;
+	padding: 1.3em;
+	background: #ffffff;
+	margin-bottom: 1.6em;
+	font-size: 1em;
+	/*box-shadow: 0em 0em 0.3em #000000;*/
+}
+/*}}}*/
+#menu {
+	display: none;
+}
+/*{{{ Left tool bar */
+#tools {
+	position: relative;
+	float: left;
+	margin: 0.5em;
+	padding: 0.5em;
+	box-shadow: 0em 0em 0.3em #000000;
+}
+
+#tools fieldset  {
+	padding: 0.5em;
+	border: none;
+	margin-bottom: 0.5em;
+}
+
+#tools legend {
+	display: block;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	font-variant: small-caps;
+	font-weight: bold;
+}
+
+#tools legend a {
+	display:none;
+}
+
+#tools ul {
+	list-style-type: none; 
+}
+
+#tools li {
+	margin-bottom: 0.3em;
+}
+
+#tools label{
+	margin-left: 0.3em;
+}
+
+#search input {
+	display: block;
+}
+/*}}}*/
+/*{{{ Apps list */
+#applist {
+	position: relative;
+	float: left;
+	margin: 0.5em;
+	padding: 0.5em;
+	min-width: 60em;
+	box-shadow: 0em 0em 0.3em #000000;
+}
+
+#applist fieldset {
+	border: 0em;
+	padding: 0em;
+}
+
+#applist legend {
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	font-variant: small-caps;
+	font-weight: bold;
+}
+
+#applist label {
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	font-variant: small-caps;
+	font-weight: bold;
+}
+
+#applist legend a {
+	display: none;
+}
+
+#applist ul {
+	list-style-type: none; 
+}
+/*}}}*/
+/*{{{ Pager */
+#page_head {
+	margin-bottom: 0.5em;
+}
+
+#page_foot {
+	margin-top: 0.5em;
+}
+
+#page_head, #page_foot {
+	height: 1.8em;
+	margin-top: 0.5em;
+}
+
+#page_head dt, #page_foot dt {
+	float: left;
+	margin-right: 1em;
+}
+
+#page_head li, #page_foot li {
+	float: left;
+}
+
+#page_head li b, #page_foot li b {
+	display: inline-block;
+	border: 0.15em solid #333333;
+	padding: 0.2em;
+	margin-right: 0.2em;
+	border-radius: 0.3em;
+	color: #FFFFFF;
+	background-color: #000000;
+}
+
+#page_head li a, #page_foot li a {
+	display: inline-block;
+	border: 0.15em solid #333333;
+	padding: 0.2em;
+	margin-right: 0.2em;
+	border-radius: 0.3em;
+	font-weight: bold;
+	text-decoration: none;
+	color: #000000;
+}
+
+#page_head li a:hover, #page_foot li a:hover {
+	border: 0.25em solid #333333;
+}
+/*}}}*/
+/*{{{ Light app sheet */
+#list_sheets [id|=app] {
+	border-bottom: 0.1em solid #000000; 
+	margin-top: 0.5em;
+	padding-bottom: 0.7em;
+}
+
+#list_sheets [id|=app] img {
+	magin-bottom: 0em;
+	padding-right: 0.5em;
+	padding-bottom: 0em;
+	display: inline;
+	float: left;
+}
+
+#list_sheets [id|=app] div:first-of-type {
+	margin-bottom: 0.8em;
+}
+
+/*}}}*/
+/*{{{ Last apps list */
+#lastapplist {
+	position: relative;
+	float: left;
+	margin: 0.5em;
+	padding: 0.5em;
+	box-shadow: 0em 0em 0.3em #000000;
+}
+
+#lastapplist fieldset {
+	border: 0em;
+}
+
+#lastapplist legend {
+	display: block;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	font-variant: small-caps;
+	font-weight: bold;
+}
+
+#lastapplist legend a {
+	display: none;
+}
+
+#lastapplist ul {
+	list-style-type: none; 
+}
+
+#lastapplist li {
+	border-bottom: 0.1em solid #000000; 
+	margin-top: 0.5em;
+	padding-bottom: 0.7em;
+	word-break: break-all;
+}
+
+#lastapplist li:last-child {
+	border-bottom: 0em; 
+}
+
+#lastapplist div {
+	margin-left: 0.5em;
+}
+
+#lastapplist div span{
+	font-size: 0.7em;
+}
+
+#lastapplist div span:first-child{
+	display: none;
+}
+
+#lastapplist img {
+	magin-bottom: 0em;
+	padding-right: 0.5em;
+	padding-bottom: 0em;
+	display: inline;
+	float: left;
+}
+/*}}}*/

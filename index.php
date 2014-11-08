@@ -86,8 +86,7 @@ function build_headers($title, $lang_label, $lang, $description=null, $favicon=n
 		<meta charset=\"UTF-8\">
 		<title>{$title}</title>
 		".((!is_null($favicon)) ? "<link type=\"image/png\" rel=\"icon\" href=\"{favicon}\">" : '')."
-		<link type=\"text/css\" rel=\"stylesheet\" href=\"deco/default.css\" />
-		<!--<script src=\"deco/action.js\" type=\"text/javascript\">-->
+		<link type=\"text/css\" rel=\"stylesheet\" href=\"Media/css/default.css\" />
 	</head>
 	<body>
 		<div id=\"header\">
@@ -95,10 +94,10 @@ function build_headers($title, $lang_label, $lang, $description=null, $favicon=n
 			<h1 id=\"label_titre\">{$title}</h1>
 			<div id=\"desc_repos\">$description</div>";
 	build_lang_selector($lang_label, $lang);
-	echo "</div>";
+	echo "</div><div id=\"body\">";
 };//}}}
-function build_footers() { //{{{
-	echo '</body></html>';
+function build_footers($legal_message=null) { //{{{
+	echo "</div><div id=\"footer\">{$legal_message}</div></body></html>";
 };//}}}
 function build_lang_selector($lang_label, $lang) { //{{{
 	echo "<dl id=\"lang\"><dt>".translate('iface', 'language', $lang).": </dt><dd><ul>";
@@ -141,7 +140,7 @@ function build_pager($page_number, $max, $lang, $id) { //{{{
 };//}}}
 function build_form_search($lang) { //{{{
 	echo "<fieldset id=\"search\">
-	<legend>".translate('iface', 'form_val', $lang).": 
+	<legend>".translate('iface', 'form_val', $lang)." 
 		<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
 			translate('iface', 'menu', $lang).
 		"</a>
@@ -174,7 +173,7 @@ function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
 	if (count($relations) > 0) {
 		echo "
 		<fieldset id=\"categories\">
-			<legend>".translate('iface', 'categories', $lang).": 
+			<legend>".translate('iface', 'categories', $lang)." 
 				<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
 					translate('iface', 'menu', $lang).
 				"</a>
@@ -214,7 +213,7 @@ function build_tagcloud_licenses($licenses, $lang, $nbr_apps) { //{{{
 	if (count($licenses) > 0) {
 		echo "
 		<fieldset id=\"licenses\">
-			<legend>".translate('iface', 'license', $lang).": 
+			<legend>".translate('iface', 'license', $lang)." 
 				<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
 					translate('iface', 'menu', $lang).
 				"</a>
@@ -499,30 +498,39 @@ function decore_app_light($app_id, $lang) { //{{{
 			return false;
 		};
 	};
-	$icon = ICONS_DIR_LIGHT.DIRECTORY_SEPARATOR.$app['icon'];
-	$version = "<dt>".translate('iface', 'version', $lang).":</dt><dd>{$app['package']['version']} - ".translate('iface', 'added', $lang).": {$app['updated']}</dd>";
-	$updated = "<dt>".translate('iface', 'updated', $lang).":</dt><dd>{$app['updated']}</dd>";
-	$summary = "<dt>".translate('iface', 'summary', $lang).":</dt><dd>{$app['summary']}</dd>";
+	$icon = ICONS_DIR_ABSTRACT.DIRECTORY_SEPARATOR.$app['icon'];
+	$version = "<li><label>".translate('iface', 'version', $lang).":</label><span>{$app['package']['version']} - ".translate('iface', 'added', $lang).": {$app['updated']}</span></li>";
+	$updated = "<li><label>".translate('iface', 'updated', $lang).":</label><span>{$app['updated']}</span></li>";
+	$summary = "<li><label>".translate('iface', 'summary', $lang).":</label><span>{$app['summary']}</span></li>";
 	$size = $app['package']['size'];
 	if (($size / 1048572) > 1) {
 		$size /= 1048572;
-		$size = "<dt>".translate('iface', 'size', $lang).":</dt><dd>".round($size, 2)." MB</dd>";
+		$size = "<li><label>".translate('iface', 'size', $lang).":</label><span>".round($size, 2)." MB</span></li>";
 	} else {
 		$size /= 1024;
-		$size = "<dt>".translate('iface', 'size', $lang).":</dt><dd>".round($size, 2)." kB</dd>";
+		$size = "<li><label>".translate('iface', 'size', $lang).":</label><span>".round($size, 2)." kB</span></li>";
 	};
-	echo "<li><fieldset id=\"".str_replace(array('.', ' '), '_', $app['id'])."\">
-	<legend>{$app['name']}</legend>
-	<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
-	<dl>
-		{$size}
-		{$version}
-		{$updated}
-		{$summary}
-	</dl>
-	<a href=\"{$app['package']['apkname']}\" title=\"".translate('iface', 'download', $lang)."\">".translate('iface', 'download', $lang)."</a>
-	<a href=\"?getSheet={$app['id']}\" title=\"".translate('iface', 'sheet', $lang)."\">".translate('iface', 'sheet', $lang)."</a>
-</fieldset></li>";
+	echo "
+	<li id=\"app-".str_replace(array('.', ' ', '_'), '-', $app['id'])."\">
+			<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
+			<div>
+				<label>{$app['name']}</label>
+				<div>
+					<a href=\"{$app['package']['apkname']}\" title=\"".translate('iface', 'download', $lang)."\">".
+					translate('iface', 'download', $lang).
+					"</a> |
+					<a href=\"?getSheet={$app['id']}\" title=\"".translate('iface', 'sheet', $lang)."\"> ".
+					translate('iface', 'sheet', $lang).
+					"</a>
+				</div>
+			<ul>
+			{$size}
+			{$version}
+			{$updated}
+			{$summary}
+			</ul>
+			</div>
+	</li>";
 };
 //}}}
 function decore_app_abstract($app_id, $lang) { //{{{
@@ -540,36 +548,48 @@ function decore_app_abstract($app_id, $lang) { //{{{
 	$license = "
 	<div title=\"".translate('iface', 'license', $lang)."\">
 		<span>".translate('iface', 'license', $lang).": </span>
-		<span>{$app['license']}</span>
+		<span>".translate('lic', $app['license'], $lang)."</span>
 	</div>";
 	echo "
-	<li>
-		<div id=\"last_".str_replace(array('.', ' '), '_', $app['id'])."\">
-			<label>
-				<a href=\"?getSheet={$app['id']}\" title=\"".translate('iface', 'sheet', $lang).": {$app['name']}\">{$app['name']}</a>
-			</label>
-			<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
+	<li id=\"last_".str_replace(array('.', ' '), '_', $app['id'])."\">
+		<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
+		<div>
+			<a href=\"?getSheet={$app['id']}\" title=\"".translate('iface', 'sheet', $lang).": {$app['name']}\">{$app['name']}</a>
 			{$license}
 		</div>
 	</li>";
 };
 //}}}
 function decore_applist($tampon, $lang, $nbr_app, $page) { //{{{
-	echo "<fieldset id=\"applist\"><legend>".translate('iface', 'applist', $lang).": <b title=\"".translate('iface', 'nbr_result', $lang).": {$nbr_app}\">({$nbr_app})</b><a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend>";
+	echo "<div id=\"applist\">";
+	if ($nbr_app > 0) build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_head');
+	echo "
+	<fieldset>
+		<legend>".translate('iface', 'applist', $lang).
+			": <b title=\"".translate('iface', 'nbr_result', $lang).
+			": {$nbr_app}\">({$nbr_app})</b>
+			<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
+			translate('iface', 'menu', $lang)."</a>
+		</legend>";
 	if ($nbr_app > 0) {
-		build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_head');
-		echo "<ul>";
+		echo "<ul id=\"list_sheets\">";
 		foreach($tampon as $app) { decore_app_light($app, $lang); };
 		echo "</ul>";
-		build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_foot');
 	} else {
 		echo '<p>'.translate('iface', 'no_result', $lang).'</p>';
 	};
 	echo "</fieldset>";
+	if ($nbr_app > 0) build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_foot');
+	echo "</div>";
 };
 //}}}
 function decore_lastapplist($list, $lang) { //{{{
-	echo "<fieldset id=\"lastapplist\"><legend>".translate('iface', 'lastapplist', $lang).": <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".translate('iface', 'menu', $lang)."</a></legend>";
+	echo "
+	<div id=\"lastapplist\">
+		<fieldset>
+			<legend>".translate('iface', 'lastapplist', $lang).
+			" <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
+			translate('iface', 'menu', $lang)."</a></legend>";
 	if (count($list) > 0) {
 		echo "<ul>";
 		foreach($list as $app) { decore_app_abstract($app, $lang); };
@@ -577,7 +597,7 @@ function decore_lastapplist($list, $lang) { //{{{
 	} else {
 		echo '<p>'.translate('iface', 'no_apps', $lang).'</p>';
 	};
-	echo "</fieldset>";
+	echo "</fieldset></div>";
 };
 //}}}
 function apply_filters($relations, $licenses, $words, $repos) { //{{{
