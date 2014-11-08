@@ -14,6 +14,7 @@ session_start();
 //{{{ Configuration
 // DIRECTORIES
 define('ROOT', dirname(__FILE__));
+define('MEDIA_SITE', 'Media');
 define('ICONS_DIR', 'icons-480');
 define('ICONS_DIR_LIGHT', 'icons-240');
 define('ICONS_DIR_ABSTRACT', 'icons-120');
@@ -40,6 +41,7 @@ define('NUMBER_LAST_APP', 4);
 define('RECORDS_PER_PAGE', 3);
 define('DEFAULT_LANG', 'fr');
 define('LOCALIZATION', 'fr');
+define('MSG_FOOTER', '');
 //}}}
 //{{{ Library
 function build_structure($_xml) { //{{{
@@ -80,27 +82,30 @@ function build_app($_xml, $id_app) { //{{{
 	file_put_contents(APP_CACHE.DIRECTORY_SEPARATOR.$application['id'], serialize($application));
 	return $application;
 };//}}}
-function build_headers($title, $lang_label, $lang, $description=null, $favicon=null) { //{{{
+function build_headers($title, $lang_label, $lang, $description=null) { //{{{
+	$favicon = (is_file(MEDIA_SITE.'/images/favicon.png') && 
+			is_readable(MEDIA_SITE.'/images/favicon.png')) ? 
+			"<link type=\"image/png\" rel=\"icon\" href=\"".MEDIA_SITE.'/images/favicon.png'."\" />" : '';
 	echo "<!DOCTYPE html>
 <html lang=\"fr\">
 	<head>
 		<meta charset=\"UTF-8\">
 		<title>{$title}</title>
-		".((!is_null($favicon)) ? "<link type=\"image/png\" rel=\"icon\" href=\"{favicon}\">" : '')."
-		<link type=\"text/css\" rel=\"stylesheet\" href=\"Media/css/default.css\" />
+		{$favicon}
+		<link type=\"text/css\" rel=\"stylesheet\" href=\"".MEDIA_SITE."/css/default.css\" />
 	</head>
 	<body>
 		<div id=\"header\">
 			<div>
-				<img src=\"Media/images/logo.png\" alt=\"logo\" />
+				<img src=\"".MEDIA_SITE."/images/logo.png\" alt=\"logo\" />
 				<h1 id=\"label_titre\">{$title}</h1>
 			</div>
 			<div id=\"desc_repos\">$description</div>";
 	build_lang_selector($lang_label, $lang);
 	echo "</div><div id=\"body\">";
 };//}}}
-function build_footers($legal_message=null) { //{{{
-	echo "</div><div id=\"footer\">{$legal_message}</div></body></html>";
+function build_footers() { //{{{
+	echo "</div><div id=\"footer\"><span>".MSG_FOOTER."</span></div></body></html>";
 };//}}}
 function build_lang_selector($lang_label, $lang) { //{{{
 	echo "<dl id=\"lang\"><dt>".translate('iface', 'language', $lang).": </dt><dd><ul>";
@@ -752,6 +757,7 @@ if (isset($_REQUEST['getSheet'])) { //{{{
 	build_tools($relations, $licenses, $lang, $repos['nbr']);
 	decore_applist($tampon, $lang, $nbr_app, $page);
 	decore_lastapplist($last_apps, $lang);
+	echo "<div></div>";		// Temporary bad hack to mitigate trouble with css
 }; //}}}
 build_footers();
 ?>

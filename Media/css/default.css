@@ -14,6 +14,9 @@
 	font-size: 1em;
 }
 
+#body div:last-child {
+	clear: both;
+}
 @media screen {
 	#menu {
 		display: none;
@@ -77,6 +80,20 @@ h1 {
 #desc_repos {
 	color: #FFFFFF;
 	margin: 0.5em;
+}
+/*}}}*/
+/*{{{ Footer */
+#footer {
+	color: #FFFFFF;
+	background-color: #000000;
+	padding: 1.7em;
+}
+
+#footer span {
+	width: 100%;
+	text-align: center;
+	display: inline-block;
+	font-weight: bold;
 }
 /*}}}*/
 /*{{{ Left tool bar */
