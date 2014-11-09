@@ -41,7 +41,7 @@ define('NUMBER_LAST_APP', 4);
 define('RECORDS_PER_PAGE', 3);
 define('DEFAULT_LANG', 'fr');
 define('LOCALIZATION', 'fr');
-define('MSG_FOOTER', '');
+define('MSG_FOOTER', '(C) Association Française des Petits Débrouillards');
 //}}}
 //{{{ Library
 function build_structure($_xml) { //{{{
@@ -757,7 +757,6 @@ if (isset($_REQUEST['getSheet'])) { //{{{
 	build_tools($relations, $licenses, $lang, $repos['nbr']);
 	decore_applist($tampon, $lang, $nbr_app, $page);
 	decore_lastapplist($last_apps, $lang);
-	echo "<div></div>";		// Temporary bad hack to mitigate trouble with css
 }; //}}}
 build_footers();
 ?>

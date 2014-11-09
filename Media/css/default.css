@@ -14,9 +14,6 @@
 	font-size: 1em;
 }
 
-#body div:last-child {
-	clear: both;
-}
 @media screen {
 	#menu {
 		display: none;
@@ -24,10 +21,6 @@
 }
 
 /*{{{ Language selector */
-#lang {
-	clear: both;
-}
-
 @media screen {
 	#lang dt {
 		display: none;
@@ -49,7 +42,7 @@
 
 #lang li b {
 	margin: 0.2em;
-	opacity: 0.5;
+	opacity: 0.4;
 }
 /*}}}*/
 /*{{{ Headers */
@@ -87,6 +80,7 @@ h1 {
 	color: #FFFFFF;
 	background-color: #000000;
 	padding: 1.7em;
+	clear: both;
 }
 
 #footer span {
@@ -170,12 +164,12 @@ h1 {
 }
 
 @media screen {
-	#page_head dt, #page_foot dt {
+	#page_head > dt, #page_foot > dt {
 		display: none;
 	}
 }
 
-#page_head dd, #page_foot dd {
+#page_head > dd, #page_foot > dd {
 	float: left;
 }
 
@@ -215,8 +209,7 @@ h1 {
 	float: left;
 	margin: 0.5em;
 	padding: 0.5em;
-	min-width: 40em;
-	max-width: 50em;
+	min-width: 30em;
 	box-shadow: 0em 0em 0.3em #000000;
 }
 
@@ -226,15 +219,6 @@ h1 {
 }
 
 #applist legend {
-	padding-left: 0.5em;
-	padding-right: 0.5em;
-	font-variant: small-caps;
-	font-weight: bold;
-}
-
-#applist label {
-	padding-left: 0.5em;
-	padding-right: 0.5em;
 	font-variant: small-caps;
 	font-weight: bold;
 }
@@ -251,47 +235,55 @@ h1 {
 /*}}}*/
 /*{{{ Light app sheet */
 
-#list_sheets [id|=app] img {
-	margin-bottom: 0em;
-	padding-right: 0.5em;
-	padding-bottom: 0em;
-	display: inline;
-	float: left;
-}
-
-#list_sheets [id|=app] {
+#list_sheets > li {
 	border-bottom: 0.1em solid #000000; 
 	margin-top: 0.5em;
 	padding-bottom: 0.7em;
 }
 
-#list_sheets [id|=app] div:first-of-type ul {
-	margin-top: 1em;
-	margin-left: 2.7em;
-	padding-right: 0em;
+#list_sheets > li > img {
+	display: inline;
+	float: left;
 }
 
-#list_sheets [id|=app] div:first-of-type div:first-of-type {
-	margin-top: 0.5em;
+#list_sheets > li > div {
+	display: inline-block;
+	margin-left: 0.5em;
 }
 
-#list_sheets [id|=app] div:first-of-type li:nth-child(1) {
-	float: right;
-}
-
-#list_sheets [id|=app] a {
+#list_sheets > li > div > label {
+	font-variant: small-caps;
 	font-weight: bold;
+	font-size: 1.2em;
+}
+
+#list_sheets > li > div > div {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+#list_sheets > li > div > div a {
 	text-decoration: none;
+	font-weight: bold;
 	color: #FFFFFF;
 	background-color: #000000;
 	border: 0.15em solid #000000;
 	border-radius: 0.3em;
-	padding: 0.08em;
+	padding: 0.15em;
 }
 
-#list_sheets [id|=app] a:hover {
+#list_sheets > li > div > div a:hover {
 	color: #000000;
 	background-color: #FFFFFF;
+}
+
+#list_sheets > li > div > ul li {
+	margin-top: 0.2em;
+}
+
+#list_sheets > li > div > ul label {
+	font-weight: bold;
+	margin-right: 0.3em;
 }
 /*}}}*/
 /*{{{ Last apps list */
@@ -309,8 +301,6 @@ h1 {
 
 #lastapplist legend {
 	display: block;
-	padding-left: 0.5em;
-	padding-right: 0.5em;
 	font-variant: small-caps;
 	font-weight: bold;
 }
@@ -330,49 +320,48 @@ h1 {
 #lastapplist li {
 	display: block;
 	border-bottom: 0.1em solid #000000; 
-	margin-top: 0.5em;
+	padding-top: 0.5em;
 	padding-bottom: 0.7em;
 	word-break: break-all;
-}
-
-#lastapplist li a {
-	text-decoration: none;
-	font-weight: bold;
-	color: #FFFFFF;
-	background-color: #000000;
-	border: 0.15em solid #000000;
-	border-radius: 0.3em;
-	padding: 0.08em;
-}
-
-#lastapplist li a:hover {
-	color: #000000;
-	background-color: #FFFFFF;
 }
 
 #lastapplist li:last-child {
 	border-bottom: 0em; 
 }
 
-#lastapplist div {
-	margin-left: 0.5em;
+#lastapplist li img {
+	float: left;
 }
 
-#lastapplist div span {
+#lastapplist li > div {
+	display: inline-block;
+	margin-left: 0.5em;
+	margin-top: 0.3em;
+}
+
+#lastapplist li > div > div {
+	margin-top: 0.7em;
 	font-size: 0.7em;
+}
+
+#lastapplist li > div a {
+	text-decoration: none;
+	font-weight: bold;
+	color: #FFFFFF;
+	background-color: #000000;
+	border: 0.15em solid #000000;
+	border-radius: 0.3em;
+	padding: 0.15em;
+}
+
+#lastapplist li > div a:hover {
+	color: #000000;
+	background-color: #FFFFFF;
 }
 
 @media screen {
 	#lastapplist div span:first-child {
 		display: none;
 	}
-}
-
-#lastapplist img {
-	margin-bottom: 0em;
-	padding-right: 0.5em;
-	padding-bottom: 0em;
-	display: inline;
-	float: left;
 }
 /*}}}*/
