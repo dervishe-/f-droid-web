@@ -15,7 +15,7 @@ session_start();
 // DIRECTORIES
 define('ROOT', dirname(__FILE__));
 define('MEDIA_SITE', 'Media');
-define('ICONS_DIR', 'icons-480');
+define('ICONS_DIR', 'icons-320');
 define('ICONS_DIR_LIGHT', 'icons-240');
 define('ICONS_DIR_ABSTRACT', 'icons-120');
 define('QRCODES_DIR', 'qrcodes');
@@ -445,54 +445,67 @@ function decore_app($app_id, $lang) { //{{{
 		if (!is_file($qrcode)) {
 			QRCode::png("https://{$_SERVER['SERVER_NAME']}/{$app['package']['apkname']}", $qrcode);
 		};
+		$dl_label = translate('iface', 'download', $lang);
 		$tag_qrcode = "
-		<dt><img src=\"{$qrcode}\" alt=\"QR-Code {$app['name']}\" title=\"QR-Code {$app['name']}\" /></dt>
-		<dd><a href=\"{$app['package']['apkname']}\">".translate('iface', 'download', $lang)."</a></dd>";
+		<li title=\"{$dl_label}\">
+			<img src=\"{$qrcode}\" alt=\"QR-Code {$app['name']}\" title=\"QR-Code {$app['name']}\" />
+			<a href=\"{$app['package']['apkname']}\" title=\"{$dl_label} {$app['name']}\">{$dl_label}</a></li>";
 	} else {
-		$tag_qrcode = "<dt><a href=\"{$app['package']['apkname']}\">".translate('iface', 'download', $lang)."</a></dt>";
+		$tag_qrcode = "<li title=\"{$dl_label} {$app['name']}\"><a href=\"{$app['package']['apkname']}\">{$dl_label}</a></li>";
 	};
 	$icon = ICONS_DIR.DIRECTORY_SEPARATOR.$app['icon'];
-	$version = "<dt>".translate('iface', 'version', $lang).":</dt><dd>{$app['package']['version']} - ".translate('iface', 'added', $lang).": {$app['updated']}</dd>";
-	$license = "<dt>".translate('iface', 'license', $lang).":</dt><dd>".translate('lic', $app['license'], $lang)."</dd>";
-	$updated = "<dt>".translate('iface', 'updated', $lang).":</dt><dd>{$app['updated']}</dd>";
-	$summary = "<dt>".translate('iface', 'summary', $lang).":</dt><dd>{$app['summary']}</dd>";
-	$desc = "<dt>".translate('iface', 'desc', $lang).":</dt><dd>{$app['desc']}</dd>";
-	$requirements = (strlen($app['requirements']) > 0) ? "<dt>".translate('iface', 'requirements', $lang).":</dt><dd>{$app['requirements']}</dd>" : '';
+	$vers_label = translate('iface', 'version', $lang);
+	$add_label =translate('iface', 'added', $lang);
+	$version = "<li title=\"{$vers_label}\"><label>{$vers_label}: </label><span>{$app['package']['version']}</span> - <label>{$add_label}</label>: {$app['added']}</span></li>";
+	$lic_label = translate('iface', 'license', $lang);
+	$license = "<li title=\"{$lic_label}\"><label>{$lic_label}: </label><span>".translate('lic', $app['license'], $lang)."</span></li>";
+	$upd_label = translate('iface', 'updated', $lang);
+	$updated = "<li title=\"{$upd_label}\"><label>{$upd_label}: </label><span>{$app['updated']}</span></li>";
+	$sum_label = translate('iface', 'summary', $lang);
+	$summary = "<li title=\"{$sum_label}\">{$app['summary']}</li>";
+	$desc_label = translate('iface', 'desc', $lang);
+	$desc = "<li title=\"{$desc_label}\"><label>{$desc_label}: </label><div id=\"description\">{$app['desc']}</div></li>";
+	$reqs_label = translate('iface', 'requirements', $lang);
+	$requirements = (strlen($app['requirements']) > 0) ? 
+		"<li title=\"{$reqs_label}\"><label>{$reqs_label}: </label><span>{$app['requirements']}</span></li>" : '';
 	$size = $app['package']['size'];
+	$size_label = translate('iface', 'size', $lang);
 	if (($size / 1048572) > 1) {
 		$size /= 1048572;
-		$size = "<dt>".translate('iface', 'size', $lang).":</dt><dd>".round($size, 2)." MB</dd>";
+		$size = "<li title=\"{$size_label}\"><label>{$size_label}: </label><span>".round($size, 2)." MB</span></li>";
 	} else {
 		$size /= 1024;
-		$size = "<dt>".translate('iface', 'size', $lang).":</dt><dd>".round($size, 2)." kB</dd>";
+		$size = "<li title=\"{$size_label}\"><label>{$size_label}: </label><span>".round($size, 2)." kB</span></li>";
 	};
 	
 	$categories = $app['categories'];
 	$cats = (strlen($categories) > 0 && $categories != 'None') ? "<ul><li>".implode('</li><li>', array_map('translate_cat', explode(',', $categories)))."</li></ul>" : '';
-	$categories = "<dt>".translate('iface', 'categories', $lang).":</dt><dd>{$cats}</dd>";
-	
+	$cats_label = translate('iface', 'categories', $lang);
+	$categories = "<li title=\"{$cats_label}\"><label>{$cats_label}: </label>{$cats}</li>";
 	$permissions = $app['package']['permissions'];
 	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_perm', explode(',', $permissions)))."</li></ul>" : '';
-	$permissions = "<dt>".translate('iface', 'permissions', $lang).":</dt><dd>{$perms}</dd>";
+	$perms_label = translate('iface', 'permissions', $lang);
+	$permissions = "<li title=\"{$perms_label}\"><label>{$perms_label}: </label>{$perms}</li>";
 	
-	echo "<fieldset id=\"".str_replace(array('.', ' '), '_', $app['id'])."\">
-	<legend>{$app['name']}</legend>
-	<a href=\"index.php\" title=\"".translate('iface', 'back', $lang)."\">".translate('iface', 'back', $lang)."</a>
-	<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
-	<dl>
-		{$size}
-		{$version}
-		{$updated}
-		{$summary}
-		".(($cats != '') ? $categories : '')."
-		{$license}
-		".(($perms != '') ? $permissions : '')."
-		{$desc}
-		{$requirements}
-		{$tag_qrcode}
-	</dl>
-	<a href=\"index.php\" title=\"".translate('iface', 'back', $lang)."\">".translate('iface', 'back', $lang)."</a>
-</fieldset>";
+	echo "<div id=\"app_sheet\">
+		<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
+		<fieldset>
+		<legend>{$app['name']}</legend>
+		<ul>
+			{$tag_qrcode}
+			{$summary}
+			{$desc}
+			{$size}
+			{$version}
+			{$updated}
+			".(($cats != '') ? $categories : '')."
+			{$license}
+			".(($perms != '') ? $permissions : '')."
+			{$requirements}
+		</ul>
+		</fieldset>
+		<div></div>
+		</div>";
 };
 //}}}
 function decore_app_light($app_id, $lang) { //{{{
@@ -519,7 +532,7 @@ function decore_app_light($app_id, $lang) { //{{{
 		$size = "<li><label>".translate('iface', 'size', $lang).":</label><span>".round($size, 2)." kB</span></li>";
 	};
 	echo "
-	<li id=\"app-".str_replace(array('.', ' ', '_'), '-', $app['id'])."\">
+	<li id=\"".str_replace(array('.', ' ', '_'), '-', $app['id'])."\">
 			<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
 			<div>
 				<label>{$app['name']}</label>
@@ -747,6 +760,7 @@ build_headers($repos['name'], $lang_label, $lang, $repos['desc']);
 if (isset($_REQUEST['getSheet'])) { //{{{ 
 	$sheet = $_REQUEST['getSheet'];
 	if (in_array($sheet, $repos['list'])) {
+		echo "<a href=\"index.php\" title=\"".translate('iface', 'back', $lang)."\">".translate('iface', 'back', $lang)."</a>";
 		decore_app($sheet, $lang);
 	} else {
 		echo "<fieldset><legend>".translate('iface', 'error_label', $lang)."</legend>";

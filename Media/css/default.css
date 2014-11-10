@@ -4,7 +4,12 @@
 	padding: 0em;
 	font-family: arial,tahoma,sans-serif;
 }
+
+ul {
+	list-style-type: none; 
+}
 /*}}}*/
+/*{{{ Body */
 #body {
 	margin-left:auto;
 	margin-right:auto;
@@ -14,12 +19,33 @@
 	font-size: 1em;
 }
 
+#body > a {
+	text-decoration: none;
+	display: inline-block;
+	float: left;
+	font-weight: bold;
+	color: #FFFFFF;
+	background-color: #000000;
+	border: 0.15em solid #000000;
+	border-radius: 0.5em;
+	padding: 0.15em;
+}
+
+#body > a:hover {
+	color: #000000;
+	background-color: #FFFFFF;
+}
+
+#app_sheet > div {
+	clear: both;
+}
+
 @media screen {
 	#menu {
 		display: none;
 	}
 }
-
+/*}}}*/
 /*{{{ Language selector */
 @media screen {
 	#lang dt {
@@ -182,7 +208,7 @@ h1 {
 	border: 0.15em solid #000000;
 	padding: 0.2em;
 	margin-right: 0.2em;
-	border-radius: 0.3em;
+	border-radius: 0.5em;
 	color: #FFFFFF;
 	background-color: #000000;
 }
@@ -192,7 +218,7 @@ h1 {
 	border: 0.15em solid #000000;
 	padding: 0.2em;
 	margin-right: 0.2em;
-	border-radius: 0.3em;
+	border-radius: 0.5em;
 	font-weight: bold;
 	text-decoration: none;
 	color: #000000;
@@ -209,7 +235,7 @@ h1 {
 	float: left;
 	margin: 0.5em;
 	padding: 0.5em;
-	min-width: 30em;
+	width: 35em;
 	box-shadow: 0em 0em 0.3em #000000;
 }
 
@@ -228,13 +254,8 @@ h1 {
 		display: none;
 	}
 }
-
-#applist ul {
-	list-style-type: none; 
-}
 /*}}}*/
 /*{{{ Light app sheet */
-
 #list_sheets > li {
 	border-bottom: 0.1em solid #000000; 
 	margin-top: 0.5em;
@@ -268,7 +289,7 @@ h1 {
 	color: #FFFFFF;
 	background-color: #000000;
 	border: 0.15em solid #000000;
-	border-radius: 0.3em;
+	border-radius: 0.5em;
 	padding: 0.15em;
 }
 
@@ -290,6 +311,7 @@ h1 {
 #lastapplist {
 	position: relative;
 	float: left;
+	min-width: 22em;
 	margin: 0.5em;
 	padding: 0.5em;
 	box-shadow: 0em 0em 0.3em #000000;
@@ -350,7 +372,7 @@ h1 {
 	color: #FFFFFF;
 	background-color: #000000;
 	border: 0.15em solid #000000;
-	border-radius: 0.3em;
+	border-radius: 0.5em;
 	padding: 0.15em;
 }
 
@@ -363,5 +385,79 @@ h1 {
 	#lastapplist div span:first-child {
 		display: none;
 	}
+}
+/*}}}*/
+/*{{{ App sheet */
+#app_sheet {
+	box-shadow: 0em 0em 0.5em #000000;
+	display: inline-block;
+	margin: 0.5em;
+	padding: 0.5em;
+}
+
+#app_sheet > img {
+	float: left;
+}
+
+#app_sheet > fieldset {
+	border: 0em;
+	width: 40em;
+	margin-left: 0.5em;
+	float: left;
+}
+
+#app_sheet > fieldset > legend {
+	font-weight: bold;
+}
+
+#app_sheet > fieldset > ul > li {
+	margin-top: 0.5em;
+}
+
+#app_sheet > fieldset > ul > li:nth-child(2) {
+	margin-top: initial;
+}
+
+#app_sheet > fieldset > ul > li:nth-child(3) div {
+	padding: 0.5em;
+	margin: 0.3em;
+}
+
+#app_sheet > fieldset > ul > li:first-child {
+	border: 0.1em solid black;
+	border-radius: 0.5em;
+	padding: 0.5em;
+	margin: 0.5em;
+	float: right;
+}
+
+#app_sheet > fieldset > ul > li:first-child img {
+	vertical-align: middle;
+}
+
+#app_sheet > fieldset > ul > li:first-child a {
+	vertical-align: middle;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 1.1em;
+	color: #FFFFFF;
+	background-color: #000000;
+	border: 0.15em solid #000000;
+	border-radius: 0.5em;
+	padding: 0.15em;
+}
+
+#app_sheet > fieldset > ul > li:first-child a:hover {
+	color: #000000;
+	background-color: #FFFFFF;
+}
+
+#app_sheet > fieldset > ul li label {
+	font-weight: bold;
+}
+
+#app_sheet > fieldset * ul {
+	list-style-type: initial;
+	padding-left: 1em;
 }
 /*}}}*/
