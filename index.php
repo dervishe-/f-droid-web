@@ -83,9 +83,9 @@ function build_app($_xml, $id_app) { //{{{
 	return $application;
 };//}}}
 function build_headers($title, $lang_label, $lang, $description=null) { //{{{
-	$favicon = (is_file(MEDIA_SITE.'/images/favicon.png') && 
-			is_readable(MEDIA_SITE.'/images/favicon.png')) ? 
-			"<link type=\"image/png\" rel=\"icon\" href=\"".MEDIA_SITE.'/images/favicon.png'."\" />" : '';
+	$favicon = (is_file(MEDIA_SITE.'/images/favicon.ico') && 
+			is_readable(MEDIA_SITE.'/images/favicon.ico')) ? 
+			"<link type=\"image/png\" rel=\"icon\" href=\"".MEDIA_SITE.'/images/favicon.ico'."\" />" : '';
 	echo "<!DOCTYPE html>
 <html lang=\"fr\">
 	<head>
