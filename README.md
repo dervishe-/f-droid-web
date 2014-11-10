@@ -31,7 +31,8 @@ The description of the repository and the URI of the logo come from the index.xm
 DESCRIPTION:
 
 Directory hierarchy:  
-root/
+
+root/  
      Media/  
           images/  
           css/  
