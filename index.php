@@ -451,12 +451,12 @@ function decore_app($app_id, $lang) { //{{{
 			<img src=\"{$qrcode}\" alt=\"QR-Code {$app['name']}\" title=\"QR-Code {$app['name']}\" />
 			<a href=\"{$app['package']['apkname']}\" title=\"{$dl_label} {$app['name']}\">{$dl_label}</a></li>";
 	} else {
-		$tag_qrcode = "<li title=\"{$dl_label} {$app['name']}\"><a href=\"{$app['package']['apkname']}\">{$dl_label}</a></li>";
+		$tag_qrcode = "<li><a title=\"{$dl_label} {$app['name']}\" href=\"{$app['package']['apkname']}\">{$dl_label}</a></li>";
 	};
 	$icon = ICONS_DIR.DIRECTORY_SEPARATOR.$app['icon'];
 	$vers_label = translate('iface', 'version', $lang);
 	$add_label =translate('iface', 'added', $lang);
-	$version = "<li title=\"{$vers_label}\"><label>{$vers_label}: </label><span>{$app['package']['version']}</span> - <label>{$add_label}</label>: {$app['added']}</span></li>";
+	$version = "<li title=\"{$vers_label}\"><label>{$vers_label}: </label><span>{$app['package']['version']}</span> - <label>{$add_label}</label>: <span>{$app['added']}</span></li>";
 	$lic_label = translate('iface', 'license', $lang);
 	$license = "<li title=\"{$lic_label}\"><label>{$lic_label}: </label><span>".translate('lic', $app['license'], $lang)."</span></li>";
 	$upd_label = translate('iface', 'updated', $lang);
