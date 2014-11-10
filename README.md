@@ -33,8 +33,11 @@ DESCRIPTION:
 Directory hierarchy:  
 
 root/  
+
      Media/  
+
           images/  
+
           css/  
 
      cache/ [Contains the cached data (serialized PHP structures)]  
