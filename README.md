@@ -17,7 +17,6 @@ CONFIGURATION:
 
 All the configuration stuffs are in the top of the index.php file.
 
-<code>
 define('HASH_ALGO', 'whirlpool');	// The hash algorithm used to check the index.xml file  
 define('USE_QRCODE', true);			// Define if you want to use (or not) the qr-codes. (incase that you don't want to use them, you don't need the phpqrcode dir  
 define('NUMBER_LAST_APP', 4);		// Define the number of last apps appearing in the right box  
@@ -25,7 +24,6 @@ define('RECORDS_PER_PAGE', 3);		// Define the number of apps per page
 define('DEFAULT_LANG', 'fr');		// Define the default language used by the GUI, actually the values are fr: french, en: english and es: spanish  
 define('LOCALIZATION', 'fr');		// Define the language used to describe the apps informations  
 define('MSG_FOOTER', 'Your footer here');		// Define the message in the footer  
-</code>
 
 The description of the repository and the URI of the logo come from the index.xml. For the logo, make sure, you put it in a directory where your web-server can reach it.
 
@@ -33,15 +31,21 @@ The description of the repository and the URI of the logo come from the index.xm
 DESCRIPTION:
 
 Directory hierarchy:  
-/Media  
-	/images  
-	/css  
-/cache [Contains the cached data (serialized PHP structures)]  
-/lang [Contains the localized files for the GUI]  
-	/dict [Contains stopwords list and several function to the search by words]  
-/phpqrcode [PHP library which generate the qr-codes (made by Dominik Dzienia <deltalab at poczta dot fm>)]  
-/qrcodes [Contains the generated qr-codes]  
-index.php [Main file]  
+root/
+     Media/  
+          images/  
+          css/  
+
+     cache/ [Contains the cached data (serialized PHP structures)]  
+
+     lang/ [Contains the localized files for the GUI]  
+          dict/ [Contains stopwords list and several function to the search by words]  
+
+     phpqrcode/ [PHP library which generate the qr-codes (made by Dominik Dzienia <deltalab at poczta dot fm>)]  
+
+     qrcodes/ [Contains the generated qr-codes]  
+
+     index.php [Main file]  
 
 
 REMARK:
