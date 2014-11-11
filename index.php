@@ -42,6 +42,8 @@ define('RECORDS_PER_PAGE', 3);
 define('DEFAULT_LANG', 'fr');
 define('LOCALIZATION', 'fr');
 define('MSG_FOOTER', '(C) Association Française des Petits Débrouillards');
+// ALLOWED VALUES
+$formats = array('json'=>1, 'atom'=>2, 'rss'=>3);
 //}}}
 //{{{ Library
 function build_structure($_xml) { //{{{
@@ -82,38 +84,13 @@ function build_app($_xml, $id_app) { //{{{
 	file_put_contents(APP_CACHE.DIRECTORY_SEPARATOR.$application['id'], serialize($application));
 	return $application;
 };//}}}
-function build_headers($title, $lang_label, $lang, $description=null) { //{{{
-	$favicon = (is_file(MEDIA_SITE.'/images/favicon.ico') && 
-			is_readable(MEDIA_SITE.'/images/favicon.ico')) ? 
-			"<link type=\"image/png\" rel=\"icon\" href=\"".MEDIA_SITE.'/images/favicon.ico'."\" />" : '';
-	echo "<!DOCTYPE html>
-<html lang=\"fr\">
-	<head>
-		<meta charset=\"UTF-8\">
-		<title>{$title}</title>
-		{$favicon}
-		<link type=\"text/css\" rel=\"stylesheet\" href=\"".MEDIA_SITE."/css/default.css\" />
-	</head>
-	<body>
-		<div id=\"header\">
-			<div>
-				<img src=\"".MEDIA_SITE."/images/logo.png\" alt=\"logo\" />
-				<h1 id=\"label_titre\">{$title}</h1>
-			</div>
-			<div id=\"desc_repos\">$description</div>";
-	build_lang_selector($lang_label, $lang);
-	echo "</div><div id=\"body\">";
-};//}}}
-function build_footers() { //{{{
-	echo "</div><div id=\"footer\"><span>".MSG_FOOTER."</span></div></body></html>";
-};//}}}
 function build_lang_selector($lang_label, $lang) { //{{{
-	echo "<dl id=\"lang\"><dt>".translate('iface', 'language', $lang).": </dt><dd><ul>";
+	$bloc = "<div id=\"lang\"><span>".translate('iface', 'language', $lang).": </span><ul>";
 	if ($dh = opendir(LANG)) {
 		while (false !== ($file = readdir($dh))) {
 			if (is_file(LANG.DIRECTORY_SEPARATOR.$file)) {
 				$file = substr($file, 0, 2);
-				echo ($file != $lang_label) ? 
+				$bloc .= ($file != $lang_label) ? 
 					"<li>
 						<a href=\"?lang={$file}\" title=\"".translate('lang', $file, $lang)."\">
 							<img alt=\"{$file}\" src=\"".FLAGS.DIRECTORY_SEPARATOR.$file.".png\" />
@@ -123,41 +100,43 @@ function build_lang_selector($lang_label, $lang) { //{{{
 		};
 		closedir($dh);
 	};
-	echo '</ul></dd></dl>';
+	$bloc .= '</ul></div>';
+	return $bloc;
 };//}}}
-function build_pager($page_number, $max, $lang, $id) { //{{{
-	echo "<dl id=\"{$id}\"><dt>".translate('iface', 'page', $lang).":</dt><dd><ul>";
+function build_pager($page_number, $max, $lang) { //{{{
+	$bloc = "<div><span>".translate('iface', 'page', $lang).":</span><ul>";
 	for ($i = 1; $i < $page_number; $i++) { 
-		echo "
+		$bloc .= "
 		<li>
 			<a href=\"?page={$i}#applist\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">
 				{$i}
 			</a>
 		</li>";
 	};
-	echo "<li><b>{$page_number}</b></li>";
+	$bloc .= "<li><span>{$page_number}</span></li>";
 	for ($i = $page_number + 1; $i <= $max; $i++) { 
-		echo "
+		$bloc .= "
 			<li>
 				<a href=\"?page={$i}#applist\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">
 				{$i}
 				</a>
 			</li>";
 	};
-	echo "</ul></dd></dl>";
+	$bloc .= "</ul></div>";
+	return $bloc;
 };//}}}
 function build_form_search($lang) { //{{{
-	echo "<fieldset id=\"search\">
-	<legend>".translate('iface', 'form_val', $lang)." 
+	return "<article id=\"search\">
+	<header><h2>".translate('iface', 'form_val', $lang)."</h2> 
 		<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
 			translate('iface', 'menu', $lang).
 		"</a>
-	</legend>
-	<form method=\"POST\" action=\"?prop=search\" id=\"search_form\">
+	</header>
+	<form method=\"POST\" action=\"?prop=search\">
 		<input type=\"text\" name=\"val\" title=\"".translate('iface', 'form_field', $lang)."\" />
 		<input type=\"submit\" value=\"".translate('iface', 'form_val', $lang)."\" title=\"".translate('iface', 'form_val', $lang)."\" />
 	</form>
-	</fieldset>";
+	</article>";
 };//}}}
 function build_cache_data($hash) { //{{{
 	$dh = opendir(CACHE);
@@ -177,102 +156,12 @@ function build_cache_data($hash) { //{{{
 	return array('repos'=>$repos, 'cat'=>$cat, 'rel'=>$rel, 'lic'=>$lic, 'wrd'=>$words, 'lst'=>$lst);
 };
 //}}}
-function build_tagcloud_categories($relations, $lang, $nbr_apps) { //{{{
-	if (count($relations) > 0) {
-		echo "
-		<fieldset id=\"categories\">
-			<legend>".translate('iface', 'categories', $lang)." 
-				<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
-					translate('iface', 'menu', $lang).
-				"</a>
-			</legend>
-			<form method=\"POST\" action=\"index.php#applist\" id=\"categories_form\">
-				<ul>";
-		$lab_all_cat = translate('iface', 'all_categories', $lang);
-		$flagCheck = (!isset($_SESSION['categories'])) ? "checked=\"checked\"" : '';
-		echo "
-		<li>
-			<input type=\"checkbox\" name=\"cat[]\" value=\"all\" {$flagCheck} title=\"".translate('iface', 'alt_cat_link', $lang).": {$lab_all_cat}\" />
-			<label>{$lab_all_cat} ({$nbr_apps})</label>
-		</li>";
-		$tab_relations = array();
-		$recorded_cats = (isset($_SESSION['categories'])) ? array_flip($_SESSION['categories']) : array();
-		reset($relations);
-		while (false !== ($cat = current($relations))) {
-			$name_cat = translate('cat', key($relations), $lang);
-			$flagCheck = (isset($recorded_cats[key($relations)])) ? "checked=\"checked\"" : '';
-			$str = "
-			<li>
-				<input type=\"checkbox\" name=\"cat[]\" value=\"".key($relations)."\" {$flagCheck} title=\"".translate('iface', 'alt_cat_link', $lang).": {$name_cat}\" />
-				<label>{$name_cat} (".count($cat).")</label>
-			</li>
-			";
-			$tab_relations[$name_cat] = $str;
-			next($relations);
-		};
-		ksort($tab_relations);
-		echo implode('', $tab_relations);
-		echo "<li><input type=\"submit\" value=\"".translate('iface', 'form_val', $lang)."\" title=\"".translate('iface', 'form_val', $lang)."\" /></li>";
-		echo "</ul></form></fieldset>";
-	};
-};	
-//}}}
-function build_tagcloud_licenses($licenses, $lang, $nbr_apps) { //{{{
-	if (count($licenses) > 0) {
-		echo "
-		<fieldset id=\"licenses\">
-			<legend>".translate('iface', 'license', $lang)." 
-				<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
-					translate('iface', 'menu', $lang).
-				"</a>
-			</legend>
-			<form method=\"POST\" action=\"index.php#applist\" id=\"licenses_form\">
-		<ul>";
-		$lab_all_lic = translate('iface', 'all_licenses', $lang);
-		$flagCheck = (!isset($_SESSION['licenses'])) ? "checked=\"checked\"" : '';
-		echo "
-		<li>
-			<input type=\"checkbox\" name=\"lic[]\" value=\"all\" {$flagCheck} title=\"".translate('iface', 'alt_lic_link', $lang).": {$lab_all_lic}\" />
-			<label>{$lab_all_lic} ({$nbr_apps})</label>
-		</li>";
-		$tab_licenses = array();
-		$recorded_lics = (isset($_SESSION['licenses'])) ? array_flip($_SESSION['licenses']) : array();
-		reset($licenses);
-		while (false !== ($lic = current($licenses))) {
-			$name_lic = translate('lic', key($licenses), $lang);
-			$flagCheck = (isset($recorded_lics[key($licenses)])) ? "checked=\"checked\"" : '';
-			$str = "
-			<li>
-				<input type=\"checkbox\" name=\"lic[]\" value=\"".key($licenses)."\" {$flagCheck} title=\"".translate('iface', 'alt_lic_link', $lang).": {$name_lic}\" />
-				<label>{$name_lic} (".count($lic).")</label>
-			</li>
-			";
-			$tab_licenses[$name_lic] = $str;
-			next($licenses);
-		};
-		ksort($tab_licenses);
-		echo implode('', $tab_licenses);
-		echo "<li><input type=\"submit\" value=\"".translate('iface', 'form_val', $lang)."\" title=\"".translate('iface', 'form_val', $lang)."\" /></li>";
-		echo "</ul></form></fieldset>";
-	};
-};	
-//}}}
-function build_menu($lang) { //{{{
-	echo "<fieldset id=\"menu\"><legend>".translate('iface', 'menu', $lang)."</legend><ul>";
-	echo "<li><a href=\"#search\" title=\"".translate('iface', 'access_form_val', $lang)."\">".translate('iface', 'form_val', $lang)."</a></li>";
-	echo "<li><a href=\"#categories\" title=\"".translate('iface', 'browse_cat', $lang)."\">".translate('iface', 'categories', $lang)."</a></li>";
-	echo "<li><a href=\"#licenses\" title=\"".translate('iface', 'browse_lic', $lang)."\">".translate('iface', 'license', $lang)."</a></li>";
-	echo "<li><a href=\"#applist\" title=\"".translate('iface', 'access_applist', $lang)."\">".translate('iface', 'applist', $lang)."</a></li>";
-	echo "<li><a href=\"#lastapplist\" title=\"".translate('iface', 'access_lastapplist', $lang)."\">".translate('iface', 'lastapplist', $lang)."</a></li>";
-	echo "</ul></fieldset>";
-};
-//}}}
 function build_tools($relations, $licenses, $lang, $nbr) { //{{{
-	echo "<div id=\"tools\">";
-	build_form_search($lang);
-	build_tagcloud_categories($relations, $lang, $nbr);
-	build_tagcloud_licenses($licenses, $lang, $nbr);
-	echo "</div>";
+	return "<aside id=\"tools\" role=\"search\">".
+			build_form_search($lang).
+			decore_categories($relations, $lang, $nbr).
+			decore_licenses($licenses, $lang, $nbr).
+			"</aside>";
 };
 //}}}
 function cache_categories($repos) { //{{{
@@ -520,38 +409,41 @@ function decore_app_light($app_id, $lang) { //{{{
 		};
 	};
 	$icon = ICONS_DIR_ABSTRACT.DIRECTORY_SEPARATOR.$app['icon'];
-	$version = "<li><label>".translate('iface', 'version', $lang).":</label><span>{$app['package']['version']}</span> - <label>".translate('iface', 'added', $lang).":</label> <span>{$app['updated']}</span></li>";
-	$updated = "<li><label>".translate('iface', 'updated', $lang).":</label><span>{$app['updated']}</span></li>";
-	$summary = "<li><label>".translate('iface', 'summary', $lang).":</label><span>{$app['summary']}</span></li>";
+	$version = "<li><span>".translate('iface', 'version', $lang).":</span><span>{$app['package']['version']}</span> - <span>".translate('iface', 'added', $lang).":</span> <span>{$app['updated']}</span></li>";
+	$updated = "<li><span>".translate('iface', 'updated', $lang).":</span><span>{$app['updated']}</span></li>";
+	$summary = "<li><span>".translate('iface', 'summary', $lang).":</span><span>{$app['summary']}</span></li>";
 	$size = $app['package']['size'];
 	if (($size / 1048572) > 1) {
 		$size /= 1048572;
-		$size = "<li><label>".translate('iface', 'size', $lang).":</label><span>".round($size, 2)." MB</span></li>";
+		$size = "<li><span>".translate('iface', 'size', $lang).":</span><span>".round($size, 2)." MB</span></li>";
 	} else {
 		$size /= 1024;
-		$size = "<li><label>".translate('iface', 'size', $lang).":</label><span>".round($size, 2)." kB</span></li>";
+		$size = "<li><span>".translate('iface', 'size', $lang).":</span><span>".round($size, 2)." kB</span></li>";
 	};
-	echo "
-	<li id=\"".str_replace(array('.', ' ', '_'), '-', $app['id'])."\">
+	$block = "
+	<article id=\"".str_replace(array('.', ' ', '_'), '-', $app['id'])."\">
+		<header>
 			<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
+			<h3>{$app['name']}</h3>
+		</header>
+		<div>
 			<div>
-				<label>{$app['name']}</label>
-				<div>
-					<a href=\"{$app['package']['apkname']}\" title=\"".translate('iface', 'download', $lang)."\">".
-					translate('iface', 'download', $lang).
-					"</a> |
-					<a href=\"?getSheet={$app['id']}\" title=\"".translate('iface', 'sheet', $lang)."\"> ".
-					translate('iface', 'sheet', $lang).
-					"</a>
-				</div>
-			<ul>
-			{$version}
-			{$size}
-			{$updated}
-			{$summary}
-			</ul>
+				<a href=\"{$app['package']['apkname']}\" title=\"".translate('iface', 'download', $lang)."\">".
+				translate('iface', 'download', $lang).
+				"</a> |
+				<a href=\"?getSheet={$app['id']}\" title=\"".translate('iface', 'sheet', $lang)."\"> ".
+				translate('iface', 'sheet', $lang).
+				"</a>
 			</div>
-	</li>";
+		<ul>
+		{$version}
+		{$size}
+		{$updated}
+		{$summary}
+		</ul>
+		</div>
+	</article>";
+	return $block;
 };
 //}}}
 function decore_app_abstract($app_id, $lang) { //{{{
@@ -571,56 +463,167 @@ function decore_app_abstract($app_id, $lang) { //{{{
 		<span>".translate('iface', 'license', $lang).": </span>
 		<span>".translate('lic', $app['license'], $lang)."</span>
 	</div>";
-	echo "
-	<li id=\"last_".str_replace(array('.', ' '), '_', $app['id'])."\">
+	return "
+	<div id=\"last_".str_replace(array('.', ' '), '_', $app['id'])."\">
 		<img src=\"{$icon}\" alt=\"icone {$app['name']}\" title=\"icone {$app['name']}\" />
 		<div>
 			<a href=\"?getSheet={$app['id']}\" title=\"".translate('iface', 'sheet', $lang).": {$app['name']}\">{$app['name']}</a>
 			{$license}
 		</div>
-	</li>";
+	</div>";
 };
 //}}}
 function decore_applist($tampon, $lang, $nbr_app, $page) { //{{{
-	echo "<div id=\"applist\">";
-	echo "
-	<fieldset>
-		<legend>".translate('iface', 'applist', $lang).
-			": <b title=\"".translate('iface', 'nbr_result', $lang).
-			": {$nbr_app}\">({$nbr_app})</b>
+	$block = "<section id=\"applist\" role=\"main\">";
+	$block .= "
+	<header>
+		<h2>".translate('iface', 'applist', $lang).
+			": <span title=\"".translate('iface', 'nbr_result', $lang).
+			": {$nbr_app}\">({$nbr_app})</span></h2>
 			<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
-			translate('iface', 'menu', $lang)."</a>
-		</legend>";
+			translate('iface', 'menu', $lang)."</a>";
+	$block .= build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang);
+	$block .= "</header>";
+		
 	if ($nbr_app > 0) {
-		build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_head');
-		echo "<ul id=\"list_sheets\">";
-		foreach($tampon as $app) { decore_app_light($app, $lang); };
-		echo "</ul>";
-		build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang, 'page_foot');
+		foreach($tampon as $app) { $block .= decore_app_light($app, $lang); };
+		$block .= "<footer>";
+		$block .= build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang);
+		$block .= "</footer>";
 	} else {
-		echo '<p>'.translate('iface', 'no_result', $lang).'</p>';
+		$block .= '<p>'.translate('iface', 'no_result', $lang).'</p>';
 	};
-	echo "</fieldset>";
-	echo "</div>";
+	$block .= "</section>";
+	return $block;
 };
 //}}}
 function decore_lastapplist($list, $lang) { //{{{
-	echo "
-	<div id=\"lastapplist\">
-		<fieldset>
-			<legend>".translate('iface', 'lastapplist', $lang).
-			" <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
-			translate('iface', 'menu', $lang)."</a></legend>";
+	$bloc = "
+	<aside id=\"lastapplist\">
+		<header>
+			<h2>".translate('iface', 'lastapplist', $lang).
+			"</h2> <a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
+			translate('iface', 'menu', $lang)."</a></header>";
 	if (count($list) > 0) {
-		echo "<ul>";
-		foreach($list as $app) { decore_app_abstract($app, $lang); };
-		echo "</ul>";
+		foreach($list as $app) { $bloc .= decore_app_abstract($app, $lang); };
 	} else {
-		echo '<p>'.translate('iface', 'no_apps', $lang).'</p>';
+		$bloc .= '<p>'.translate('iface', 'no_apps', $lang).'</p>';
 	};
-	echo "</fieldset></div>";
+	$bloc .= "</aside>";
+	return $bloc;
 };
 //}}}
+function decore_categories($relations, $lang, $nbr_apps) { //{{{
+	$bloc = "";
+	if (count($relations) > 0) {
+		$bloc .= "
+		<article id=\"categories\">
+			<header><h2>".translate('iface', 'categories', $lang)."</h2>
+				<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
+					translate('iface', 'menu', $lang).
+				"</a>
+			</header>
+			<form method=\"POST\" action=\"index.php#applist\">
+				<ul>";
+		$lab_all_cat = translate('iface', 'all_categories', $lang);
+		$flagCheck = (!isset($_SESSION['categories'])) ? "checked=\"checked\"" : '';
+		$bloc .= "
+		<li>
+			<input type=\"checkbox\" id=\"all_cat\" name=\"cat[]\" value=\"all\" {$flagCheck} title=\"".
+				translate('iface', 'alt_cat_link', $lang).": {$lab_all_cat}\" />
+			<label for=\"all_cat\">{$lab_all_cat} ({$nbr_apps})</label>
+		</li>";
+		$tab_relations = array();
+		$recorded_cats = (isset($_SESSION['categories'])) ? array_flip($_SESSION['categories']) : array();
+		reset($relations);
+		$i = 0;
+		while (false !== ($cat = current($relations))) {
+			$name_cat = translate('cat', key($relations), $lang);
+			$flagCheck = (isset($recorded_cats[key($relations)])) ? "checked=\"checked\"" : '';
+			$str = "
+			<li>
+				<input type=\"checkbox\" id=\"cat_{$i}\" name=\"cat[]\" value=\"".
+					key($relations)."\" {$flagCheck} title=\"".
+					translate('iface', 'alt_cat_link', $lang).": {$name_cat}\" />
+				<label for=\"cat_{$i}\">{$name_cat} (".count($cat).")</label>
+			</li>
+			";
+			$tab_relations[$name_cat] = $str;
+			$i++;
+			next($relations);
+		};
+		ksort($tab_relations);
+		$bloc .= implode('', $tab_relations);
+		$bloc .= "
+		<li>
+			<input type=\"submit\" value=\"".translate('iface', 'form_val', $lang).
+				"\" title=\"".translate('iface', 'form_val', $lang)."\" />
+		</li>
+		</ul></form></article>";
+		return $bloc;
+	};
+};	
+//}}}
+function decore_licenses($licenses, $lang, $nbr_apps) { //{{{
+	$bloc = "";
+	if (count($licenses) > 0) {
+		$bloc .= "
+		<article id=\"licenses\">
+			<header><h2>".translate('iface', 'license', $lang)."</h2>
+				<a href=\"#menu\" title=\"".translate('iface', 'ret_menu', $lang)."\">".
+					translate('iface', 'menu', $lang).
+				"</a>
+			</header>
+			<form method=\"POST\" action=\"index.php#applist\">
+		<ul>";
+		$lab_all_lic = translate('iface', 'all_licenses', $lang);
+		$flagCheck = (!isset($_SESSION['licenses'])) ? "checked=\"checked\"" : '';
+		$bloc .= "
+		<li>
+			<input type=\"checkbox\" id=\"all_lic\" name=\"lic[]\" value=\"all\" {$flagCheck} title=\"".translate('iface', 'alt_lic_link', $lang).": {$lab_all_lic}\" />
+			<label for=\"all_lic\">{$lab_all_lic} ({$nbr_apps})</label>
+		</li>";
+		$tab_licenses = array();
+		$recorded_lics = (isset($_SESSION['licenses'])) ? array_flip($_SESSION['licenses']) : array();
+		reset($licenses);
+		$i = 0;
+		while (false !== ($lic = current($licenses))) {
+			$name_lic = translate('lic', key($licenses), $lang);
+			$flagCheck = (isset($recorded_lics[key($licenses)])) ? "checked=\"checked\"" : '';
+			$str = "
+			<li>
+				<input type=\"checkbox\" id=\"lic_{$i}\" name=\"lic[]\" value=\"".key($licenses)."\" {$flagCheck} title=\"".translate('iface', 'alt_lic_link', $lang).": {$name_lic}\" />
+				<label for=\"lic_{$i}\">{$name_lic} (".count($lic).")</label>
+			</li>
+			";
+			$tab_licenses[$name_lic] = $str;
+			$i++;
+			next($licenses);
+		};
+		ksort($tab_licenses);
+		$bloc .= implode('', $tab_licenses);
+		$bloc .= "
+		<li>
+			<input type=\"submit\" value=\"".
+				translate('iface', 'form_val', $lang).
+				"\" title=\"".translate('iface', 'form_val', $lang).
+				"\" />
+		</li></ul></form></article>";
+		return $bloc;
+	};
+};	
+//}}}
+function decore_headers($title, $lang_label, $lang, $description=null) { //{{{
+	$bloc = "<header role=\"banner\">
+			<div>
+				<img src=\"".MEDIA_SITE."/images/logo.png\" alt=\"logo\" />
+				<h1>{$title}</h1>
+			</div>
+			<div>$description</div>";
+	$bloc .= build_lang_selector($lang_label, $lang);
+	$bloc .= "</header>";
+	return $bloc;
+};//}}}
 function apply_filters($relations, $licenses, $words, $repos) { //{{{
 	$flag = false;
 	$candidates = array();
@@ -702,6 +705,7 @@ if (isset($_GET['lang'])) {
 	$lang_label = (is_file(LANG.DIRECTORY_SEPARATOR."{$_SESSION['lang']}.php")) ? $_SESSION['lang'] : DEFAULT_LANG;
 } else {
 	$lang_label = DEFAULT_LANG;
+	$_SESSION['lang'] = $lang_label;
 };
 include_once("lang/{$lang_label}.php");
 //}}}
@@ -756,21 +760,61 @@ if (isset($_GET['page'])) {
 };
 $tampon = array_slice($list, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 //}}}
-build_headers($repos['name'], $lang_label, $lang, $repos['desc']);
-if (isset($_REQUEST['getSheet'])) { //{{{ 
-	$sheet = $_REQUEST['getSheet'];
-	if (in_array($sheet, $repos['list'])) {
-		echo "<a href=\"index.php\" title=\"".translate('iface', 'back', $lang)."\">".translate('iface', 'back', $lang)."</a>";
-		decore_app($sheet, $lang);
+if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// HTML case
+	//{{{ Building content
+	$footer = "<footer role=\"contentinfo\"><span>".MSG_FOOTER."</span></footer>";
+	$favicon = (is_file(MEDIA_SITE.'/images/favicon.ico') && 
+			is_readable(MEDIA_SITE.'/images/favicon.ico')) ? 
+			"<link type=\"image/png\" rel=\"icon\" href=\"".MEDIA_SITE.'/images/favicon.ico'."\" />" : '';
+	$menu = "
+	<nav id=\"menu\" role=\"navigation\">
+		<h4>".translate('iface', 'menu', $lang).":</h4>
+		<ul>
+			<li><a href=\"#search\" title=\"".translate('iface', 'access_form_val', $lang)."\">".translate('iface', 'form_val', $lang)."</a></li>
+			<li><a href=\"#categories\" title=\"".translate('iface', 'browse_cat', $lang)."\">".translate('iface', 'categories', $lang)."</a></li>
+			<li><a href=\"#licenses\" title=\"".translate('iface', 'browse_lic', $lang)."\">".translate('iface', 'license', $lang)."</a></li>
+			<li><a href=\"#applist\" title=\"".translate('iface', 'access_applist', $lang)."\">".translate('iface', 'applist', $lang)."</a></li>
+			<li><a href=\"#lastapplist\" title=\"".translate('iface', 'access_lastapplist', $lang)."\">".translate('iface', 'lastapplist', $lang)."</a></li>
+		</ul>
+	</nav>
+	";
+	$headers = decore_headers($repos['name'], $lang_label, $lang, $repos['desc']);
+	$tools = build_tools($relations, $licenses, $lang, $repos['nbr']);
+	$applist = decore_applist($tampon, $lang, $nbr_app, $page);
+	$lastapp = decore_lastapplist($last_apps, $lang);
+	//}}}
+	echo "
+<!DOCTYPE html>
+<html lang=\"{$_SESSION['lang']}\">
+	<head>
+		<meta charset=\"UTF-8\">
+		<title>{$repos['name']}</title>
+		{$favicon}
+		<link type=\"text/css\" rel=\"stylesheet\" href=\"".MEDIA_SITE."/css/default.css\" />
+	</head>
+	<body>
+	{$headers}";
+	if (isset($_REQUEST['getSheet'])) { //{{{ 
+		$sheet = $_REQUEST['getSheet'];
+		if (in_array($sheet, $repos['list'])) {
+			echo "<a href=\"index.php\" title=\"".translate('iface', 'back', $lang)."\">".translate('iface', 'back', $lang)."</a>";
+			decore_app($sheet, $lang);
+		} else {
+			echo "<fieldset><legend>".translate('iface', 'error_label', $lang)."</legend>";
+			echo translate('iface', 'error_message', $lang)."</fieldset>";
+		};
 	} else {
-		echo "<fieldset><legend>".translate('iface', 'error_label', $lang)."</legend>";
-		echo translate('iface', 'error_message', $lang)."</fieldset>";
-	};
-} else {
-	build_menu($lang);
-	build_tools($relations, $licenses, $lang, $repos['nbr']);
-	decore_applist($tampon, $lang, $nbr_app, $page);
-	decore_lastapplist($last_apps, $lang);
-}; //}}}
-build_footers();
+		echo "
+		<main id=\"body\">
+			{$tools}
+			{$menu}
+			{$applist}
+			{$lastapp}
+		</main>";
+	}; //}}}
+	
+	echo "{$footer}</body></html>";
+} elseif ($_REQUEST['format'] == 'json') {
+} elseif ($_REQUEST['format'] == 'atom') {
+};
 ?>
