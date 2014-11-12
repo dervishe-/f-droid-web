@@ -59,12 +59,6 @@ For the moment, it didn't use database or nosql things just plaintext files or f
 
 * It is HTML5 and CSS3 valid (with semantic markup).
 
-* It pass the Functional Accessibility test: http://fae20.cita.illinois.edu/summary/149a3c187a7187cd/rc/ (1 alert)
-
-* It is WCAG 2.0 (Level AA) compliant
-
-* It pass the WAVE test: http://wave.webaim.org/report#/https://repos.debrouillonet.org/ (1 alert)
-
 * Actually, you can browse by apps, by licenses or by categories.
 
 * To add a translation, simply add a code_lang.php wich must be a copy of one other language file in ./lang directory
