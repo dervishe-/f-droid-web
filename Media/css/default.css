@@ -25,7 +25,7 @@
 	padding: 0.2em;
 }
 
-#lang li b {
+#lang li span {
 	opacity: 0.4;
 }
 /*}}}*/
@@ -78,13 +78,8 @@ aside h2 {
 
 @media screen {
 	nav {
-		display: none;
-	}
-	aside header a {
-		display:none;
-	}
-	section > header a {
-		display:none;
+		position: absolute;
+		top: -30em;
 	}
 }
 /*}}}*/
@@ -126,6 +121,15 @@ body > footer span {
 	display: block;
 	margin: 0.3em;
 }
+
+#tools fieldset {
+	border: 0em;
+}
+
+#tools fieldset legend {
+	top: -100em;
+	position: absolute;
+}
 /*}}}*/
 /*{{{ Last apps list */
 #lastapplist > div {
@@ -160,7 +164,7 @@ body > footer span {
 }
 /*}}}*/
 /*{{{ Apps list */
-section h2 {
+section > header > h2 {
 	display: block;
 	margin: 0.5em;
 	padding-top: 0em;
@@ -178,21 +182,21 @@ section footer {
 }
 /*{{{ Pager */
 @media screen {
-	section > header > div span, section > footer > div span {
+	section > footer > div span {
 		display: none;
 	}
 }
 
-section > header ul, section > footer ul {
+section > footer ul {
 	list-style-type: none;
 	clear: both;
 }
 
-section > header li, section > footer li {
+section > footer li {
 	float: left; 
 }
 
-section > header > div a, section > footer > div a {
+section > footer > div a {
 	display: inline-block;
 	border: 0.15em solid #000000;
 	padding: 0.2em;
@@ -204,17 +208,17 @@ section > header > div a, section > footer > div a {
 	background-color: #FFFFFF;
 }
 
-section > header > div a:hover, section > footer > div a:hover {
+section > footer > div a:hover {
 	border: 0.25em solid #000000;
 	padding: 0.1em;
 	margin-right: 0.15em;
 }
 
-section > header > div a:last-child, section > footer > div a:last-child {
+section > footer > div a:last-child {
 	clear: both;
 }
 
-section > header > div * span, section > footer > div * span {
+section > footer > div * span {
 	font-weight: bold;
 	display: inline-block;
 	border: 0.15em solid #000000;
@@ -227,103 +231,123 @@ section > header > div * span, section > footer > div * span {
 /*}}}*/
 /*}}}*/
 /*{{{ Light app sheet */
-section article {
+section > article {
 	padding: 0.5em;
 	border-bottom: 0.1em solid black;
 }
 
-section article:last-child {
+section > article:last-child {
 	border-bottom: 0em;
 }
 
-section article header {
-	display: inline-bloc;
-}
-
-section article header img {
-	vertical-align: middle;
+section > article header {
+	display: inline-block;
 	float: left;
-	margin-right: 0.3em;
 }
 
-section article header h3 {
+section > article header img {
+	display: inline-block;
+	float: left;
+	margin-right: 0.5em;
+}
+
+section > article header h2 {
 	font-size: 1em;
-	vertical-align: middle;
 	float: left;
 }
 
-section article > div {
-	padding-top: 0.3em;
+section > article header span {
+	display: inline-block;
+}
+
+section > article > div {
+	float: right;
+}
+
+section > article a {
+	float: right;
+	display: inline-block;
+	margin: 0.3em;
+	vertical-align: middle;
+	text-decoration: none;
+	font-weight: bold;
+	color: #FFFFFF;
+	background-color: #000000;
+	border: 0.15em solid #000000;
+	border-radius: 0.5em;
+	padding: 0.15em;
+}
+
+section > article a:hover {
+	color: #000000;
+	background-color: #FFFFFF;
+}
+
+section > article ul {
+	list-style-type: none;
 	clear: both;
 }
 
-section article ul {
-	list-style-type: none;
+section > article li:first-child {
+	float: right;
 }
 
-section article li {
+section > article li {
 	padding: 0.2em;
 }
 
-section article li:first-child span:nth-child(3) {
+section > article li:last-child span:nth-child(3) {
 	font-weight: bold;
 	padding-right: 0.3em;
 }
 
-section article li span:first-child {
+section > article li span:first-child {
 	font-weight: bold;
 	padding-right: 0.3em;
 }
 /*}}}*/
 /*{{{ App sheet */
-#app_sheet {
+main > article {
 	box-shadow: 0em 0em 0.5em #000000;
+	float: left;
+	display: block;
+	margin: 0.5em;
+	padding: 2em;
+}
+
+main > article > header {
 	display: inline-block;
-	margin: 0.5em;
-	padding: 0.5em;
+	margin-bottom: 1.5em;
 }
 
-#app_sheet > img {
+main > article > header img {
+	display: inline-block;
+	margin-right: 0.5em;
 	float: left;
 }
 
-#app_sheet > fieldset {
-	border: 0em;
-	width: 40em;
-	margin-left: 0.5em;
+main > article > aside {
+	box-shadow: 0em 0em 0em #000000;
 	float: left;
+	margin-left: 0em;
+	padding-left: 0em;
 }
 
-#app_sheet > fieldset > legend {
-	font-weight: bold;
-}
-
-#app_sheet > fieldset > ul > li {
-	margin-top: 0.5em;
-}
-
-#app_sheet > fieldset > ul > li:nth-child(2) {
-	margin-top: initial;
-}
-
-#app_sheet > fieldset > ul > li:nth-child(3) div {
-	padding: 0.5em;
-	margin: 0.3em;
-}
-
-#app_sheet > fieldset > ul > li:first-child {
-	border: 0.1em solid black;
-	border-radius: 0.5em;
-	padding: 0.5em;
-	margin: 0.5em;
+main > article > aside:first-of-type {
 	float: right;
+	border: 0.1em solid #000000;
+	border-radius: 0.5em;
 }
 
-#app_sheet > fieldset > ul > li:first-child img {
+main > article > ul {
+	list-style-type: none;
+}
+
+main > article > aside > img {
 	vertical-align: middle;
 }
 
-#app_sheet > fieldset > ul > li:first-child a {
+main > article > aside > a {
 	vertical-align: middle;
 	text-decoration: none;
 	font-weight: bold;
@@ -335,17 +359,42 @@ section article li span:first-child {
 	padding: 0.15em;
 }
 
-#app_sheet > fieldset > ul > li:first-child a:hover {
+main > article > aside > a:hover {
 	color: #000000;
 	background-color: #FFFFFF;
 }
 
-#app_sheet > fieldset > ul li label {
+main > article > aside ul {
+	list-style-type: none;
+}
+
+main > article > div {
+	padding: 0.2em;
+}
+
+main > article > aside li {
+	margin: 0.2em;
+}
+
+main > article > aside span {
+	font-weight: bold;
+	clear: both;
+}
+
+main > article > div > span:first-child {
 	font-weight: bold;
 }
 
-#app_sheet > fieldset * ul {
-	list-style-type: initial;
-	padding-left: 1em;
+main > article > div  > span:nth-child(3) {
+	font-weight: bold;
+}
+
+#description {
+	width: 40em;
+	padding: 0.5em;
+}
+
+#description ul, #description ol {
+	padding: 1em;
 }
 /*}}}*/
