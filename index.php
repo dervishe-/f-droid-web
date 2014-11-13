@@ -73,7 +73,12 @@ function build_app($_xml, $id_app) { //{{{
 	$application['category'] = (string) $app->category;
 	$application['web'] = (string) $app->web;
 	$application['source'] = (string) $app->source;
+	$application['tracker'] = (string) $app->tracker;
 	$application['requirements'] = (string) $app->requirements;
+	$application['donate'] = (string) $app->donate;
+	$application['flattr'] = (string) $app->flattr;
+	$application['bitcoin'] = (string) $app->bitcoin;
+	$application['antifeatures'] = (string) $app->antifeatures;
 	$package = array();
 	$package['version'] = (string) $app->package->version;
 	$package['apkname'] = (string) $app->package->apkname;
@@ -308,6 +313,11 @@ function translate_perm($item) { //{{{
 	return (isset($lang['perms'][$item])) ? $lang['perms'][$item] : $item;
 };
 //}}}
+function translate_feat($item) { //{{{
+	global $lang;
+	return (isset($lang['afeat'][$item])) ? $lang['afeat'][$item] : $item;
+};
+//}}}
 function translate_cat($item) { //{{{
 	global $lang;
 	return (isset($lang['cat'][$item])) ? $lang['cat'][$item] : $item;
@@ -328,7 +338,7 @@ function decore_app($app_id, $lang) { //{{{
 			return false;
 		};
 	};
-	if (USE_QRCODE) {
+	if (USE_QRCODE) { //{{{
 		include_once('phpqrcode/phpqrcode.php');
 		$qrcode = QRCODES_DIR.DIRECTORY_SEPARATOR.$app['id'].".png";
 		if (!is_file($qrcode)) {
@@ -341,26 +351,22 @@ function decore_app($app_id, $lang) { //{{{
 			<a href=\"{$app['package']['apkname']}\" title=\"{$dl_label} {$app['name']}\">{$dl_label}</a></aside>";
 	} else {
 		$tag_qrcode = "<aside><a title=\"{$dl_label} {$app['name']}\" href=\"{$app['package']['apkname']}\">{$dl_label}</a></aside>";
-	};
+	};//}}}
 	$icon = ICONS_DIR.DIRECTORY_SEPARATOR.$app['icon'];
-	$vers_label = translate('iface', 'version', $lang);
-	if ($app['updated'] != $app['added']) {
-		$upd_label = translate('iface', 'updated', $lang);
-		$version = "
-	<div title=\"{$vers_label}\">
-		<span>{$vers_label}: </span>
-		<span>{$app['package']['version']}</span> - <span>{$upd_label}</span>: 
-		<span>{$app['updated']}</span>
-	</div>";
+	if ($app['updated'] != $app['added']) { //{{{
+		$label = translate('iface', 'updated', $lang);
+		$date = $app['updated'];
 	} else {
-		$add_label = translate('iface', 'added', $lang);
-		$version = "
+		$label = translate('iface', 'added', $lang);
+		$date = $app['added'];
+	};
+	$vers_label = translate('iface', 'version', $lang);
+	$version = "
 	<div title=\"{$vers_label}\">
 		<span>{$vers_label}: </span>
-		<span>{$app['package']['version']}</span> - <span>{$add_label}</span>: 
-		<span>{$app['added']}</span>
-	</div>";
-	};
+		<span>{$app['package']['version']}</span> - <span>{$label}</span>: 
+		<span>{$date}</span>
+	</div>";//}}}
 	$lic_label = translate('iface', 'license', $lang);
 	$license = "<div title=\"{$lic_label}\"><span>{$lic_label}: </span><span>".translate('lic', $app['license'], $lang)."</span></div>";
 	$sum_label = translate('iface', 'summary', $lang);
@@ -370,7 +376,7 @@ function decore_app($app_id, $lang) { //{{{
 	$reqs_label = translate('iface', 'requirements', $lang);
 	$requirements = (strlen($app['requirements']) > 0) ? 
 		"<div title=\"{$reqs_label}\"><span>{$reqs_label}: </span><span>{$app['requirements']}</span></div>" : '';
-	$size = $app['package']['size'];
+	$size = $app['package']['size']; //{{{
 	$size_label = translate('iface', 'size', $lang);
 	if (($size / 1048572) > 1) {
 		$size /= 1048572;
@@ -378,8 +384,7 @@ function decore_app($app_id, $lang) { //{{{
 	} else {
 		$size /= 1024;
 		$size = "<div title=\"{$size_label}\"><span>{$size_label}: </span><span>".round($size, 2)." kB</span></div>";
-	};
-	
+	};//}}}
 	$categories = $app['categories'];
 	$cats = (strlen($categories) > 0 && $categories != 'None') ? "<ul><li>".implode('</li><li>', array_map('translate_cat', explode(',', $categories)))."</li></ul>" : '';
 	$cats_span = translate('iface', 'categories', $lang);
@@ -388,7 +393,10 @@ function decore_app($app_id, $lang) { //{{{
 	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_perm', explode(',', $permissions)))."</li></ul>" : '';
 	$perms_span = translate('iface', 'permissions', $lang);
 	$permissions = "<aside title=\"{$perms_span}\"><span>{$perms_span}: </span>{$perms}</aside>";
-	
+	$afeatures = $app['antifeatures'];
+	$afeat = (strlen($afeatures) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_feat', explode(',', $afeatures)))."</li></ul>" : '';
+	$afeat_span = translate('iface', 'antifeatures', $lang);
+	$afeatures = "<aside id=\"antifeatures\" title=\"{$afeat_span}\"><span>{$afeat_span}: </span>{$afeat}</aside>";
 	return "
 <article id=\"appsheet\">
 	<header>
@@ -406,6 +414,7 @@ function decore_app($app_id, $lang) { //{{{
 	{$requirements}
 	".(($cats != '') ? $categories : '')."
 	".(($perms != '') ? $permissions : '')."
+	".(($afeat != '') ? $afeatures : '')."
 </article>";
 };
 //}}}

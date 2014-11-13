@@ -389,6 +389,16 @@ main > article > div  > span:nth-child(3) {
 	font-weight: bold;
 }
 
+#antifeatures ul {
+	list-style-type: disc;
+	padding-left: 1em;
+}
+
+#antifeatures {
+	clear: both;
+	max-width: 40em;
+}
+
 #description {
 	width: 40em;
 	padding: 0.5em;
