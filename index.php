@@ -20,8 +20,6 @@ define('ICONS_DIR_LIGHT', 'icons-240');
 define('ICONS_DIR_ABSTRACT', 'icons-120');
 define('QRCODES_DIR', 'qrcodes');
 define('LANG', 'lang');
-define('DICT', LANG.DIRECTORY_SEPARATOR.'dict');
-define('FLAGS', LANG.DIRECTORY_SEPARATOR.'flag');
 define('CACHE', ROOT.DIRECTORY_SEPARATOR.'cache');
 define('APP_CACHE', CACHE.DIRECTORY_SEPARATOR.'app_files');
 // FILES
@@ -93,15 +91,15 @@ function build_app($_xml, $id_app) { //{{{
 function build_lang_selector($lang_label, $lang) { //{{{
 	$bloc = "<div id=\"lang\"><span>".translate('iface', 'language', $lang).": </span><ul>";
 	if ($dh = opendir(LANG)) {
-		while (false !== ($file = readdir($dh))) {
-			if (is_file(LANG.DIRECTORY_SEPARATOR.$file)) {
-				$file = substr($file, 0, 2);
-				$bloc .= ($file != $lang_label) ? 
+		while (false !== ($dir = readdir($dh))) {
+			$rep_lang = LANG.DIRECTORY_SEPARATOR.$dir.DIRECTORY_SEPARATOR;
+			if (is_file($rep_lang.'lang.php')) {
+				$bloc .= ($dir != $lang_label) ? 
 					"<li>
-						<a href=\"?lang={$file}\" title=\"".translate('lang', $file, $lang)."\">
-							<img alt=\"".translate('lang', $file, $lang)."\" src=\"".FLAGS.DIRECTORY_SEPARATOR.$file.".png\" />
+						<a href=\"?lang={$dir}\" title=\"".translate('lang', $dir, $lang)."\">
+							<img alt=\"".translate('lang', $dir, $lang)."\" src=\"{$rep_lang}flag.png\" />
 						</a>
-					</li>" : "<li><span	><img alt=\"".translate('lang', $file, $lang)."\" src=\"".FLAGS.DIRECTORY_SEPARATOR.$file.".png\" /></span></li>";
+					</li>" : "<li><span	><img alt=\"".translate('lang', $dir, $lang)."\" src=\"{$rep_lang}flag.png\" /></span></li>";
 			};
 		};
 		closedir($dh);
@@ -278,7 +276,7 @@ function cache_lastapps($repos) { //{{{
 function cache_words($repos) { //{{{	Fields to search: name, summary, description
 	$wd = array();
 	if (is_file(DATA) && is_readable(DATA) && ($data = simplexml_load_file(DATA)) !== false) {
-		include_once(DICT.DIRECTORY_SEPARATOR.LOCALIZATION.".st.php"); // $stopwords loading
+		include_once(LANG.DIRECTORY_SEPARATOR.LOCALIZATION.DIRECTORY_SEPARATOR."stopwords.php"); // $stopwords loading
 		foreach ($data->application as $app) {
 			$name = (string) $app->name;
 			$summary = (string) $app->summary;
@@ -290,7 +288,7 @@ function cache_words($repos) { //{{{	Fields to search: name, summary, descriptio
 			};
 		};
 	} elseif (count($repos) > 0) {		// Fallback: if DATA is not present, then we use app file stored in cache
-		include_once(DICT.DIRECTORY_SEPARATOR.LOCALIZATION.".st.php"); // $stopwords loading
+		include_once(LANG.DIRECTORY_SEPARATOR.LOCALIZATION."stopwords.php"); // $stopwords loading
 		foreach ($repos as $app) {
 			if (is_file(CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app)) {
 				$app = unserialize(file_get_contents($app));
@@ -766,15 +764,15 @@ function apply_filters($relations, $licenses, $words, $repos) { //{{{
 //{{{Select lang
 if (isset($_GET['lang'])) {
 	$lang_label = filter_var($_GET['lang'], FILTER_VALIDATE_REGEXP, array('options'=>array('regexp'=>'/^[a-z]{2}$/')));
-	if ($lang_label === false || !is_file(LANG.DIRECTORY_SEPARATOR."{$lang_label}.php")) $lang_label = DEFAULT_LANG;
+	if ($lang_label === false || !is_file(LANG.DIRECTORY_SEPARATOR.$lang_label.DIRECTORY_SEPARATOR."lang.php")) $lang_label = DEFAULT_LANG;
 	$_SESSION['lang'] = $lang_label;
 } elseif (isset($_SESSION['lang'])) {
-	$lang_label = (is_file(LANG.DIRECTORY_SEPARATOR."{$_SESSION['lang']}.php")) ? $_SESSION['lang'] : DEFAULT_LANG;
+	$lang_label = (is_file(LANG.DIRECTORY_SEPARATOR.$_SESSION['lang'].DIRECTORY_SEPARATOR."lang.php")) ? $_SESSION['lang'] : DEFAULT_LANG;
 } else {
 	$lang_label = DEFAULT_LANG;
 	$_SESSION['lang'] = $lang_label;
 };
-include_once("lang/{$lang_label}.php");
+include_once("lang/{$lang_label}".DIRECTORY_SEPARATOR."lang.php");
 //}}}
 //{{{ Retrieve data from cache
 libxml_use_internal_errors(true);
