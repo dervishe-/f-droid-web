@@ -38,8 +38,8 @@ define('MANIFEST', CACHE.DIRECTORY_SEPARATOR.'Manifest'); // store index.xml has
 define('FLATTR_SCHEME', 'https://flattr.com/thing/');
 define('HASH_ALGO', 'whirlpool');
 define('USE_QRCODE', true);
-define('NUMBER_LAST_APP', 4);
-define('RECORDS_PER_PAGE', 3);
+define('NUMBER_LAST_APP', 6);
+define('RECORDS_PER_PAGE', 8);
 define('DEFAULT_LANG', 'fr');
 define('LOCALIZATION', 'fr');
 define('MSG_FOOTER', '(C) Association Française des Petits Débrouillards');
@@ -347,11 +347,11 @@ function decore_app($app_id, $lang) { //{{{
 		};
 		$dl_label = translate('iface', 'download', $lang);
 		$tag_qrcode = "
-		<aside title=\"{$dl_label}\">
+		<aside id=\"download\">
 			<img src=\"{$qrcode}\" alt=\"QR-Code {$app['name']}\" title=\"QR-Code: {$dl_label} {$app['name']}\" />
 			<a href=\"{$app['package']['apkname']}\" title=\"{$dl_label} {$app['name']}\">{$dl_label}</a></aside>";
 	} else {
-		$tag_qrcode = "<aside><a title=\"{$dl_label} {$app['name']}\" href=\"{$app['package']['apkname']}\">{$dl_label}</a></aside>";
+		$tag_qrcode = "<aside id=\"download\"><a title=\"{$dl_label} {$app['name']}\" href=\"{$app['package']['apkname']}\">{$dl_label}</a></aside>";
 	};//}}}
 	$icon = ICONS_DIR.DIRECTORY_SEPARATOR.$app['icon'];
 	if ($app['updated'] != $app['added']) { //{{{
@@ -389,16 +389,16 @@ function decore_app($app_id, $lang) { //{{{
 	$categories = $app['categories']; //{{{
 	$cats = (strlen($categories) > 0 && $categories != 'None') ? "<ul><li>".implode('</li><li>', array_map('translate_cat', explode(',', $categories)))."</li></ul>" : '';
 	$cats_span = translate('iface', 'categories', $lang);
-	$categories = "<aside title=\"{$cats_span}\"><span>{$cats_span}: </span>{$cats}</aside>";//}}}
+	$categories = "<aside id=\"categories\" title=\"{$cats_span}\"><span>{$cats_span}: </span>{$cats}</aside>";//}}}
 	$permissions = $app['package']['permissions']; //{{{
 	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_perm', explode(',', $permissions)))."</li></ul>" : '';
 	$perms_span = translate('iface', 'permissions', $lang);
-	$permissions = "<aside title=\"{$perms_span}\"><span>{$perms_span}: </span>{$perms}</aside>";//}}}
+	$permissions = "<aside id=\"perms\" title=\"{$perms_span}\"><span>{$perms_span}: </span>{$perms}</aside>";//}}}
 	$afeatures = $app['antifeatures']; //{{{
 	$afeat = (strlen($afeatures) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_feat', explode(',', $afeatures)))."</li></ul>" : '';
 	$afeat_span = translate('iface', 'antifeatures', $lang);
 	$afeatures = "<aside id=\"antifeatures\" title=\"{$afeat_span}\"><span>{$afeat_span}: </span>{$afeat}</aside>";//}}}
-	$donate = "";
+	$donate = ""; //{{{
 	$don_label = translate('iface', 'donate', $lang);
 	$flattr_label = translate('iface', 'flattr', $lang);
 	$bc_label = translate('iface', 'bitcoin', $lang);
@@ -408,7 +408,14 @@ function decore_app($app_id, $lang) { //{{{
 		$donate .= "<a title=\"{$don_label}: {$flattr_label}\" href=\"".FLATTR_SCHEME."{$app['flattr']}\">{$flattr_label}</a>";
 	if ($app['bitcoin'] != '') 
 		$donate .= "<div title=\"{$don_label}: {$bc_label}\"><span>{$bc_label}</span><span>{$app['bitcoin']}</span></div>";
-	if ($donate != '') $donate = "<aside id=\"donate_app\">{$donate}</aside>";
+	if ($donate != '') $donate = "<aside id=\"donate_app\">{$donate}</aside>"; //}}}
+	$dev_span = translate('iface', 'devfeatures', $lang);
+	$sdk_span = translate('iface', 'sdkver', $lang);
+	$dev_body = "<div><span>{$sdk_span}: </span><span>v{$app['package']['sdkver']}</span></div>";
+	if ($app['web'] != '') $dev_body .= "<a href=\"{$app['web']}\">".translate('iface', 'web', $lang)."</a>";
+	if ($app['tracker'] != '') $dev_body .= "<a href=\"{$app['tracker']}\">".translate('iface', 'tracker', $lang)."</a>";
+	if ($app['source'] != '') $dev_body .= "<a href=\"{$app['source']}\">".translate('iface', 'sources', $lang)."</a>";
+	$blockdev = "<aside id=\"block_dev\">{$dev_body}</aside>";
 	return "
 <article id=\"appsheet\">
 	<header>
@@ -428,6 +435,7 @@ function decore_app($app_id, $lang) { //{{{
 	".(($cats != '') ? $categories : '')."
 	".(($perms != '') ? $permissions : '')."
 	".(($afeat != '') ? $afeatures : '')."
+	{$blockdev}
 </article>";
 };
 //}}}
@@ -875,8 +883,8 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 		{$headers}
 		<main role=\"main\">
 			{$menu}
-			{$tools}
 			{$main}
+			{$tools}
 			{$lastapp}
 		</main>
 		{$footer}

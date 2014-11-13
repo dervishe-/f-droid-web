@@ -374,6 +374,7 @@ main > article > div {
 
 main > article > aside li {
 	margin: 0.2em;
+	font-size: 0.9em;
 }
 
 main > article > aside span {
@@ -389,20 +390,20 @@ main > article > div  > span:nth-child(3) {
 	font-weight: bold;
 }
 
-#donate_app {
+#donate_app, #block_dev {
 	float: right;
 	padding: 0em;
 	border: 0.1em solid #000000;
 	border-radius: 0.5em;
 }
 
-#donate_app > a {
+#donate_app a, #block_dev a {
 	display: block;
 	margin: 0.5em;
 	text-align: center;
 }
 
-#donate_app > div {
+#donate_app div, #block_dev div {
 	vertical-align: middle;
 	border: 0.15em solid #000000;
 	border-radius: 0.5em;
