@@ -35,6 +35,7 @@ define('LAST_FILE', CACHE.DIRECTORY_SEPARATOR.'last_apps'); // store last apps i
 define('WORD_FILE', CACHE.DIRECTORY_SEPARATOR.'words'); // store used words as an array
 define('MANIFEST', CACHE.DIRECTORY_SEPARATOR.'Manifest'); // store index.xml hash
 // PARAMETERS
+define('FLATTR_SCHEME', 'https://flattr.com/thing/');
 define('HASH_ALGO', 'whirlpool');
 define('USE_QRCODE', true);
 define('NUMBER_LAST_APP', 4);
@@ -385,18 +386,29 @@ function decore_app($app_id, $lang) { //{{{
 		$size /= 1024;
 		$size = "<div title=\"{$size_label}\"><span>{$size_label}: </span><span>".round($size, 2)." kB</span></div>";
 	};//}}}
-	$categories = $app['categories'];
+	$categories = $app['categories']; //{{{
 	$cats = (strlen($categories) > 0 && $categories != 'None') ? "<ul><li>".implode('</li><li>', array_map('translate_cat', explode(',', $categories)))."</li></ul>" : '';
 	$cats_span = translate('iface', 'categories', $lang);
-	$categories = "<aside title=\"{$cats_span}\"><span>{$cats_span}: </span>{$cats}</aside>";
-	$permissions = $app['package']['permissions'];
+	$categories = "<aside title=\"{$cats_span}\"><span>{$cats_span}: </span>{$cats}</aside>";//}}}
+	$permissions = $app['package']['permissions']; //{{{
 	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_perm', explode(',', $permissions)))."</li></ul>" : '';
 	$perms_span = translate('iface', 'permissions', $lang);
-	$permissions = "<aside title=\"{$perms_span}\"><span>{$perms_span}: </span>{$perms}</aside>";
-	$afeatures = $app['antifeatures'];
+	$permissions = "<aside title=\"{$perms_span}\"><span>{$perms_span}: </span>{$perms}</aside>";//}}}
+	$afeatures = $app['antifeatures']; //{{{
 	$afeat = (strlen($afeatures) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_feat', explode(',', $afeatures)))."</li></ul>" : '';
 	$afeat_span = translate('iface', 'antifeatures', $lang);
-	$afeatures = "<aside id=\"antifeatures\" title=\"{$afeat_span}\"><span>{$afeat_span}: </span>{$afeat}</aside>";
+	$afeatures = "<aside id=\"antifeatures\" title=\"{$afeat_span}\"><span>{$afeat_span}: </span>{$afeat}</aside>";//}}}
+	$donate = "";
+	$don_label = translate('iface', 'donate', $lang);
+	$flattr_label = translate('iface', 'flattr', $lang);
+	$bc_label = translate('iface', 'bitcoin', $lang);
+	if ($app['donate'] != '') 
+		$donate .= "<a title=\"{$don_label}\" href=\"{$app['donate']}\">{$don_label}</a>";
+	if ($app['flattr'] != '') 
+		$donate .= "<a title=\"{$don_label}: {$flattr_label}\" href=\"".FLATTR_SCHEME."{$app['flattr']}\">{$flattr_label}</a>";
+	if ($app['bitcoin'] != '') 
+		$donate .= "<div title=\"{$don_label}: {$bc_label}\"><span>{$bc_label}</span><span>{$app['bitcoin']}</span></div>";
+	if ($donate != '') $donate = "<aside id=\"donate_app\">{$donate}</aside>";
 	return "
 <article id=\"appsheet\">
 	<header>
@@ -411,6 +423,7 @@ function decore_app($app_id, $lang) { //{{{
 	{$version}
 	{$license}
 	{$desc}
+	{$donate}
 	{$requirements}
 	".(($cats != '') ? $categories : '')."
 	".(($perms != '') ? $permissions : '')."
