@@ -71,7 +71,6 @@ There is also a translation for categories.
 
 TODO:
 
-* RSS and Atom Feeds
 * JSONification 
 * UI dynamization (JS)
 * Add other languages (german, portugese, ...)
