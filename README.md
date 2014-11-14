@@ -54,12 +54,14 @@ Directory hierarchy:
 
 REMARK:
 
-* This website don't use cookies (except the session cookie). It's tracker free.
-For the moment, it didn't use database or nosql things just plaintext files or files storing serialized PHP structures.
+* This website don't use cookies (except the session cookie). It's tracker free. For the moment, it didn't use database or nosql things just plaintext files or files storing serialized PHP structures.
 
 * It is HTML5 and CSS3 valid (with semantic markup).
 
-* Actually, you can browse by apps, by licenses or by categories.
+* You can browse by apps, by licenses or by categories.
+
+* You can search by words. The search will be performed in the name, summary and description fields. You can use the "+" symbol, in order to cross research:
+word1 + word2 will gather apps matching the 2 words (or n words)
 
 * To add a translation, simply add a code_lang.php wich must be a copy of one other language file in ./lang directory
 There is also a translation for categories.
@@ -68,7 +70,6 @@ There is also a translation for categories.
 TODO:
 
 * RSS and Atom Feeds
-* Search apps on summary, name and desc (nearly finished)
 * JSONification 
 * UI dynamization (JS)
 * Add other languages (german, portugese, ...)
