@@ -14,7 +14,6 @@ session_start();
 //{{{ Configuration
 // DIRECTORIES
 define('ROOT', dirname(__FILE__));
-define('MEDIA_SITE', 'Media');
 define('ICONS_DIR', 'icons-320');
 define('ICONS_DIR_LIGHT', 'icons-240');
 define('ICONS_DIR_ABSTRACT', 'icons-120');
@@ -32,17 +31,19 @@ define('LIC_FILE', CACHE.DIRECTORY_SEPARATOR.'licenses'); // store used licenses
 define('LAST_FILE', CACHE.DIRECTORY_SEPARATOR.'last_apps'); // store last apps id as an array
 define('WORD_FILE', CACHE.DIRECTORY_SEPARATOR.'words'); // store used words as an array
 define('MANIFEST', CACHE.DIRECTORY_SEPARATOR.'Manifest'); // store index.xml hash
+define('FEED_NAME', "last_app.atom");
 // PARAMETERS
 define('FLATTR_SCHEME', 'https://flattr.com/thing/');
 define('HASH_ALGO', 'whirlpool');
 define('USE_QRCODE', true);
+define('USE_FEEDS', true);
 define('NUMBER_LAST_APP', 6);
 define('RECORDS_PER_PAGE', 8);
 define('DEFAULT_LANG', 'fr');
 define('LOCALIZATION', 'fr');
 define('MSG_FOOTER', '(C) Association Française des Petits Débrouillards');
 // ALLOWED VALUES
-$formats = array('json'=>1, 'atom'=>2, 'rss'=>3);
+$formats = array('json'=>1);
 //}}}
 //{{{ Library
 function build_structure($_xml) { //{{{
@@ -50,6 +51,8 @@ function build_structure($_xml) { //{{{
 	$repos['name'] = (string) $_xml->repo['name'];
 	$repos['icon'] = (string) $_xml->repo['icon'];
 	$repos['desc'] = (string) $_xml->repo->description;
+	$repos['url'] = (string) $_xml->repo['url'];
+	$repos['timestamp'] = (string) $_xml->repo['timestamp'];
 	$repos['list'] = array();
 	foreach($_xml->application as $app) { $repos['list'][] = (string) $app->id; };
 	$repos['nbr'] = count($repos['list']);
@@ -157,6 +160,7 @@ function build_cache_data($hash) { //{{{
 	$rel = cache_relations($repos['list']);
 	$lic = cache_licenses($repos['list']);
 	$lst = cache_lastapps($repos['list']);
+	if (USE_FEEDS) build_atom($repos, $lst);
 	return array('repos'=>$repos, 'cat'=>$cat, 'rel'=>$rel, 'lic'=>$lic, 'wrd'=>$words, 'lst'=>$lst);
 };
 //}}}
@@ -461,7 +465,7 @@ function decore_app_light($app_id, $lang) { //{{{
 		</li>";
 	};
 	$sum_label = translate('iface', 'summary', $lang);
-	$summary = "<span id=\"desc_{$app['name']}\" title=\"{$sum_label}\">{$app['summary']}</span>";
+	$summary = "<span id=\"desc_{$app['id']}\" title=\"{$sum_label}\">{$app['summary']}</span>";
 	$size = $app['package']['size'];
 	if (($size / 1048572) > 1) {
 		$size /= 1048572;
@@ -482,12 +486,12 @@ function decore_app_light($app_id, $lang) { //{{{
 	<div>
 		<a href=\"{$app['package']['apkname']}\" title=\"".
 		translate('iface', 'download', $lang).
-		": {$app['name']}\" aria-describedby=\"desc_{$app['name']}\">".
+		": {$app['name']}\" aria-describedby=\"desc_{$app['id']}\">".
 		translate('iface', 'download', $lang).
 		"</a>
 		<a href=\"?getSheet={$app['id']}\" title=\"".
 		translate('iface', 'sheet', $lang).
-		": {$app['name']}\" aria-describedby=\"desc_{$app['name']}\">".
+		": {$app['name']}\" aria-describedby=\"desc_{$app['id']}\">".
 		translate('iface', 'sheet', $lang).
 		"</a>
 	</div>
@@ -674,7 +678,7 @@ function decore_licenses($licenses, $lang, $nbr_apps) { //{{{
 function decore_headers($title, $lang_label, $lang, $description=null) { //{{{
 	$bloc = "<header role=\"banner\">
 			<div>
-				<img src=\"".MEDIA_SITE."/images/logo.png\" alt=\"logo: {$title}\" />
+				<img src=\"Media/images/logo.png\" alt=\"logo: {$title}\" />
 				<h1>{$title}</h1>
 			</div>
 			<div>$description</div>";
@@ -682,6 +686,34 @@ function decore_headers($title, $lang_label, $lang, $description=null) { //{{{
 	$bloc .= "</header>";
 	return $bloc;
 };//}}}
+function build_atom($repos, $list) { //{{{
+	$icon = "{$_SERVER['SERVER_NAME']}/Media/images/logo.png";
+	$date = date('c', $repos['timestamp']);
+	$feed = "";
+	foreach ($list as $app) {
+		$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
+		$feed .= "
+<entry>
+	<title>{$app['name']}</title>
+	<link href=\"{$_SERVER['SERVER_NAME']}/{$app['package']['apkname']}\" />
+	<id>{$app['id']}</id>
+	<updated>{$app['updated']}</updated>
+	<summary>{$app['summary']}</summary>
+</entry>";
+	};
+	$bloc = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
+<feed xmlns=\"http://www.w3.org/2005/Atom\">
+	<title>{$repos['name']}</title>
+	<subtitle>{$repos['desc']}</subtitle>
+	<link>{$repos['url']}</link>
+	<updated>{$date}</updated>
+	<id>{$_SERVER['SERVER_NAME']}</id>
+	<logo>{$icon}</logo>
+	{$feed}
+</feed>";
+	file_put_contents(FEED_NAME, $bloc);
+};
+//}}}
 function apply_filters($relations, $licenses, $words, $repos) { //{{{
 	$flag = false;
 	$candidates = array();
@@ -829,9 +861,9 @@ $tampon = array_slice($list, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// HTML case
 	//{{{ Building content
 	$footer = "<footer role=\"contentinfo\"><span>".MSG_FOOTER."</span></footer>";
-	$favicon = (is_file(MEDIA_SITE.'/images/favicon.ico') && 
-			is_readable(MEDIA_SITE.'/images/favicon.ico')) ? 
-			"<link type=\"image/png\" rel=\"icon\" href=\"".MEDIA_SITE.'/images/favicon.ico'."\" />" : '';
+	$favicon = (is_file('Media/images/favicon.ico') && 
+			is_readable('Media/images/favicon.ico')) ? 
+			"<link type=\"image/png\" rel=\"icon\" href=\"Media/images/favicon.ico\" />" : '';
 	$headers = decore_headers($repos['name'], $lang_label, $lang, $repos['desc']);
 	$tools = build_tools($relations, $licenses, $lang, $repos['nbr']);
 	$applist = decore_applist($tampon, $lang, $nbr_app, $page);
@@ -856,6 +888,11 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 		$label_menu = translate('iface', 'applist', $lang);
 		$main = $applist;
 	}; //}}}
+	$tagFeed = '';
+	if (USE_FEEDS) {
+		$feed_title = "";
+		$tagfeed = "<link rel=\"alternate\" type=\"application/atom+xml\" title=\"{$feed_title}\" href=\"".FEED_NAME."\" />";
+	};
 	$menu = "
 <nav id=\"menu\" role=\"navigation\">
 	<h2>".translate('iface', 'menu', $lang).":</h2>
@@ -876,7 +913,8 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 		<meta charset=\"UTF-8\">
 		<title>{$repos['name']}</title>
 		{$favicon}
-		<link type=\"text/css\" rel=\"stylesheet\" href=\"".MEDIA_SITE."/css/default.css\" />
+		{$tagfeed}
+		<link type=\"text/css\" rel=\"stylesheet\" href=\"Media/css/default.css\" />
 	</head>
 	<body>
 		{$headers}
@@ -891,6 +929,6 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 </html>
 ";
 } elseif ($_REQUEST['format'] == 'json') {
-} elseif ($_REQUEST['format'] == 'atom') {
+} elseif ($_REQUEST['format'] == 'feed') {
 };
 ?>

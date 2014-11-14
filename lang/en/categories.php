@@ -1,15 +1,9 @@
 <?php
+/**
+ *  array(KEY => VALUE)
+ *  where KEY is the initial name of the category
+ *  and VALUE is the translated KEY in the chosen language
+ */
 $categories_list = array(
-	'Sécurité' =>'Security',
-	'Développement durable' => 'Sustainable development',
-	'Outils' => 'Tools',
-	'Jeu' => 'Game',
-	'Ressources' => 'Resources',
-	'Transition' => 'Transition',
-	'Administration' => 'Administration',
-	'Son' => 'Sound',
-	'Sciencetour' => 'Sciencetour',
-	'Parcours' => 'Educational itinerary',
-	'Démarche expérimentale' => 'Experimental approach'
 );
 ?>
