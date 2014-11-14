@@ -1,4 +1,6 @@
 <?php
+include_once(LANG.DIRECTORY_SEPARATOR.'languages.php');
+include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'categories.php');
 $lang = array(
 	'iface' => array( //{{{
 		'language' => 'Language',
@@ -43,16 +45,13 @@ $lang = array(
 		'access_form_val' => "Access to search form",
 		'browse_lic' => "Browse apps by licenses",
 		'browse_cat' => "Browse apps by categories",
-		'sheet' => 'Factsheet',
+		'sheet' => 'Visualize',
 		'nbr_result' => 'Number of results',
 		'no_result' => "No app has been found with the criteria you choose.",
 		'error_label' => 'Error',
 		'error_message' => "Ooops, this repository is temporarily unavailable. We're sorry. Re-try latter please.",
 		'error_message_sheet' => "Ooops, the app's sheet you requested doesn't exists..."), //}}}
-	'lang' => array( //{{{
-		'en' => 'English version',
-		'es' => 'Versión española',
-		'fr' => 'Version fançaise'), //}}}
+	'lang' => $languages_list,
 	'perms' => array( //{{{
 		'ACCESS_NETWORK_STATE' => "Network's state access needed",
 		'WRITE_EXTERNAL_STORAGE' => "Write on external storage",
@@ -64,18 +63,7 @@ $lang = array(
 		'READ_FRAME_BUFFER' => "Read the frame buffer",
 		'CAMERA' => "Camera access needed",
 		'ACCESS_SUPERUSER' => "Superuser access needed"), //}}}
-	'cat' => array( //{{{
-		'Sécurité' =>'Security',
-		'Développement durable' => 'Sustainable development',
-		'Outils' => 'Tools',
-		'Jeu' => 'Game',
-		'Ressources' => 'Resources',
-		'Transition' => 'Transition',
-		'Administration' => 'Administration',
-		'Son' => 'Sound',
-		'Sciencetour' => 'Sciencetour',
-		'Parcours' => 'Educational itinerary',
-		'Démarche expérimentale' => 'Experimental approach'), //}}}
+	'cat' => $categories_list,
 	'afeat' => array( //{{{
 		'Ads' => 'Contains advertising.',
 		'Tracking' => 'Tracks and reports your activity to somewhere without your consent.',

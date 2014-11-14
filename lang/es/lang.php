@@ -1,4 +1,6 @@
 <?php
+include_once(LANG.DIRECTORY_SEPARATOR.'languages.php');
+include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'categories.php');
 $lang = array(
 	'iface' => array( //{{{
 		'language' => 'Idioma',
@@ -43,16 +45,13 @@ $lang = array(
 		'access_form_val' => "Acceso al formulario de búsqueda",
 		'browse_lic' => "Acceso al Filtró por licencias",
 		'browse_cat' => "Acceso al Filtró por categorías",
-		'sheet' => 'Ficha de información',
+		'sheet' => 'Visualizar',
 		'nbr_result' => 'Número de resultados',
 		'no_result' => "No aplicación se ha encontrado con los criterios que usted ha elegido.",
 		'error_label' => 'Error',
 		'error_message' => "Ooops, este depósito de aplicaciónes no está disponible temporalmente. Lo sentimos, por favor, inténtalo de nuevo más tarde...",
 		'error_message_sheet' => "Ooops, la ficha de la aplicación que ha solicitado no existe..."), //}}}
-	'lang' => array( //{{{
-		'en' => 'English version',
-		'es' => 'Versión española',
-		'fr' => 'Version fançaise'), //}}}
+	'lang' => $languages_list,
 	'perms' => array( //{{{
 		'ACCESS_NETWORK_STATE' => 'Acceso al estado de la red',
 		'WRITE_EXTERNAL_STORAGE' => 'Escritura en el almacenamiento exterior',
@@ -64,18 +63,7 @@ $lang = array(
 		'READ_FRAME_BUFFER' => 'Acceso al frame buffer',
 		'CAMERA' => 'Acceso a la camara',
 		'ACCESS_SUPERUSER' => "Solicitar derechos 'super utilizador'"), //}}}
-	'cat' => array( //{{{
-		'Sécurité' =>'Seguridad',
-		'Développement durable' => 'Desarrollo Sostenible',
-		'Outils' => 'Instrumentos',
-		'Jeu' => 'Juegos',
-		'Ressources' => 'Recursos',
-		'Transition' => 'Transición',
-		'Administration' => 'Administración',
-		'Son' => 'Sonido',
-		'Sciencetour' => 'Sciencetour',
-		'Parcours' => 'Recorridos',
-		'Démarche expérimentale' => 'Proceso experimental'), //}}}
+	'cat' => $categories_list,
 	'afeat' => array( //{{{
 		'Ads' => 'Contiene publicidad.',
 		'Tracking' => 'Rastrea e informa de sus actividades en algún lugar sin su consentimiento.',

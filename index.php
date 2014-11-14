@@ -5,7 +5,7 @@
  *	@author A. Keledjian	<dervishe@yahoo.fr>
  *	@copyright Association Française des Petits Débrouillards
  *	@license http://opensource.org/licenses/LGPL-3.0 GNU Public License
- *	@version 1.0
+ *	@version 0.1
  *
  *	Lightweight website for f-droid server
  *
@@ -307,23 +307,14 @@ function cache_words($repos) { //{{{	Fields to search: name, summary, descriptio
 	return $wd;
 };
 //}}}
-function translate_perm($item) { //{{{
-	global $lang;
-	return (isset($lang['perms'][$item])) ? $lang['perms'][$item] : $item;
+function translate($section, $item, $lang) { //{{{
+	return (isset($lang[$section][$item])) ? $lang[$section][$item] : $item;
 };
 //}}}
-function translate_feat($item) { //{{{
-	global $lang;
-	return (isset($lang['afeat'][$item])) ? $lang['afeat'][$item] : $item;
-};
-//}}}
-function translate_cat($item) { //{{{
-	global $lang;
-	return (isset($lang['cat'][$item])) ? $lang['cat'][$item] : $item;
-};
-//}}}
-function translate($cat, $item, $lang) { //{{{
-	return (isset($lang[$cat][$item])) ? $lang[$cat][$item] : $item;
+function translator($section, $lang) { //{{{
+	return function($item) use($lang, $section) {
+		return translate($section, $item, $lang);
+	};
 };
 //}}}
 function decore_app($app_id, $lang) { //{{{
@@ -385,15 +376,18 @@ function decore_app($app_id, $lang) { //{{{
 		$size = "<div title=\"{$size_label}\"><span>{$size_label}: </span><span>".round($size, 2)." kB</span></div>";
 	};//}}}
 	$categories = $app['categories']; //{{{
-	$cats = (strlen($categories) > 0 && $categories != 'None') ? "<ul><li>".implode('</li><li>', array_map('translate_cat', explode(',', $categories)))."</li></ul>" : '';
+	$translate_cat = translator('cat', $lang);
+	$cats = (strlen($categories) > 0 && $categories != 'None') ? "<ul><li>".implode('</li><li>', array_map($translate_cat, explode(',', $categories)))."</li></ul>" : '';
 	$cats_span = translate('iface', 'categories', $lang);
 	$categories = "<aside id=\"categories\" title=\"{$cats_span}\"><span>{$cats_span}: </span>{$cats}</aside>";//}}}
 	$permissions = $app['package']['permissions']; //{{{
-	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_perm', explode(',', $permissions)))."</li></ul>" : '';
+	$translate_perm = translator('perms', $lang);
+	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map($translate_perm, explode(',', $permissions)))."</li></ul>" : '';
 	$perms_span = translate('iface', 'permissions', $lang);
 	$permissions = "<aside id=\"perms\" title=\"{$perms_span}\"><span>{$perms_span}: </span>{$perms}</aside>";//}}}
 	$afeatures = $app['antifeatures']; //{{{
-	$afeat = (strlen($afeatures) > 0) ? "<ul><li>".implode('</li><li>', array_map('translate_feat', explode(',', $afeatures)))."</li></ul>" : '';
+	$translate_feat = translator('afeat', $lang);
+	$afeat = (strlen($afeatures) > 0) ? "<ul><li>".implode('</li><li>', array_map($translate_feat, explode(',', $afeatures)))."</li></ul>" : '';
 	$afeat_span = translate('iface', 'antifeatures', $lang);
 	$afeatures = "<aside id=\"antifeatures\" title=\"{$afeat_span}\"><span>{$afeat_span}: </span>{$afeat}</aside>";//}}}
 	$donate = ""; //{{{
@@ -734,14 +728,21 @@ function apply_filters($relations, $licenses, $words, $repos) { //{{{
 	}; //}}}
 	//}}}
 	//{{{ Words
-	$wrd_ids = (isset($_REQUEST['wrd'])) ? $_REQUEST['wrd'] : array();
-	if (!is_array($wrd_ids)) $wrd_ids = array($wrd_ids);
-	if (count($wrd_ids) > 0) { //{{{
-		$_SESSION['words'] = $wrd_ids;
+	$wordstofind = (isset($_REQUEST['val']) && trim($_REQUEST['val']) != '') ? $_REQUEST['val'] : array();
+	if (!is_array($wordstofind)) $wordstofind = explode('+', $wordstofind);
+	$candidates['words'] = $repos;
+	if (count($wordstofind) > 0) { //{{{
+		$_SESSION['words'] = $wordstofind;
 		$flag |= true;
-		$candidates['words'] = array();
-		foreach ($wrd_ids as $key) {
-			if (isset($licenses[$key])) $candidates['words'] = array_merge($candidates['words'], $words[$key]);
+		$registered_words = array_keys($words);
+		foreach ($wordstofind as $tosearch) {
+			$tampon = array();
+			foreach($registered_words as $key) {
+				if (strpos(trim(strtolower($key)), trim(strtolower($tosearch))) !== false) {
+					$tampon = array_merge($tampon, $words[$key]);
+				};
+			};
+			$candidates['words'] = array_intersect($candidates['words'], $tampon);
 		};
 		$candidates['words'] = array_unique($candidates['words']);
 	} else {
