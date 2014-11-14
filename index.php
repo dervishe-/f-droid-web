@@ -37,8 +37,9 @@ define('FLATTR_SCHEME', 'https://flattr.com/thing/');
 define('HASH_ALGO', 'whirlpool');
 define('USE_QRCODE', true);
 define('USE_FEEDS', true);
+define('FEED_AUTHOR', 'Les Petits Débrouillards');
 define('NUMBER_LAST_APP', 6);
-define('RECORDS_PER_PAGE', 8);
+define('RECORDS_PER_PAGE', 12);
 define('DEFAULT_LANG', 'fr');
 define('LOCALIZATION', 'fr');
 define('MSG_FOOTER', '(C) Association Française des Petits Débrouillards');
@@ -170,6 +171,42 @@ function build_tools($relations, $licenses, $lang, $nbr) { //{{{
 			decore_categories($relations, $lang, $nbr).
 			decore_licenses($licenses, $lang, $nbr).
 			"</aside>";
+};
+//}}}
+function build_atom($repos, $list) { //{{{
+	$scheme = ($_SERVER['HTTPS'] != '') ? 'https://' : 'http://';
+	$icon = "{$_SERVER['SERVER_NAME']}/Media/images/logo.png";
+	$date = date('c', $repos['timestamp']);
+	$feed = "";
+	$i = 0;
+	foreach ($list as $app) {
+		$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
+		$time_comp = explode('-', $app['updated']);
+		$date_app = date('c', mktime(0, $i, 0, $time_comp[1], $time_comp[3], $time_comp[2]));
+		$i++;
+		$feed .= "
+<entry>
+	<title>{$app['name']}</title>
+	<link href=\"{$scheme}{$_SERVER['SERVER_NAME']}/{$app['package']['apkname']}\" />
+	<id>{$scheme}{$_SERVER['SERVER_NAME']}/{$app['package']['apkname']}</id>
+	<updated>{$date_app}</updated>
+	<summary>{$app['summary']}</summary>
+</entry>";
+	};
+	$bloc = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
+<feed xmlns=\"http://www.w3.org/2005/Atom\">
+	<title>{$repos['name']}</title>
+	<subtitle>{$repos['desc']}</subtitle>
+	<link rel=\"self\" href=\"{$repos['url']}".FEED_NAME."\" />
+	<updated>{$date}</updated>
+	<id>{$scheme}{$_SERVER['SERVER_NAME']}/</id>
+	<logo>{$icon}</logo>
+	<author>
+		<name>".FEED_AUTHOR."</name>
+	</author>
+	{$feed}
+</feed>";
+	file_put_contents(FEED_NAME, $bloc);
 };
 //}}}
 function cache_categories($repos) { //{{{
@@ -686,34 +723,6 @@ function decore_headers($title, $lang_label, $lang, $description=null) { //{{{
 	$bloc .= "</header>";
 	return $bloc;
 };//}}}
-function build_atom($repos, $list) { //{{{
-	$icon = "{$_SERVER['SERVER_NAME']}/Media/images/logo.png";
-	$date = date('c', $repos['timestamp']);
-	$feed = "";
-	foreach ($list as $app) {
-		$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
-		$feed .= "
-<entry>
-	<title>{$app['name']}</title>
-	<link href=\"{$_SERVER['SERVER_NAME']}/{$app['package']['apkname']}\" />
-	<id>{$app['id']}</id>
-	<updated>{$app['updated']}</updated>
-	<summary>{$app['summary']}</summary>
-</entry>";
-	};
-	$bloc = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
-<feed xmlns=\"http://www.w3.org/2005/Atom\">
-	<title>{$repos['name']}</title>
-	<subtitle>{$repos['desc']}</subtitle>
-	<link>{$repos['url']}</link>
-	<updated>{$date}</updated>
-	<id>{$_SERVER['SERVER_NAME']}</id>
-	<logo>{$icon}</logo>
-	{$feed}
-</feed>";
-	file_put_contents(FEED_NAME, $bloc);
-};
-//}}}
 function apply_filters($relations, $licenses, $words, $repos) { //{{{
 	$flag = false;
 	$candidates = array();
@@ -929,6 +938,5 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 </html>
 ";
 } elseif ($_REQUEST['format'] == 'json') {
-} elseif ($_REQUEST['format'] == 'feed') {
 };
 ?>
