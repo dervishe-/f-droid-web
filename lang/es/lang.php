@@ -1,6 +1,7 @@
 <?php
 include_once(LANG.DIRECTORY_SEPARATOR.'languages.php');
 include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'categories.php');
+include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'permissions.php');
 $lang = array(
 	'iface' => array( //{{{
 		'language' => 'Idioma',
@@ -29,6 +30,7 @@ $lang = array(
 		'form_val' => 'Buscar',
 		'form_field' => 'Buscar valor',
 		'menu' => 'Menú',
+		'share' => 'Compartir este contenido con',
 		'sdkver' => 'SDK',
 		'tracker' => 'Seguimiento',
 		'web' => 'Sitio web',
@@ -52,17 +54,7 @@ $lang = array(
 		'error_message' => "Ooops, este depósito de aplicaciónes no está disponible temporalmente. Lo sentimos, por favor, inténtalo de nuevo más tarde...",
 		'error_message_sheet' => "Ooops, la ficha de la aplicación que ha solicitado no existe..."), //}}}
 	'lang' => $languages_list,
-	'perms' => array( //{{{
-		'ACCESS_NETWORK_STATE' => 'Acceso al estado de la red',
-		'WRITE_EXTERNAL_STORAGE' => 'Escritura en el almacenamiento exterior',
-		'VIBRATE' => 'Acceso al vibrador',
-		'ACCESS_WIFI_STATE' => 'Acceso al estado wifi',
-		'INTERNET' => 'Acceso a internet',
-		'READ_PHONE_STATE' => 'Lectura del estado telefono',
-		'READ_EXTERNAL_STORAGE' => 'Lectura del almacenamiento exterior',
-		'READ_FRAME_BUFFER' => 'Acceso al frame buffer',
-		'CAMERA' => 'Acceso a la camara',
-		'ACCESS_SUPERUSER' => "Solicitar derechos 'super utilizador'"), //}}}
+	'perms' => $permissions_list,
 	'cat' => $categories_list,
 	'afeat' => array( //{{{
 		'Ads' => 'Contiene publicidad.',

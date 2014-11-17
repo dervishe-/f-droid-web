@@ -1,6 +1,7 @@
 <?php
 include_once(LANG.DIRECTORY_SEPARATOR.'languages.php');
 include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'categories.php');
+include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'permissions.php');
 $lang = array(
 	'iface' => array( //{{{
 		'language' => 'Language',
@@ -30,6 +31,7 @@ $lang = array(
 		'form_field' => 'Search value',
 		'menu' => 'Menu',
 		'sdkver' => 'SDK',
+		'share' => 'Share this content with',
 		'tracker' => 'Issue tracker',
 		'web' => 'Website',
 		'sources' => 'Sources',
@@ -52,17 +54,7 @@ $lang = array(
 		'error_message' => "Ooops, this repository is temporarily unavailable. We're sorry. Re-try latter please.",
 		'error_message_sheet' => "Ooops, the app's sheet you requested doesn't exists..."), //}}}
 	'lang' => $languages_list,
-	'perms' => array( //{{{
-		'ACCESS_NETWORK_STATE' => "Network's state access needed",
-		'WRITE_EXTERNAL_STORAGE' => "Write on external storage",
-		'VIBRATE' => 'Vibrate access needed',
-		'ACCESS_WIFI_STATE' => "Wifi state access",
-		'INTERNET' => "Internet access needed",
-		'READ_PHONE_STATE' => "Read the phone's state",
-		'READ_EXTERNAL_STORAGE' => "Read on external storage",
-		'READ_FRAME_BUFFER' => "Read the frame buffer",
-		'CAMERA' => "Camera access needed",
-		'ACCESS_SUPERUSER' => "Superuser access needed"), //}}}
+	'perms' => $permissions_list,
 	'cat' => $categories_list,
 	'afeat' => array( //{{{
 		'Ads' => 'Contains advertising.',

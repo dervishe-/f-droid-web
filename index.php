@@ -14,6 +14,7 @@ session_start();
 //{{{ Configuration
 // DIRECTORIES
 define('ROOT', dirname(__FILE__));
+define('SOCIAL_DIR', 'Media/images/social_icons/');
 define('ICONS_DIR', 'icons-320');
 define('ICONS_DIR_LIGHT', 'icons-240');
 define('ICONS_DIR_ABSTRACT', 'icons-120');
@@ -37,6 +38,7 @@ define('FLATTR_SCHEME', 'https://flattr.com/thing/');
 define('HASH_ALGO', 'whirlpool');
 define('USE_QRCODE', true);
 define('USE_FEEDS', true);
+define('USE_SOCIAL', true);
 define('FEED_AUTHOR', 'Les Petits Débrouillards');
 define('NUMBER_LAST_APP', 6);
 define('RECORDS_PER_PAGE', 12);
@@ -44,7 +46,7 @@ define('DEFAULT_LANG', 'fr');
 define('LOCALIZATION', 'fr');
 define('MSG_FOOTER', '(C) Association Française des Petits Débrouillards');
 // ALLOWED VALUES
-$formats = array('json'=>1);
+$formats = array('json' => 1);
 //}}}
 //{{{ Library
 function build_structure($_xml) { //{{{
@@ -174,7 +176,7 @@ function build_tools($relations, $licenses, $lang, $nbr) { //{{{
 };
 //}}}
 function build_atom($repos, $list) { //{{{
-	$scheme = ($_SERVER['HTTPS'] != '') ? 'https://' : 'http://';
+	$scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != '') ? 'https://' : 'http://';
 	$icon = "{$_SERVER['SERVER_NAME']}/Media/images/logo.png";
 	$date = date('c', $repos['timestamp']);
 	$feed = "";
@@ -359,7 +361,7 @@ function translator($section, $lang) { //{{{
 };
 //}}}
 function decore_app($app_id, $lang) { //{{{
-	if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app_id)) {
+	if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app_id)) { //{{{
 		$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app_id));
 	} else {
 		if (($data = simplexml_load_file(DATA)) !== false) {
@@ -368,12 +370,13 @@ function decore_app($app_id, $lang) { //{{{
 		} else {
 			return false;
 		};
-	};
+	};//}}}
+	$scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != '') ? 'https://' : 'http://';
 	if (USE_QRCODE) { //{{{
 		include_once('phpqrcode/phpqrcode.php');
 		$qrcode = QRCODES_DIR.DIRECTORY_SEPARATOR.$app['id'].".png";
 		if (!is_file($qrcode)) {
-			QRCode::png("https://{$_SERVER['SERVER_NAME']}/{$app['package']['apkname']}", $qrcode);
+			QRCode::png("{$scheme}{$_SERVER['SERVER_NAME']}/{$app['package']['apkname']}", $qrcode);
 		};
 		$dl_label = translate('iface', 'download', $lang);
 		$tag_qrcode = "
@@ -401,7 +404,7 @@ function decore_app($app_id, $lang) { //{{{
 	$lic_label = translate('iface', 'license', $lang);
 	$license = "<div title=\"{$lic_label}\"><span>{$lic_label}: </span><span>".translate('lic', $app['license'], $lang)."</span></div>";
 	$sum_label = translate('iface', 'summary', $lang);
-	$summary = "<span title=\"{$sum_label}\">{$app['summary']}</span>";
+	$summary = "<div title=\"{$sum_label}\">{$app['summary']}</div>";
 	$desc_label = translate('iface', 'desc', $lang);
 	$desc = "<div title=\"{$desc_label}\" id=\"description\">{$app['desc']}</div>";
 	$reqs_label = translate('iface', 'requirements', $lang);
@@ -420,11 +423,24 @@ function decore_app($app_id, $lang) { //{{{
 	$translate_cat = translator('cat', $lang);
 	$cats = (strlen($categories) > 0 && $categories != 'None') ? "<ul><li>".implode('</li><li>', array_map($translate_cat, explode(',', $categories)))."</li></ul>" : '';
 	$cats_span = translate('iface', 'categories', $lang);
-	$categories = "<aside id=\"categories\" title=\"{$cats_span}\"><span>{$cats_span}: </span>{$cats}</aside>";//}}}
+	$categories = "<aside id=\"used_categories\" title=\"{$cats_span}\"><span>{$cats_span}: </span>{$cats}</aside>";//}}}
 	$permissions = $app['package']['permissions']; //{{{
 	$translate_perm = translator('perms', $lang);
-	$perms = (strlen($permissions) > 0) ? "<ul><li>".implode('</li><li>', array_map($translate_perm, explode(',', $permissions)))."</li></ul>" : '';
 	$perms_span = translate('iface', 'permissions', $lang);
+	$perms = '';
+	$permissions = explode(',', $permissions);
+	if (count($permissions)) {
+		reset($permissions);
+		while ($perm = current($permissions)) {
+			$perms .= "
+		<li>
+			<a title=\"{$perms_span}: {$perm}\" href=\"http://developer.android.com/reference/android/Manifest.permission.html#".$perm."\">".
+			$translate_perm($perm).
+			"</a></li>";
+			next($permissions);
+		};
+		$perms = "<ul>{$perms}</ul>";
+	};
 	$permissions = "<aside id=\"perms\" title=\"{$perms_span}\"><span>{$perms_span}: </span>{$perms}</aside>";//}}}
 	$afeatures = $app['antifeatures']; //{{{
 	$translate_feat = translator('afeat', $lang);
@@ -449,6 +465,28 @@ function decore_app($app_id, $lang) { //{{{
 	if ($app['tracker'] != '') $dev_body .= "<a href=\"{$app['tracker']}\">".translate('iface', 'tracker', $lang)."</a>";
 	if ($app['source'] != '') $dev_body .= "<a href=\"{$app['source']}\">".translate('iface', 'sources', $lang)."</a>";
 	$blockdev = "<aside id=\"block_dev\">{$dev_body}</aside>";
+	if (USE_SOCIAL) { //{{{
+		$social_msg = urlencode("{$app['name']}: {$app['summary']}");
+		$social_alt = translate('iface', 'share', $lang);
+		$social_url = "{$scheme}{$_SERVER['SERVER_NAME']}/?getSheet={$app['id']}";
+		$social = "
+	<aside id=\"social_links\">
+		<a title=\"{$social_alt} Diaspora\" href=\"http://sharetodiaspora.github.io/?title={$social_msg}&amp;url={$social_url}\">
+			<img alt=\"{$social_alt} Diaspora\" src=\"".SOCIAL_DIR."Diaspora.ico\" />
+		</a>
+		<a title=\"{$social_alt} Facebook\" href=\"https://www.facebook.com/sharer.php?u={$social_msg}&amp;t={$social_url}\">
+			<img alt=\"{$social_alt} Facebook\" src=\"".SOCIAL_DIR."Facebook.ico\" />
+		</a>
+		<a title=\"{$social_alt} Google+\" href=\"https://plus.google.com/share?url={$social_url}\">
+			<img alt=\"{$social_alt} Google+\" src=\"".SOCIAL_DIR."GooglePlus.ico\" />
+		</a>
+		<a title=\"{$social_alt} Twitter\" href=\"https://twitter.com/intent/tweet?text={$social_msg}&amp;url={$social_url}\">
+			<img alt=\"{$social_alt} Twitter\" src=\"".SOCIAL_DIR."Twitter.ico\" />
+		</a>
+		</aside>";
+	} else {
+		$social = '';
+	};//}}}
 	return "
 <article id=\"appsheet\">
 	<header>
@@ -457,18 +495,25 @@ function decore_app($app_id, $lang) { //{{{
 			<span>{$app['name']}</span>
 		</h2>
 		{$summary}
+		{$social}
 	</header>
+	<div id=\"details\">
 	{$tag_qrcode}
 	{$size}
 	{$version}
 	{$license}
-	{$desc}
-	{$donate}
 	{$requirements}
+	</div>
+	{$desc}
+	<div id=\"misc\">
 	".(($cats != '') ? $categories : '')."
 	".(($perms != '') ? $permissions : '')."
+	</div>
 	".(($afeat != '') ? $afeatures : '')."
+	<div>
+	{$donate}
 	{$blockdev}
+	</div>
 </article>";
 };
 //}}}

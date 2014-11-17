@@ -315,39 +315,28 @@ main > article {
 	padding: 2em;
 }
 
-main > article > header {
-	display: inline-block;
+main > article header {
 	margin-bottom: 1.5em;
 }
 
-main > article > header img {
+main > article header img {
 	display: inline-block;
 	margin-right: 0.5em;
 	float: left;
 }
 
-main > article > aside {
-	box-shadow: 0em 0em 0em #000000;
-	float: left;
+main > article aside {
+	box-shadow: none;
 	margin-left: 0em;
 	padding-left: 0em;
+	max-width: 30em;
 }
 
-main > article > aside:first-of-type {
-	float: right;
-	border: 0.1em solid #000000;
-	border-radius: 0.5em;
-}
-
-main > article > ul {
-	list-style-type: none;
-}
-
-main > article > aside > img {
+main > article aside > img {
 	vertical-align: middle;
 }
 
-main > article > aside > a {
+main > article aside > a {
 	vertical-align: middle;
 	text-decoration: none;
 	font-weight: bold;
@@ -359,39 +348,74 @@ main > article > aside > a {
 	padding: 0.15em;
 }
 
-main > article > aside > a:hover {
+main > article aside a:hover {
 	color: #000000;
 	background-color: #FFFFFF;
 }
 
-main > article > aside ul {
-	list-style-type: none;
+#social_links {
+	margin: 0em;
+	margin-top: 0.3em;
+	float: none;
+	padding: 0em;
+	border: none;
+}
+
+#social_links a {
+	margin: 0em;
+	padding: 0em;
+	display: inline-block;
+	background-color: #FFFFFF;
+	vertical-align: middle;
+	border: 0em;
+}
+
+#social_links a img {
+	margin: 0em;
+	padding: 0.2em;
+	vertical-align: middle;
 }
 
 main > article > div {
-	padding: 0.2em;
-}
-
-main > article > aside li {
-	margin: 0.2em;
-	font-size: 0.9em;
-}
-
-main > article > aside span {
-	font-weight: bold;
 	clear: both;
+	padding: 0.5em;
+	min-width: 35em;
 }
 
-main > article > div > span:first-child {
+#details * span:first-child {
 	font-weight: bold;
 }
 
-main > article > div  > span:nth-child(3) {
+#download {
+	margin: 0em;
+	float: right;
+	border: 0.1em solid #000000;
+	border-radius: 0.5em;
+}
+
+#description {
+	max-width: 40em;
+	padding: 0.5em;
+	clear: none;
+}
+
+#description ul, #description ol {
+	padding: 1em;
+}
+
+#misc ul, #antifeatures ul {
+	list-style-type: none;
+}
+
+#misc span, #antifeatures span {
 	font-weight: bold;
+}
+
+#antifeatures {
+	max-width: 40em;
 }
 
 #donate_app, #block_dev {
-	float: right;
 	padding: 0em;
 	border: 0.1em solid #000000;
 	border-radius: 0.5em;
@@ -421,24 +445,5 @@ main > article > div  > span:nth-child(3) {
 #donate_app > div > span:last-child {
 	font-size: 0.6em;
 	margin-bottom: 0.2em;
-}
-
-#antifeatures ul {
-	list-style-type: disc;
-	padding-left: 1em;
-}
-
-#antifeatures {
-	clear: both;
-	max-width: 40em;
-}
-
-#description {
-	width: 40em;
-	padding: 0.5em;
-}
-
-#description ul, #description ol {
-	padding: 1em;
 }
 /*}}}*/

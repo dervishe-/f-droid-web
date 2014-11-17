@@ -1,6 +1,7 @@
 <?php
 include_once(LANG.DIRECTORY_SEPARATOR.'languages.php');
 include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'categories.php');
+include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'permissions.php');
 $lang = array(
 	'iface' => array( //{{{
 		'language' => 'Langage',
@@ -30,6 +31,7 @@ $lang = array(
 		'form_field' => 'Valeur à chercher',
 		'menu' => 'Menu',
 		'sdkver' => 'SDK',
+		'share' => 'Partager le contenu avec',
 		'page' => 'Pages',
 		'tracker' => 'Suivit',
 		'web' => 'Site web',
@@ -52,17 +54,7 @@ $lang = array(
 		'error_message' => "Ooops, ce dépot d'applications est temporairement indisponible. Nous en sommes désolé, veuillez ré-essayer plus tard...",
 		'error_message_sheet' => "Ooops, la fiche de l'application demandée n'existe pas..."), //}}}
 	'lang' => $languages_list,
-	'perms' => array( //{{{
-		'ACCESS_NETWORK_STATE' => "Accès à l'état du réseau",
-		'WRITE_EXTERNAL_STORAGE' => "Ecriture sur le stockage extérieur",
-		'VIBRATE' => 'Accès au vibreur',
-		'ACCESS_WIFI_STATE' => "Accès à l'état du wifi",
-		'INTERNET' => "Accès à internet",
-		'READ_PHONE_STATE' => "Lecture de l'état du téléphone",
-		'READ_EXTERNAL_STORAGE' => "Lecture sur le stockage externe",
-		'READ_FRAME_BUFFER' => "Accès au frame buffer",
-		'CAMERA' => "Accès à la caméra",
-		'ACCESS_SUPERUSER' => "Demande les droits 'super utilisateur'"), //}}}
+	'perms' => $permissions_list,
 	'cat' => $categories_list,
 	'afeat' => array( //{{{
 		'Ads' => "Contient de la publicité.",
