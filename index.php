@@ -230,12 +230,12 @@ function build_atom($repos, $list) { //{{{
 			$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
 		};
 		$time_comp = explode('-', $app['updated']);
-		$date_app = date('c', mktime(0, $i, 0, $time_comp[0], $time_comp[2], $time_comp[1]));
+		$date_app = date('c', mktime(0, $i, 0, $time_comp[1], $time_comp[2], $time_comp[0]));
 		$i++;
 		$feed .= "
 <entry>
 	<title>{$app['name']}</title>
-	<link href=\"{$scheme}{$_SERVER['SERVER_NAME']}/{$app['package']['apkname']}\" />
+	<link href=\"{$scheme}{$_SERVER['SERVER_NAME']}/?getSheet={$app['id']}\" />
 	<id>{$scheme}{$_SERVER['SERVER_NAME']}/{$app['package']['apkname']}</id>
 	<updated>{$date_app}</updated>
 	<summary>{$app['summary']}</summary>
@@ -245,7 +245,7 @@ function build_atom($repos, $list) { //{{{
 <feed xmlns=\"http://www.w3.org/2005/Atom\">
 	<title>{$repos['name']}</title>
 	<subtitle>{$repos['desc']}</subtitle>
-	<link rel=\"self\" href=\"{$repos['url']}".FEED_NAME."\" />
+	<link rel=\"self\" href=\"{$scheme}{$_SERVER['SERVER_NAME']}/".FEED_NAME."\" />
 	<updated>{$date}</updated>
 	<id>{$scheme}{$_SERVER['SERVER_NAME']}/</id>
 	<logo>{$icon}</logo>
