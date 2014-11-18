@@ -40,11 +40,12 @@ define('USE_QRCODE', true);
 define('USE_FEEDS', true);
 define('USE_SOCIAL', true);
 define('FEED_AUTHOR', 'Les Petits Débrouillards');
-define('NUMBER_LAST_APP', 6);
-define('RECORDS_PER_PAGE', 12);
-define('DEFAULT_LANG', 'fr');
-define('LOCALIZATION', 'fr');
-define('MSG_FOOTER', '(C) Association Française des Petits Débrouillards');
+define('NUMBER_LAST_APP', 10);
+define('RECORDS_PER_PAGE', 8);
+define('NUMBER_PAGES', 9);		// Fixe the number of appearing page numbers in the pager
+define('DEFAULT_LANG', 'fr');	// Fixe the localization of the UI
+define('LOCALIZATION', 'fr');	// Fixe the localization of the search (mainly related to the languages in which the apps are describes)
+define('MSG_FOOTER', '(C) Association Française des Petits Débrouillards - Licence: LGPL');
 // ALLOWED VALUES
 $formats = array('json' => 1);
 //}}}
@@ -55,6 +56,7 @@ function build_structure($_xml) { //{{{
 	$repos['icon'] = (string) $_xml->repo['icon'];
 	$repos['desc'] = (string) $_xml->repo->description;
 	$repos['url'] = (string) $_xml->repo['url'];
+	$repos['pubkey'] = (string) $_xml->repo['pubkey'];
 	$repos['timestamp'] = (string) $_xml->repo['timestamp'];
 	$repos['list'] = array();
 	foreach($_xml->application as $app) { $repos['list'][] = (string) $app->id; };
@@ -113,9 +115,33 @@ function build_lang_selector($lang_label, $lang) { //{{{
 	$bloc .= '</ul></div>';
 	return $bloc;
 };//}}}
-function build_pager($page_number, $max, $lang) { //{{{
+function build_pager($current_page, $number_page, $lang) { //{{{
 	$bloc = "<div><span>".translate('iface', 'page', $lang).":</span><ul>";
-	for ($i = 1; $i < $page_number; $i++) { 
+	$nb = NUMBER_PAGES - 1;
+	if ($number_page <= NUMBER_PAGES) {
+		$page_init = 1;
+	} elseif ($current_page >= $number_page - floor($nb / 2)) {
+		$page_init = $number_page - $nb;
+	} else {
+		$page_init = max(array($current_page - floor($nb / 2), 1));
+	};
+	if ($number_page <= NUMBER_PAGES) {
+		$page_end = $number_page;
+	} elseif ($current_page <= floor($nb / 2)) {
+		$page_end = NUMBER_PAGES;
+	} else {
+		$page_end = min(array($current_page + floor($nb / 2) + ($nb % 2), $number_page));
+	};
+	if ($current_page > floor($nb / 2) + 1) {
+		$bloc .= "
+		<li>
+			<a href=\"?page=1\" title=\"".translate('iface', 'go_to_page', $lang)." 1\">
+				1
+			</a>
+		</li>";
+	};
+	if ($page_init > 2) $bloc .= "<li> .. </li>";
+	for ($i = $page_init; $i < $current_page; $i++) { 
 		$bloc .= "
 		<li>
 			<a href=\"?page={$i}\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">
@@ -123,14 +149,23 @@ function build_pager($page_number, $max, $lang) { //{{{
 			</a>
 		</li>";
 	};
-	$bloc .= "<li><span>{$page_number}</span></li>";
-	for ($i = $page_number + 1; $i <= $max; $i++) { 
+	$bloc .= "<li><span>{$current_page}</span></li>";
+	for ($i = $current_page + 1; $i <= $page_end; $i++) { 
 		$bloc .= "
 			<li>
 				<a href=\"?page={$i}\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">
 				{$i}
 				</a>
 			</li>";
+	};
+	if ($page_end < $number_page - 1) $bloc .= "<li> .. </li>";
+	if ($current_page < $number_page - ceil($nb / 2)) {
+		$bloc .= "
+		<li>
+			<a href=\"?page={$number_page}\" title=\"".translate('iface', 'go_to_page', $lang)." {$number_page}\">
+				{$number_page}
+			</a>
+		</li>";
 	};
 	$bloc .= "</ul></div>";
 	return $bloc;
@@ -164,6 +199,12 @@ function build_cache_data($hash) { //{{{
 	$lic = cache_licenses($repos['list']);
 	$lst = cache_lastapps($repos['list']);
 	if (USE_FEEDS) build_atom($repos, $lst);
+	if (USE_QRCODE) {
+		include_once('phpqrcode/phpqrcode.php');
+		$qrcode = "Media/images/repos_qrcode.png";
+		$url = "{$repos['url']}";//?fingerprint=".hash('sha256', $repos['pubkey']);
+		QRCode::png($url, $qrcode);
+	};
 	return array('repos'=>$repos, 'cat'=>$cat, 'rel'=>$rel, 'lic'=>$lic, 'wrd'=>$words, 'lst'=>$lst);
 };
 //}}}
@@ -181,10 +222,15 @@ function build_atom($repos, $list) { //{{{
 	$date = date('c', $repos['timestamp']);
 	$feed = "";
 	$i = 0;
+	$_xml = simplexml_load_file(DATA);
 	foreach ($list as $app) {
-		$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
+		if (!is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app) || !is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app)) {
+			$app = build_app($_xml, $app);
+		} else {
+			$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
+		};
 		$time_comp = explode('-', $app['updated']);
-		$date_app = date('c', mktime(0, $i, 0, $time_comp[1], $time_comp[3], $time_comp[2]));
+		$date_app = date('c', mktime(0, $i, 0, $time_comp[0], $time_comp[2], $time_comp[1]));
 		$i++;
 		$feed .= "
 <entry>
@@ -762,6 +808,7 @@ function decore_headers($title, $lang_label, $lang, $description=null) { //{{{
 			<div>
 				<img src=\"Media/images/logo.png\" alt=\"logo: {$title}\" />
 				<h1>{$title}</h1>
+				<img src=\"Media/images/repos_qrcode.png\" alt=\"qrcode: {$title}\" />
 			</div>
 			<div>$description</div>";
 	$bloc .= build_lang_selector($lang_label, $lang);
@@ -902,7 +949,7 @@ $nbr_app = count($list);
 //{{{Select page
 if (isset($_GET['page'])) {
 	$page = filter_var($_GET['page'], FILTER_VALIDATE_INT);
-	if ($page === false || ((int) $page - 1) * RECORDS_PER_PAGE > $nbr_app) $page = 1;
+	if ($page === false || ((int) $page - 1) * RECORDS_PER_PAGE > $nbr_app || $page < 1) $page = 1;
 	$_SESSION['page'] = $page;
 } elseif (isset($_SESSION['page']) && !isset($_REQUEST['getSheet'])) {
 	$page = $_SESSION['page'];

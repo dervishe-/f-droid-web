@@ -63,9 +63,6 @@ REMARK:
 * You can search by words. The search will be performed in the name, summary and description fields. You can use the "+" symbol, in order to cross research:
 word1 + word2 will gather apps matching the 2 words (or n words)
 
-* To add a translation, simply add a code_lang.php wich must be a copy of one other language file in ./lang directory
-There is also a translation for categories.
-
 * The last apps list is available via an atom feed
 
 

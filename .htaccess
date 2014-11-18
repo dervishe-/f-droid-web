@@ -1,6 +1,6 @@
 # ETag
-Header unset ETag
-FileETag none
+#Header unset ETag
+#FileETag none
 
 # Expires
 AddType image/x-icon .ico

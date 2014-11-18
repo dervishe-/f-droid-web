@@ -36,15 +36,10 @@ body > header {
 	padding: 0.5em;
 }
 
-body > header div:first-child img {
-	vertical-align: middle;
-	padding-right: 0.5em;
-}
-body > header div:first-child h1 {
-	display: inline;
-	font-size: 3em;
-	font-weight: bold;
-	vertical-align: middle;
+body > header > div:first-child {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
 }
 
 body > header div:nth-child(2) {
