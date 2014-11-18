@@ -1,7 +1,7 @@
-# ETag
-#Header unset ETag
-#FileETag none
-
+<FilesMatch "\.(ico|jpe?g|png|gif|swf|css|gz|php)$">
+	Header unset ETag
+	FileETag none
+</FilesMatch>
 # Expires
 AddType image/x-icon .ico
 ExpiresActive on

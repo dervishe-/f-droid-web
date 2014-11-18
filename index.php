@@ -963,9 +963,8 @@ $tampon = array_slice($list, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// HTML case
 	//{{{ Building content
 	$footer = "<footer role=\"contentinfo\"><span>".MSG_FOOTER."</span></footer>";
-	$favicon = (is_file('Media/images/favicon.ico') && 
-			is_readable('Media/images/favicon.ico')) ? 
-			"<link type=\"image/png\" rel=\"icon\" href=\"Media/images/favicon.ico\" />" : '';
+	$favicon = (is_file('favicon.ico') && is_readable('favicon.ico')) ? 
+			"<link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\" />" : '';
 	$headers = decore_headers($repos['name'], $lang_label, $lang, $repos['desc']);
 	$tools = build_tools($relations, $licenses, $lang, $repos['nbr']);
 	$applist = decore_applist($tampon, $lang, $nbr_app, $page);
