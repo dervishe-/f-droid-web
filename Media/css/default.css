@@ -381,6 +381,10 @@ main > article > div {
 	font-weight: bold;
 }
 
+#details * span:nth-child(3) {
+	font-weight: bold;
+}
+
 #download {
 	margin: 0em;
 	float: right;
