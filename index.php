@@ -202,7 +202,7 @@ function build_cache_data($hash) { //{{{
 	if (USE_QRCODE) {
 		include_once('phpqrcode/phpqrcode.php');
 		$qrcode = "Media/images/repos_qrcode.png";
-		$url = "{$repos['url']}";//?fingerprint=".hash('sha256', $repos['pubkey']);
+		$url = "{$repos['url']}?fingerprint=".hash('sha256', hex2bin($repos['pubkey']));
 		QRCode::png($url, $qrcode);
 	};
 	return array('repos'=>$repos, 'cat'=>$cat, 'rel'=>$rel, 'lic'=>$lic, 'wrd'=>$words, 'lst'=>$lst);
