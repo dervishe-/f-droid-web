@@ -37,6 +37,7 @@ $lang = array(
 		'sources' => 'Código base',
 		'page' => 'Páginas',
 		'go_to_page' => 'Ir a la página',
+		'qrcode_repo' => "Escanea este Código QR para instalar este repositorio en su aplicación f-droid",
 		'back' => 'Volver a la lista',
 		'applist' => 'Aplicaciones',
 		'lastapplist' => 'Ultimas aplicaciones',

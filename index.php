@@ -644,7 +644,7 @@ function decore_app_abstract($app_id, $lang) { //{{{
 	};
 	$icon = ICONS_DIR_ABSTRACT.DIRECTORY_SEPARATOR.$app['icon'];
 	$license = "
-	<div title=\"".translate('iface', 'license', $lang)."\">
+	<div title=\"".translate('iface', 'license', $lang).": ".translate('lic', $app['license'], $lang)."\">
 		<span>".translate('iface', 'license', $lang).": </span>
 		<span>".translate('lic', $app['license'], $lang)."</span>
 	</div>";
@@ -808,7 +808,8 @@ function decore_headers($title, $lang_label, $lang, $description=null) { //{{{
 			<div>
 				<img src=\"Media/images/logo.png\" alt=\"logo: {$title}\" />
 				<h1>{$title}</h1>
-				<img src=\"Media/images/repos_qrcode.png\" alt=\"qrcode: {$title}\" />
+				<img title=\"".translate('iface', 'qrcode_repo', $lang).
+				"\" src=\"Media/images/repos_qrcode.png\" alt=\"qrcode: {$title}\" />
 			</div>
 			<div>$description</div>";
 	$bloc .= build_lang_selector($lang_label, $lang);
