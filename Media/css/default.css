@@ -387,6 +387,8 @@ main > article > div {
 
 #download {
 	margin: 0em;
+	padding: 0.9em;
+	font-size: 0.8em;
 	float: right;
 	border: 0.1em solid #000000;
 	border-radius: 0.5em;
@@ -410,14 +412,32 @@ main > article > div {
 	font-weight: bold;
 }
 
+#perms ul {
+	font-size: 0.9em;
+}
+
 #antifeatures {
 	max-width: 40em;
+}
+
+#hash {
+	margin: 0em;
+	padding: 0em;
+}
+
+#hash > span:last-child {
+	font-size: 0.8em;
+}
+
+#hash > span:first-child {
+	font-weight: bold;
 }
 
 #donate_app, #block_dev {
 	padding: 0em;
 	border: 0.1em solid #000000;
 	border-radius: 0.5em;
+	font-size: 0.8em;
 }
 
 #donate_app a, #block_dev a {
@@ -442,7 +462,50 @@ main > article > div {
 }
 
 #donate_app > div > span:last-child {
-	font-size: 0.6em;
+	font-size: 0.7em;
 	margin-bottom: 0.2em;
+}
+
+#oldversions {
+	clear: both;
+}
+
+#oldversions > div {
+	border: none;
+	border-top: 0.1em solid #000000;
+	font-size: 0.8em;
+	padding: 0.5em;
+	margin-bottom: 0.3em;
+}
+
+#oldversions div {
+	margin-bottom: 0.3em;
+}
+
+#oldversions > div > a {
+	float: right;
+	font-weight: bold;
+	text-decoration: none;
+	color: #FFFFFF;
+	background-color: #000000;
+	border: 0.2em solid #000000;
+	border-radius: 0.5em;
+	padding: 0.15em;
+	margin: 0.5em;
+	text-align: center;
+}
+
+#oldversions > div > a:hover {
+	color: #000000;
+	background-color: #FFFFFF;
+}
+
+#oldversions > div * ul {
+	list-style-type: none;
+	padding-left: 1em;
+}
+
+#oldversions > div * span:first-child, #oldversions > div * span:nth-child(3) {
+	font-weight: bold;
 }
 /*}}}*/
