@@ -260,7 +260,7 @@ function build_atom($repos, $list) { //{{{
 		$feed .= "
 <entry>
 	<title>{$app['name']}</title>
-	<link href=\"{$scheme}{$_SERVER['SERVER_NAME']}/?getSheet={$app['id']}\" />
+	<link href=\"{$scheme}{$_SERVER['SERVER_NAME']}/?sheet={$app['id']}\" />
 	<id>{$scheme}{$_SERVER['SERVER_NAME']}/{$app['packages'][0]['apkname']}</id>
 	<updated>{$date_app}</updated>
 	<summary>{$app['summary']}</summary>
@@ -547,7 +547,7 @@ function decore_app($app_id, $lang) { //{{{
 	if (USE_SOCIAL) { //{{{
 		$social_msg = urlencode("{$app['name']}: {$app['summary']}");
 		$social_alt = translate('iface', 'share', $lang);
-		$social_url = "{$scheme}{$_SERVER['SERVER_NAME']}/?getSheet={$app['id']}";
+		$social_url = "{$scheme}{$_SERVER['SERVER_NAME']}/?sheet={$app['id']}";
 		$social = "
 	<aside id=\"social_links\">
 		<a title=\"{$social_alt} Diaspora\" href=\"http://sharetodiaspora.github.io/?title={$social_msg}&amp;url={$social_url}\">
@@ -717,7 +717,7 @@ function decore_app_light($app_id, $lang) { //{{{
 		": {$app['name']}\" aria-describedby=\"desc_{$app['id']}\">".
 		translate('iface', 'download', $lang).
 		"</a>
-		<a href=\"?getSheet={$app['id']}\" title=\"".
+		<a href=\"?sheet={$app['id']}\" title=\"".
 		translate('iface', 'sheet', $lang).
 		": {$app['name']}\" aria-describedby=\"desc_{$app['id']}\">".
 		translate('iface', 'sheet', $lang).
@@ -752,7 +752,7 @@ function decore_app_abstract($app_id, $lang) { //{{{
 	<div id=\"last_".str_replace(array('.', ' '), '_', $app['id'])."\">
 		<img src=\"{$icon}\" alt=\"icone {$app['name']}\" />
 		<div>
-			<a href=\"?getSheet={$app['id']}\" title=\"".
+			<a href=\"?sheet={$app['id']}\" title=\"".
 			translate('iface', 'sheet', $lang).": {$app['name']}\">{$app['name']}</a>
 			{$license}
 		</div>
@@ -975,13 +975,13 @@ function apply_filters($relations, $licenses, $words, $repos) { //{{{
 		$flag |= true;
 		$registered_words = array_keys($words);
 		foreach ($wordstofind as $tosearch) {
-			$tampon = array();
+			$buffer = array();
 			foreach($registered_words as $key) {
 				if (strpos(trim(strtolower($key)), trim(strtolower($tosearch))) !== false) {
-					$tampon = array_merge($tampon, $words[$key]);
+					$buffer = array_merge($buffer, $words[$key]);
 				};
 			};
-			$candidates['words'] = array_intersect($candidates['words'], $tampon);
+			$candidates['words'] = array_intersect($candidates['words'], $buffer);
 		};
 		$candidates['words'] = array_unique($candidates['words']);
 	} else {
@@ -991,10 +991,7 @@ function apply_filters($relations, $licenses, $words, $repos) { //{{{
 	if ($flag) {
 		$list = array_intersect($candidates['categories'], $candidates['licenses'], $candidates['words']);
 		$_SESSION['list'] = $list;
-		unset($_SESSION['page']);
 		return $list;
-	} elseif (isset($_SESSION['list'])) {
-		return $_SESSION['list'];
 	} else {
 		return $repos;
 	};
@@ -1056,8 +1053,11 @@ if (isset($_REQUEST['reset'])) {
 	unset($_SESSION['categories']);
 	unset($_SESSION['words']);
 	unset($_SESSION['list']);
+	unset($_SESSION['page']);
 	$list = $repos['list'];
 } elseif (isset($_REQUEST['search'])) {
+	unset($_SESSION['list']);
+	unset($_SESSION['page']);
 	$list = apply_filters($relations, $licenses, $words, $repos['list']);
 } elseif (isset($_SESSION['list'])) {
 	$list = $_SESSION['list'];
@@ -1070,10 +1070,10 @@ if (isset($_REQUEST['page'])) {
 	$page = filter_var($_REQUEST['page'], FILTER_VALIDATE_INT);
 	if ($page === false || ((int) $page - 1) * RECORDS_PER_PAGE > $nbr_app || $page < 1) $page = 1;
 	$_SESSION['page'] = $page;
-} elseif (isset($_SESSION['page']) && !isset($_REQUEST['getSheet'])) {
+} elseif (isset($_SESSION['page'])) {
 	$page = $_SESSION['page'];
-	unset($_SESSION['page']);
 } else {
+	unset($_SESSION['page']);
 	$page = 1;
 };
 $tampon = array_slice($list, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
@@ -1087,9 +1087,11 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 	$tools = build_tools($relations, $licenses, $lang, $repos['nbr']);
 	$applist = decore_applist($tampon, $lang, $nbr_app, $page);
 	$lastapp = decore_lastapplist($last_apps, $lang);
-	if (isset($_REQUEST['getSheet'])) { //{{{ 
-		$sheet = $_REQUEST['getSheet'];
+	if (!isset($_REQUEST['lang'])) unset($_SESSION['sheet']);
+	if (isset($_REQUEST['sheet']) || isset($_SESSION['sheet'])) { //{{{ 
+		$sheet = (isset($_REQUEST['sheet'])) ? $_REQUEST['sheet'] : $_SESSION['sheet'];
 		if (in_array($sheet, $repos['list'])) {
+			$_SESSION['sheet'] = $sheet;
 			$main = decore_app($sheet, $lang);
 		} else {
 			$main = "
