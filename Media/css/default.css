@@ -93,7 +93,7 @@ body > footer span {
 	font-weight: bold;
 }
 /*}}}*/
-/*{{{ Left tool bar */
+/*{{{ Tool bar */
 #tools ul {
 	list-style-type: none; 
 }
@@ -112,7 +112,7 @@ body > footer span {
 	border-bottom: 0em;
 }
 
-#search input {
+#search input, #reset input {
 	display: block;
 	margin: 0.3em;
 }
@@ -317,6 +317,25 @@ main > article header img {
 	display: inline-block;
 	margin-right: 0.5em;
 	float: left;
+}
+
+main > article header h2 a {
+	float: right;
+	vertical-align: middle;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 0.6em;
+	color: #FFFFFF;
+	background-color: #000000;
+	border: 0.15em solid #000000;
+	border-radius: 0.5em;
+	padding: 0.15em;
+	margin-left: 0.5em;
+}
+
+main > article header h2 a:hover {
+	color: #000000;
+	background-color: #FFFFFF;
 }
 
 main > article aside {

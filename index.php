@@ -637,6 +637,7 @@ function decore_app($app_id, $lang) { //{{{
 		<h2>
 			<img src=\"{$icon}\" alt=\"icone {$app['name']}\" />
 			<span>{$app['name']}</span>
+			<a href=\"index.php\">".translate('iface', 'back', $lang)."</a>
 		</h2>
 		{$summary}
 		{$social}
