@@ -601,7 +601,7 @@ function decore_app($app_id, $lang) { //{{{
 			};//}}}
 			$label = translate('iface', 'added', $lang);
 			$date_pkg = $pkg['added'];
-			$tag_dl_pkg = "<a title=\"{$dl_label} {$app['name']}\" href=\"{$pkg['apkname']}\" aria-describedby=\"perms_{$pkg['version']}\">{$dl_label}</a>";
+			$tag_dl_pkg = "<a title=\"{$dl_label} {$app['name']}\" href=\"{$pkg['apkname']}\" aria-describedby=\"{$pkg['version']}\">{$dl_label}</a>";
 			$version_pkg = "
 			<div title=\"{$vers_label}\">
 				<span>{$vers_label}: </span>
@@ -615,7 +615,7 @@ function decore_app($app_id, $lang) { //{{{
 			</div>";
 			$sdk_pkg = "<div><span>{$sdk_span}: </span><span>v{$pkg['sdkver']}</span></div>";
 			$oldlist .= "
-				<div>
+				<div id=\"{$pkg['version']}\">
 					{$tag_dl_pkg}
 					{$version_pkg}
 					{$sdk_pkg}
@@ -752,7 +752,7 @@ function decore_app_abstract($app_id, $lang) { //{{{
 	<div id=\"last_".str_replace(array('.', ' '), '_', $app['id'])."\">
 		<img src=\"{$icon}\" alt=\"icone {$app['name']}\" />
 		<div>
-			<a href=\"?sheet={$app['id']}\" title=\"".
+			<a aria-describedby=\"lastapplist\" href=\"?sheet={$app['id']}\" title=\"".
 			translate('iface', 'sheet', $lang).": {$app['name']}\">{$app['name']}</a>
 			{$license}
 		</div>
