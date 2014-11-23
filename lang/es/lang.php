@@ -52,6 +52,7 @@ $lang = array(
 		'browse_lic' => "Acceso al Filtró por licencias",
 		'browse_cat' => "Acceso al Filtró por categorías",
 		'sheet' => 'Visualizar',
+		'last_modified' => 'Ultima modificación',
 		'nbr_result' => 'Número de resultados',
 		'no_result' => "No aplicación se ha encontrado con los criterios que usted ha elegido.",
 		'error_label' => 'Error',

@@ -42,6 +42,12 @@ body > header > div:first-child {
 	align-items: center;
 }
 
+body > header div:nth-child(3) {
+	float: right;
+	font-weight: bold;
+	font-size: 0.8em;
+}
+
 body > header div:nth-child(2) {
 	padding: 0.5em;
 }

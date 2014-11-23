@@ -51,6 +51,7 @@ $lang = array(
 		'browse_lic' => "Browse apps by licenses",
 		'browse_cat' => "Browse apps by categories",
 		'sheet' => 'Visualize',
+		'last_modified' => 'Last modified',
 		'qrcode_repo' => "Flash this QR-Code to install this repository in your f-droid app.",
 		'nbr_result' => 'Number of results',
 		'no_result' => "No app has been found with the criteria you choose.",

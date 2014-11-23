@@ -904,17 +904,18 @@ function decore_licenses($licenses, $lang, $nbr_apps) { //{{{
 	};
 };	
 //}}}
-function decore_headers($title, $lang_label, $lang, $logo, $description=null) { //{{{
+function decore_headers($repos, $lang_label, $lang) { //{{{
 	$tag_qrcode = 
 			(USE_QRCODE) ? "<img title=\"".translate('iface', 'qrcode_repo', $lang).
-			"\" src=\"".REPOS_QRCODE."\" alt=\"qrcode: {$title}\" />" : '';
+			"\" src=\"".REPOS_QRCODE."\" alt=\"qrcode: {$repos['name']}\" />" : '';
 	$bloc = "<header role=\"banner\">
 			<div>
-				<img src=\"Media/images/{$logo}\" alt=\"logo: {$title}\" />
-				<h1>{$title}</h1>
+				<img src=\"Media/images/{$repos['icon']}\" alt=\"logo: {$repos['name']}\" />
+				<h1>{$repos['name']}</h1>
 				{$tag_qrcode}
 			</div>
-			<div>$description</div>";
+			<div>{$repos['desc']}</div>";
+	$bloc .= "<div><span>".translate('iface', 'last_modified', $lang).": </span><span>".date('Y-m-d', $repos['timestamp'])."</span></div>";
 	$bloc .= build_lang_selector($lang_label, $lang);
 	$bloc .= "</header>";
 	return $bloc;
@@ -1084,7 +1085,7 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 	$footer = "<footer role=\"contentinfo\"><span>".MSG_FOOTER."</span></footer>";
 	$favicon = (is_file('favicon.ico') && is_readable('favicon.ico')) ? 
 			"<link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\" />" : '';
-	$headers = decore_headers($repos['name'], $lang_label, $lang, $repos['icon'], $repos['desc']);
+	$headers = decore_headers($repos, $lang_label, $lang);
 	$tools = build_tools($relations, $licenses, $lang, $repos['nbr']);
 	$applist = decore_applist($tampon, $lang, $nbr_app, $page);
 	$lastapp = decore_lastapplist($last_apps, $lang);
@@ -1151,5 +1152,6 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 </html>
 ";
 } elseif ($_REQUEST['format'] == 'json') {
+		var_dump($list);
 };
 ?>
