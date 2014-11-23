@@ -1,70 +1,26 @@
 f-droid-web
 ===========
 
-A simple and lightweight webpage which aims is to present the apps stored in a f-droid repository
-
-DISCLAIMER:
-
--- This is a work in progress --
-
-
-INSTALLATION:
-
-Just put the code inside the repo directory and make your webserver pointing to it.
-
-
-CONFIGURATION:
-
-All the configuration stuffs are in the top of the index.php file.
-
-define('HASH_ALGO', 'whirlpool');	// The hash algorithm used to check the index.xml file  
-define('USE_QRCODE', true);			// Define if you want to use (or not) the qr-codes. (incase that you don't want to use them, you don't need the phpqrcode dir  
-define('NUMBER_LAST_APP', 4);		// Define the number of last apps appearing in the right box  
-define('RECORDS_PER_PAGE', 3);		// Define the number of apps per page  
-define('DEFAULT_LANG', 'fr');		// Define the default language used by the GUI, actually the values are fr: french, en: english and es: spanish  
-define('LOCALIZATION', 'fr');		// Define the language used to describe the apps informations  
-define('MSG_FOOTER', 'Your footer here');		// Define the message in the footer  
-
-The description of the repository and the URI of the logo come from the index.xml. For the logo, make sure, you put it in a directory where your web-server can reach it.
-
-
 DESCRIPTION:
 
-Directory hierarchy:  
+__F-droid-web__ is a simple and lightweight web interface to [f-droid server] (https://gitlab.com/fdroid/fdroidserver/tree/master). It provide a way: 
+* via qr-codes to register automatically the repository in the [fdroid app](https://f-droid.org/repository/browse/?fdfilter=f-droid&fdid=org.fdroid.fdroid)
+* to browse your f-droid catalogue by
+   * app's name, summary and description
+   * app's type of license
+   * app's category
 
-  repo/  
+For the installation and configurations information, go to the [wiki](https://github.com/dervishe-/f-droid-web/wiki)
 
-     Media/  
-
-          images/  
-
-          css/  
-
-     cache/ [Contains the cached data (serialized PHP structures)]  
-
-     lang/ [Contains the localized files for the GUI]  
-          dict/ [Contains stopwords list and several function to the search by words]  
-
-     phpqrcode/ [PHP library which generate the qr-codes (made by Dominik Dzienia <deltalab at poczta dot fm>)]  
-
-     qrcodes/ [Contains the generated qr-codes]  
-
-     index.php [Main file]  
-
-
-REMARK:
+MISC:
 
 * This website don't use cookies (except the session cookie). It's tracker free. For the moment, it didn't use database or nosql things just plaintext files or files storing serialized PHP structures.
-
 * It is HTML5 and CSS3 valid (with semantic markup).
-
 * You can browse by apps, by licenses or by categories.
-
 * You can search by words. The search will be performed in the name, summary and description fields. You can use the "+" symbol, in order to cross research:
 word1 + word2 will gather apps matching the 2 words (or n words)
-
 * The last apps list is available via an atom feed
-
+* You can make your queries both by GET and POST method
 
 TODO:
 
@@ -72,4 +28,3 @@ TODO:
 * UI dynamization (JS)
 * Add other languages (german, portugese, ...)
 * WCAG2.0 AAA
-
