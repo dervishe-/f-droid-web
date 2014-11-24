@@ -664,6 +664,29 @@ function decore_app($app_id, $lang) { //{{{
 </article>";
 };
 //}}}
+function decore_app_json($app_id, $light=false) { //{{{
+	if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app_id)) {
+		$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app_id));
+	} else {
+		if (($data = simplexml_load_file(DATA)) !== false) {
+			$app = build_app($data, $app_id);
+			$data = null;
+		} else {
+			return false;
+		};
+	};
+	if ($light) {
+		$buffer = array();
+		$buffer['id'] = $app['id'];
+		$buffer['name'] = $app['name'];
+		$buffer['summary'] = $app['summary'];
+		$buffer['version'] = $app['packages'][0]['version'];
+		$buffer['size'] = $app['packages'][0]['size'];
+		$buffer['updated'] = $app['updated'];
+		$app = $buffer;
+	};
+	return $app;
+}//}}}
 function decore_app_light($app_id, $lang) { //{{{
 	if (is_file(CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app_id)) {
 		$app = unserialize(file_get_contents(CACHE.DIRECTORY_SEPARATOR.$app_id));
@@ -1000,7 +1023,6 @@ function apply_filters($relations, $licenses, $words, $repos) { //{{{
 };
 //}}}
 //}}}
-
 //{{{Select lang
 if (isset($_REQUEST['lang'])) {
 	$lang_label = filter_var($_REQUEST['lang'], FILTER_VALIDATE_REGEXP, array('options'=>array('regexp'=>'/^[a-z]{2}$/')));
@@ -1078,7 +1100,7 @@ if (isset($_REQUEST['page'])) {
 	unset($_SESSION['page']);
 	$page = 1;
 };
-$tampon = array_slice($list, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
+$buffer = array_slice($list, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 //}}}
 if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// HTML case
 	//{{{ Building content
@@ -1087,7 +1109,7 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 			"<link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\" />" : '';
 	$headers = decore_headers($repos, $lang_label, $lang);
 	$tools = build_tools($relations, $licenses, $lang, $repos['nbr']);
-	$applist = decore_applist($tampon, $lang, $nbr_app, $page);
+	$applist = decore_applist($buffer, $lang, $nbr_app, $page);
 	$lastapp = decore_lastapplist($last_apps, $lang);
 	if (!isset($_REQUEST['lang'])) unset($_SESSION['sheet']);
 	if (isset($_REQUEST['sheet']) || isset($_SESSION['sheet'])) { //{{{ 
@@ -1152,6 +1174,23 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 </html>
 ";
 } elseif ($_REQUEST['format'] == 'json') {
-		var_dump($list);
+	if (isset($_REQUEST['categories'])) {
+		echo json_encode($categories);
+	} elseif (isset($_REQUEST['licenses'])) {
+		echo json_encode(array_keys($licenses));
+	} elseif (isset($_REQUEST['sheet'])) {
+		echo json_encode(decore_app_json($_REQUEST['sheet']));
+	} else {
+		$result = array('total' => count($list), 'list' => array());
+		if (isset($_REQUEST['all'])) {
+			$buffer = $list;
+		} else {
+			$result['page'] = $page;
+		};
+		foreach($buffer as $app) {
+			$result['list'][] = decore_app_json($app, true);
+		};
+		echo json_encode($result);
+	};
 };
 ?>
