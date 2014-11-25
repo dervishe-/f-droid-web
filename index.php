@@ -1175,7 +1175,7 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 ";
 } elseif ($_REQUEST['format'] == 'json') {
 	if (isset($_REQUEST['categories'])) {
-		echo json_encode($categories);
+		echo json_encode(array_keys($categories));
 	} elseif (isset($_REQUEST['licenses'])) {
 		echo json_encode(array_keys($licenses));
 	} elseif (isset($_REQUEST['sheet'])) {
