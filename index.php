@@ -16,7 +16,6 @@ session_start();
 define('ROOT', dirname(__FILE__));
 define('SOCIAL_DIR', 'Media/images/social_icons/');
 define('ICONS_DIR', 'icons-320');
-define('ICONS_DIR_LIGHT', 'icons-240');
 define('ICONS_DIR_ABSTRACT', 'icons-120');
 define('QRCODES_DIR', 'qrcodes');
 define('LANG', 'lang');
@@ -458,7 +457,7 @@ function decore_app($app_id, $lang) { //{{{
 	} else {
 		$tag_qrcode = "<aside id=\"download\"><a title=\"{$dl_label} {$app['name']}\" href=\"{$app['packages'][0]['apkname']}\">{$dl_label}</a></aside>";
 	};//}}}
-	$icon = ICONS_DIR.DIRECTORY_SEPARATOR.$app['icon'];
+	$icon = ICONS_DIR."/{$app['icon']}";
 	if ($app['updated'] != $app['added']) { //{{{
 		$label = translate('iface', 'updated', $lang);
 		$date = $app['updated'];
