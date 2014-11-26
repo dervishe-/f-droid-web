@@ -26,7 +26,6 @@ word1 + word2 will gather apps matching the 2 words (or n words).
 
 TODO:
 
-* JSONification 
 * UI dynamization (JS)
 * Add other languages (german, portugese, ...)
 * WCAG2.0 AAA
