@@ -17,7 +17,7 @@ define('ROOT', dirname(__FILE__));
 define('SOCIAL_DIR', 'Media/images/social_icons/');
 define('ICONS_DIR', 'icons-320');
 define('ICONS_DIR_ABSTRACT', 'icons-120');
-define('QRCODES_DIR', 'qrcodes');
+define('QRCODES_DIR', 'Media/images/qrcodes');
 define('LANG', 'lang');
 define('CACHE', ROOT.DIRECTORY_SEPARATOR.'cache');
 define('APP_CACHE', CACHE.DIRECTORY_SEPARATOR.'app_files');//}}}
@@ -32,7 +32,7 @@ define('LAST_FILE', CACHE.DIRECTORY_SEPARATOR.'last_apps'); // store last apps i
 define('WORD_FILE', CACHE.DIRECTORY_SEPARATOR.'words'); // store used words as an array
 define('MANIFEST', CACHE.DIRECTORY_SEPARATOR.'Manifest'); // store index.xml hash
 define('FEED_NAME', "last_app.atom");
-define('REPOS_QRCODE', QRCODES_DIR."/repos_qrcode.png"); //}}}
+define('REPOS_QRCODE', "Media/images/repos_qrcode.png"); //}}}
 //{{{ PARAMETERS
 define('FLATTR_SCHEME', 'https://flattr.com/thing/');
 define('HASH_ALGO', 'whirlpool');
@@ -687,8 +687,8 @@ function decore_app_json($app_id, $light=false) { //{{{
 	return $app;
 }//}}}
 function decore_app_light($app_id, $lang) { //{{{
-	if (is_file(CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app_id)) {
-		$app = unserialize(file_get_contents(CACHE.DIRECTORY_SEPARATOR.$app_id));
+	if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app_id)) {
+		$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app_id));
 	} else {
 		if (($data = simplexml_load_file(DATA)) !== false) {
 			$app = build_app($data, $app_id);
@@ -755,8 +755,8 @@ function decore_app_light($app_id, $lang) { //{{{
 };
 //}}}
 function decore_app_abstract($app_id, $lang) { //{{{
-	if (is_file(CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app_id)) {
-		$app = unserialize(file_get_contents(CACHE.DIRECTORY_SEPARATOR.$app_id));
+	if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app_id)) {
+		$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app_id));
 	} else {
 		if (($data = simplexml_load_file(DATA)) !== false) {
 			$app = build_app($data, $app_id);
@@ -1038,11 +1038,47 @@ include_once("lang/{$lang_label}".DIRECTORY_SEPARATOR."lang.php");
 //{{{ Retrieve data from cache
 libxml_use_internal_errors(true);
 if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false) {
-	if (!is_file(REPOS_FILE)) {
-		build_headers(translate('iface', 'error_label', $lang), translate('iface', 'error_message', $lang));
-		build_footers();
-		exit;
+	if (!is_file(REPOS_FILE)) {//{{{
+		$favicon = (is_file('favicon.ico') && is_readable('favicon.ico')) ? 
+			"<link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\" />" : '';
+		$headers = "<header role=\"banner\">
+			<div>
+				<h1>".translate('iface', 'error_label', $lang)."</h1>
+			</div>";
+		$headers .= build_lang_selector($lang_label, $lang);
+		$headers .= "</header>";
+		$main = "<article><h2>".translate('iface', 'error_label', $lang)."</h2><div id=\"warning\">".translate('iface', 'error_message', $lang)."<div></article>";
+		$footer = "<footer role=\"contentinfo\"><span>".MSG_FOOTER."</span></footer>";
+		$menu = "
+<nav id=\"menu\" role=\"navigation\">
+	<h2>".translate('iface', 'menu', $lang).":</h2>
+	<ul>
+		<li><a href=\"#warning\" title=\"".translate('iface', 'access_error_mess', $lang)."\">".translate('iface', 'error_label', $lang)."</a></li>
+	</ul>
+</nav>
+";
+		echo "
+<!DOCTYPE html>
+<html lang=\"{$_SESSION['lang']}\">
+	<head>
+		<meta charset=\"UTF-8\">
+		<title>".translate('iface', 'error_label', $lang)."</title>
+		{$favicon}
+		<link type=\"text/css\" rel=\"stylesheet\" href=\"Media/css/default.css\" />
+	</head>
+	<body>
+		{$headers}
+		<main role=\"main\">
+			{$menu}
+			{$main}
+		</main>
+		{$footer}
+	</body>
+</html>
+";
+		exit;//}}}
 	} else {
+		$warning = "<div id=\"warning\" title=\"".translate('iface', 'warning_label', $lang)."\">".translate('iface', 'warning_msg', $lang)."</div>";
 		$repos = unserialize(file_get_contents(REPOS_FILE));
 		$categories = (is_file(CAT_FILE)) ? unserialize(file_get_contents(CAT_FILE)) : cache_categories($repos['list']);
 		$relations = (is_file(REL_FILE)) ? unserialize(file_get_contents(REL_FILE)) : cache_relations($repos['list']);
@@ -1051,6 +1087,7 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 		$last_apps = (is_file(LAST_FILE)) ? unserialize(file_get_contents(LAST_FILE)) : cache_lastapps($repos);
 	};
 } else {
+	$warning = '';
 	$hash = hash_file(HASH_ALGO, DATA);
 	if ((is_file(MANIFEST) && $hash != file_get_contents(MANIFEST)) || !is_file(REPOS_FILE)) {
 		$data = build_cache_data($hash);
@@ -1163,6 +1200,7 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 	<body>
 		{$headers}
 		<main role=\"main\">
+			{$warning}
 			{$menu}
 			{$main}
 			{$tools}
