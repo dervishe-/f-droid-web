@@ -1085,6 +1085,18 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 		$licenses = (is_file(LIC_FILE)) ? unserialize(file_get_contents(LIC_FILE)) : cache_licenses($repos['list']);
 		$words = (is_file(WORD_FILE)) ? unserialize(file_get_contents(WORD_FILE)) : cache_words($repos['list']);
 		$last_apps = (is_file(LAST_FILE)) ? unserialize(file_get_contents(LAST_FILE)) : cache_lastapps($repos);
+		// reducing the list to the apps only present in the cache
+		$buffered_list = array();
+		if (is_dir(APP_CACHE)) {
+			$dh = opendir(APP_CACHE);
+			while (false !== ($file = readdir($dh))) {
+				if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$file) && 
+					is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$file))
+						$buffered_list[] = $file;
+			};
+			closedir($dh);
+		};
+		$repos['list'] = $buffered_list;
 	};
 } else {
 	$warning = '';
