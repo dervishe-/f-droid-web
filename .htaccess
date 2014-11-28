@@ -21,3 +21,7 @@ BrowserMatch bMSI[E] !no-gzip !gzip-only-text/html
 SetEnvIfNoCase Request_URI .(?:gif|jpe?g|png|ico)$ no-gzip dont-vary
 Header append Vary User-Agent env=!dont-vary
 
+#PHP
+php_value session.cookie_httponly 1
+php_value session.cookie_secure 1
+
