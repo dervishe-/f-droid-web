@@ -1,6 +1,7 @@
 <?php
 include_once(LANG.DIRECTORY_SEPARATOR.'languages.php');
 include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'categories.php');
+include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'licenses.php');
 include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'permissions.php');
 $lang = array(
 	'iface' => array( //{{{
@@ -70,17 +71,6 @@ $lang = array(
 		'NonFreeNet' => 'Relies on computational services that are impossible to replace or that the replacement cannot be connected to without major changes to the app.',
 		'NonFreeAdd' => 'Promotes non-Free add-ons, such that the app is effectively an advert for other non-free software and such software is not clearly labelled as such.',
 		'NonFreeDep' => 'Depends on a non-Free application.'), //}}}
-	'lic' => array( //{{{
-		'Unknown' => "Unknown",
-		'GPLv2' => "GNU GPL v2",
-		'GPLv2+' => "GNU GPL v2 or later",
-		'GPLv3' => "GNU GPL v3",
-		'GPLv3+' => "GNU GPL v3 or later",
-		'GPL' => "Unspecified GPL version",
-		'AGPL' => "Afferro GPL version 3",
-		'Apache2' => "Apache 2",
-		'MIT' => "MIT X11 license",
-		'BSD' => "BSD license orig.",
-		'NewBSD' => "BSD license new") //}}}
+	'lic' => $licenses_list
 );
 ?>
