@@ -40,13 +40,13 @@ define('HASH_REPOS_PUBKEY', 'sha256');
 define('USE_QRCODE', true);
 define('USE_FEEDS', true);
 define('USE_SOCIAL', true);
-define('FEED_AUTHOR', 'Les Petits Débrouillards');
+define('FEED_AUTHOR', "The feed's author");
 define('NUMBER_LAST_APP', 10);
 define('RECORDS_PER_PAGE', 12);
 define('NUMBER_PAGES', 9);		// Fixe the number of appearing page numbers in the pager
 define('DEFAULT_LANG', 'fr');	// Fixe the localization of the UI
 define('LOCALIZATION', 'fr');	// Fixe the localization of the search (mainly related to the languages in which the apps are describes)
-define('MSG_FOOTER', '(C) Association Française des Petits Débrouillards - Licence: LGPL');//}}}
+define('MSG_FOOTER', 'Your footer message');//}}}
 // ALLOWED VALUES
 $formats = array('json' => 1);
 //}}}
@@ -942,6 +942,11 @@ function decore_headers($repos, $lang_label, $lang) { //{{{
 	$bloc .= "</header>";
 	return $bloc;
 };//}}}
+function sanitize($words) { //{{{
+	$buffer = array();
+	foreach ($words as $item) $buffer[] = htmlentities($item);
+	return $buffer;
+};//}}}
 function apply_filters($relations, $licenses, $words, $repos) { //{{{
 	$flag = false;
 	$candidates = array();
@@ -995,6 +1000,7 @@ function apply_filters($relations, $licenses, $words, $repos) { //{{{
 	};
 	$candidates['words'] = $repos;
 	if (count($wordstofind) > 0) { //{{{
+		$wordstofind = sanitize($wordstofind);
 		$_SESSION['words'] = $wordstofind;
 		$flag |= true;
 		$registered_words = array_keys($words);
