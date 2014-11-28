@@ -3,6 +3,7 @@ include_once(LANG.DIRECTORY_SEPARATOR.'languages.php');
 include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'categories.php');
 include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'licenses.php');
 include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'permissions.php');
+include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'afeatures.php');
 $lang = array(
 	'iface' => array( //{{{
 		'language' => 'Langage',
@@ -65,12 +66,7 @@ $lang = array(
 	'lang' => $languages_list,
 	'perms' => $permissions_list,
 	'cat' => $categories_list,
-	'afeat' => array( //{{{
-		'Ads' => "Contient de la publicité.",
-		'Tracking' => "Traque et rapporte ses activités quelque part sans votre consentement.",
-		'NonFreeNet' => "Dépend de services informatiques que l'on ne peut changer (ou alors sans changements majeurs dans l'application).",
-		'NonFreeAdd' => "Promeut des ajouts non libres (C'est en fait une publicité pour d'autres applications non libres).",
-		'NonFreeDep' => "Dépend d'applications non libres."), //}}}
+	'afeat' => $afeatures_list,
 	'lic' => $licenses_list
 );
 ?>
