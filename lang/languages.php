@@ -2,6 +2,7 @@
 $languages_list = array(
 	'en' => 'English version',
 	'es' => 'Versión española',
-	'fr' => 'Version fançaise'
+	'fr' => 'Version fançaise',
+	'de' => 'Deutsche version'
 );
 ?>
