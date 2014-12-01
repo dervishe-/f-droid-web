@@ -118,22 +118,23 @@ function sort_package($pkg1, $pkg2) { //{{{
 	return -1;
 };//}}}
 function build_lang_selector($lang_label, $lang) { //{{{
-	$bloc = "<div id=\"lang\"><span>".translate('iface', 'language', $lang).": </span><ul>";
+	$bloc = '';
 	if ($dh = opendir(LANG)) {
 		while (false !== ($dir = readdir($dh))) {
 			$rep_lang = LANG.DIRECTORY_SEPARATOR.$dir.DIRECTORY_SEPARATOR;
 			if (is_file($rep_lang.'lang.php')) {
-				$bloc .= ($dir != $lang_label) ? 
-					"<li>
-						<a href=\"?lang={$dir}\" title=\"".translate('lang', $dir, $lang)."\">
-							<img alt=\"".translate('lang', $dir, $lang)."\" src=\"{$rep_lang}flag.png\" />
-						</a>
-					</li>" : "<li><span	><img alt=\"".translate('lang', $dir, $lang)."\" src=\"{$rep_lang}flag.png\" /></span></li>";
+				$placeholders = array(
+					'Lang:Id' => $dir,
+					'Lang:IconPath' => $rep_lang.'flag.png',
+					'Lang:IsSelected' => $dir == $lang_label,
+					'Lang:IsNotSelected' => $dir != $lang_label,
+					'Lang:Name' => translate('lang', $dir, $lang),
+				);
+				$bloc .= parse_template('main_headers_language', $placeholders);
 			};
 		};
 		closedir($dh);
 	};
-	$bloc .= '</ul></div>';
 	return $bloc;
 };//}}}
 function build_pager($current_page, $number_page, $lang) { //{{{
@@ -929,20 +930,22 @@ function decore_licenses($licenses, $lang, $nbr_apps) { //{{{
 };	
 //}}}
 function decore_headers($repos, $lang_label, $lang) { //{{{
-	$tag_qrcode = 
-			(USE_QRCODE) ? "<img title=\"".translate('iface', 'qrcode_repo', $lang).
-			"\" src=\"".REPOS_QRCODE."\" alt=\"qrcode: {$repos['name']}\" />" : '';
-	$bloc = "<header role=\"banner\">
-			<div>
-				<img src=\"Media/images/{$repos['icon']}\" alt=\"logo: {$repos['name']}\" />
-				<h1>{$repos['name']}</h1>
-				{$tag_qrcode}
-			</div>
-			<div>{$repos['desc']}</div>";
-	$bloc .= "<div><span>".translate('iface', 'last_modified', $lang).": </span><span>".date('Y-m-d', $repos['timestamp'])."</span></div>";
-	$bloc .= build_lang_selector($lang_label, $lang);
-	$bloc .= "</header>";
-	return $bloc;
+	$placeholders = array(
+		'Config:UseQrCodes' => USE_QRCODE,
+
+		'Text:LastModified' => translate('iface', 'last_modified', $lang),
+		'Text:Language' => translate('iface', 'language', $lang),
+		'Text:RepoQrCode' => translate('iface', 'qrcode_repo', $lang),
+
+		'Repo:Name' => $repos['name'],
+		'Repo:Description' => $repos['desc'],
+		'Repo:LastModified' => date('Y-m-d', $repos['timestamp']),
+		'Repo:IconPath' => 'Media/images/' . $repos['icon'],
+		'Repo:QrCodePath' => REPOS_QRCODE,
+
+		'Subtemplate:LangSelector' => build_lang_selector($lang_label, $lang),
+	);
+	return parse_template('main_headers', $placeholders);
 };//}}}
 function sanitize_entry($words) { //{{{
 	$buffer = array();
@@ -1086,7 +1089,7 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 ";
 		exit;//}}}
 	} else {
-		$warning = "<div id=\"warning\" title=\"".translate('iface', 'warning_label', $lang)."\">".translate('iface', 'warning_msg', $lang)."</div>";
+		$warning = translate('iface', 'warning_msg', $lang);
 		$repos = unserialize(file_get_contents(REPOS_FILE));
 		$categories = (is_file(CAT_FILE)) ? unserialize(file_get_contents(CAT_FILE)) : cache_categories($repos['list']);
 		$relations = (is_file(REL_FILE)) ? unserialize(file_get_contents(REL_FILE)) : cache_relations($repos['list']);
@@ -1160,11 +1163,6 @@ $buffer = array_slice($list, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 //}}}
 if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// HTML case
 	//{{{ Building content
-	$footer = "<footer role=\"contentinfo\"><span>".MSG_FOOTER."</span></footer>";
-	$favicon = (is_file('favicon.ico') && is_readable('favicon.ico')) ? 
-			"<link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\" />" : '';
-	$headers = decore_headers($repos, $lang_label, $lang);
-	$tools = build_tools($relations, $licenses, $lang, $repos['nbr']);
 	$applist = decore_applist($buffer, $lang, $nbr_app, $page);
 	$lastapp = decore_lastapplist($last_apps, $lang);
 	if (!isset($_REQUEST['lang'])) unset($_SESSION['sheet']);
@@ -1189,47 +1187,45 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 		$label_menu = translate('iface', 'applist', $lang);
 		$main = $applist;
 	}; //}}}
-	$tagFeed = '';
-	if (USE_FEEDS) {
-		$feed_title = "";
-		$tagfeed = "<link rel=\"alternate\" type=\"application/atom+xml\" title=\"{$feed_title}\" href=\"".FEED_NAME."\" />";
-	};
-	$menu = "
-<nav id=\"menu\" role=\"navigation\">
-	<h2>".translate('iface', 'menu', $lang).":</h2>
-	<ul>
-		<li><a href=\"#search\" title=\"".translate('iface', 'access_form_val', $lang)."\">".translate('iface', 'form_val', $lang)."</a></li>
-		<li><a href=\"#categories\" title=\"".translate('iface', 'browse_cat', $lang)."\">".translate('iface', 'categories', $lang)."</a></li>
-		<li><a href=\"#licenses\" title=\"".translate('iface', 'browse_lic', $lang)."\">".translate('iface', 'license', $lang)."</a></li>
-		<li><a href=\"{$anchor_menu}\" title=\"{$label_access_menu}\">{$label_menu}</a></li>
-		<li><a href=\"#lastapplist\" title=\"".translate('iface', 'access_lastapplist', $lang)."\">".translate('iface', 'lastapplist', $lang)."</a></li>
-	</ul>
-</nav>
-";
 	//}}}
-	echo "
-<!DOCTYPE html>
-<html lang=\"{$_SESSION['lang']}\">
-	<head>
-		<meta charset=\"UTF-8\">
-		<title>{$repos['name']}</title>
-		{$favicon}
-		{$tagfeed}
-		<link type=\"text/css\" rel=\"stylesheet\" href=\"Media/css/default.css\" />
-	</head>
-	<body>
-		{$headers}
-		<main role=\"main\">
-			{$warning}
-			{$menu}
-			{$main}
-			{$tools}
-			{$lastapp}
-		</main>
-		{$footer}
-	</body>
-</html>
-";
+
+	$placeholders = array(
+		'Config:UseFeeds' => USE_FEEDS,
+
+		'Text:Warning' => translate('iface', 'warning_label', $lang),
+		'Text:Menu' => translate('iface', 'menu', $lang),
+
+		'Text:Nav:AccessFormVal' => translate('iface', 'access_form_val', $lang),
+		'Text:Nav:FormVal' => translate('iface', 'form_val', $lang),
+		'Text:Nav:BrowseCategories' => translate('iface', 'browse_cat', $lang),
+		'Text:Nav:Categories' => translate('iface', 'categories', $lang),
+		'Text:Nav:BrowseLicenses' => translate('iface', 'browse_lic', $lang),
+		'Text:Nav:Licenses' => translate('iface', 'license', $lang),
+		'Text:Nav:AccessLastAppList' => translate('iface', 'access_lastapplist', $lang),
+		'Text:Nav:LastAppList' => translate('iface', 'lastapplist', $lang),
+
+		'Text:Nav:AccessMenu' => $label_access_menu,
+		'Text:Nav:Menu' => $label_menu,
+
+		'Lang:Current' => $lang_label,
+
+		'Page:Favicon' => (is_file('favicon.ico') && is_readable('favicon.ico')) ? 'favicon.ico' : '',
+		'Page:Feed:Link' => FEED_NAME,
+		'Page:Feed:Name' => '',
+		'Page:Nav:AnchorMenu' => $anchor_menu,
+		'Page:WarningMessage' => $warning,
+		'Page:FooterText' => MSG_FOOTER,
+
+		'Repo:Name' => $repos['name'],
+
+		'Subtemplate:Headers' => decore_headers($repos, $lang_label, $lang),
+		'Subtemplate:MainContent' => $main,
+		'Subtemplate:Tools' => build_tools($relations, $licenses, $lang, $repos['nbr']),
+		'Subtemplate:LastApp' => $lastapp,
+	);
+
+	echo parse_template('main', $placeholders);
+
 } elseif ($_REQUEST['format'] == 'json') {
 	if (isset($_REQUEST['categories'])) {
 		echo json_encode(array_keys($categories));
