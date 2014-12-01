@@ -46,7 +46,7 @@ define('RECORDS_PER_PAGE', 12);
 define('NUMBER_PAGES', 9);		// Fixe the number of appearing page numbers in the pager
 define('DEFAULT_LANG', 'fr');	// Fixe the localization of the UI
 define('LOCALIZATION', 'en');	// Fixe the localization of the search (mainly related to the languages in which the apps are describes)
-define('MSG_FOOTER', "Your footer's message here");//}}}
+define('MSG_FOOTER', "Your footer's text here");//}}}
 // ALLOWED VALUES
 $formats = array('json' => 1);
 //}}}
@@ -1202,7 +1202,7 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 	}; //}}}
 	$tagFeed = '';
 	if (USE_FEEDS) {
-		$feed_title = "";
+		$feed_title = "{$repos['name']}: ".translate('iface', 'lastapplist', $lang);
 		$tagfeed = "<link rel=\"alternate\" type=\"application/atom+xml\" title=\"{$feed_title}\" href=\"".FEED_NAME."\" />";
 	};
 	$menu = "
