@@ -153,10 +153,4 @@ $stopwords = array( //{{{
 	"y",
 	"z"
 ); //}}}
-function sanitize($text, $stopwords) { //{{{
-	$pattern_markup = "/<\/?[^>]*>/";
-	$pattern = "/[^éèêëçùôîûàâï\-a-z]+/";
-	$result = preg_split($pattern, preg_replace($pattern_markup, '', strtolower($text)));
-	return array_unique(array_diff($result, $stopwords));
-};//}}}
 ?>

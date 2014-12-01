@@ -40,13 +40,13 @@ define('HASH_REPOS_PUBKEY', 'sha256');
 define('USE_QRCODE', true);
 define('USE_FEEDS', true);
 define('USE_SOCIAL', true);
-define('FEED_AUTHOR', "The Atom feed's author");
+define('FEED_AUTHOR', "Your feed's author here");
 define('NUMBER_LAST_APP', 10);
 define('RECORDS_PER_PAGE', 12);
 define('NUMBER_PAGES', 9);		// Fixe the number of appearing page numbers in the pager
 define('DEFAULT_LANG', 'fr');	// Fixe the localization of the UI
-define('LOCALIZATION', 'fr');	// Fixe the localization of the search (mainly related to the languages in which the apps are describes)
-define('MSG_FOOTER', "You're footer's message");//}}}
+define('LOCALIZATION', 'en');	// Fixe the localization of the search (mainly related to the languages in which the apps are describes)
+define('MSG_FOOTER', "Your footer's message here");//}}}
 // ALLOWED VALUES
 $formats = array('json' => 1);
 //}}}
@@ -941,6 +941,19 @@ function decore_headers($repos, $lang_label, $lang) { //{{{
 	$bloc .= build_lang_selector($lang_label, $lang);
 	$bloc .= "</header>";
 	return $bloc;
+};//}}}
+function sanitize($text, $stopwords) { //{{{
+	$pattern_markup = "/<\/?[^>]*>/";
+	$quote_list = "\"“”’«";
+	$pattern_split = "/[{$quote_list}{}\[\]{}\(\)+=_*<>!?.,;:\/\s]+/";
+	$pattern_surround = "/[{$quote_list}']?([^{$quote_list}']*)[{$quote_list}']?/";
+	$buffer = preg_split($pattern_split, preg_replace($pattern_markup, ' ', trim(strtolower($text))));
+	$result = array();
+	foreach ($buffer as $key) {
+		$tmp = preg_replace($pattern_surround, '\1', $key);
+		if (strlen($tmp) > 2) $result[] = $tmp;
+	};
+	return array_unique(array_diff($result, $stopwords));
 };//}}}
 function sanitize_entry($words) { //{{{
 	$buffer = array();
