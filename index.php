@@ -17,6 +17,9 @@ define('ROOT', dirname(__FILE__));
 define('SOCIAL_DIR', 'Media/images/social_icons/');
 define('ICONS_DIR', 'icons-320');
 define('ICONS_DIR_ABSTRACT', 'icons-160');
+define('TEMPLATE_DIR', ROOT.DIRECTORY_SEPARATOR.'templates');
+define('DEFAULT_THEME', 'default');
+define('THEME', 'default');
 define('QRCODES_DIR', 'Media/images/qrcodes');
 define('LANG', 'lang');
 define('CACHE', ROOT.DIRECTORY_SEPARATOR.'cache');
@@ -421,6 +424,45 @@ function cache_words($repos) { //{{{	Fields to search: name, summary, descriptio
 	return $wd;
 };
 //}}}
+function load_template($template) { //{{{
+	$file = TEMPLATE_DIR.DIRECTORY_SEPARATOR.THEME.DIRECTORY_SEPARATOR.$template.".tpl";
+	if (!file_exists($file)) {
+		$file = TEMPLATE_DIR.DIRECTORY_SEPARATOR.DEFAULT_THEME.DIRECTORY_SEPARATOR.$template.".tpl";
+		if (!file_exists($file)) {
+			return "<div>Could not find template \"$theme/$template\" (or \"default/$template\")</div>";
+		}
+	}
+	return file_get_contents($file);
+};
+//}}}
+/**
+ * Either removes the entire <if>*</if> block if trim((string)$value) evaluates to false, or
+ * removes the <if> and </if> tags leaving the content otherwise.
+ * TODO: Don;t do the preg_match_all for each placeholder.
+ *  - Rather, do it once capturing the value of placeholder="(.*)" as well.
+ */
+function parse_conditional_placeholder($template, $placeholder, $value) { //{{{
+	$pattern = '/<if placeholder="' . $placeholder . '">(.*)<\/if>/Usm';
+	$matches = array();
+	if (preg_match_all($pattern, $template, $matches)) {
+		for ($i = 0; $i < count($matches[0]); $i ++) {
+			$to_replace = $matches[0][$i];
+			$to_replace_with = $value ? $matches[1][$i] : '';
+			$template = str_replace($to_replace, $to_replace_with, $template);
+		}
+	}
+	return $template;
+}
+//}}}
+function parse_template($template, $placeholders) { //{{{
+	$template = load_template($template);
+	foreach($placeholders as $key => $value) {
+		$template = parse_conditional_placeholder($template, $key, $value);
+		$template = str_replace("[$key]", $value, $template);
+	}
+	return $template;
+};
+//}}}
 function translate($section, $item, $lang) { //{{{
 	return (isset($lang[$section][$item])) ? $lang[$section][$item] : $item;
 };
@@ -443,224 +485,110 @@ function decore_app($app_id, $lang) { //{{{
 		};
 	};//}}}
 	$scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != '') ? 'https://' : 'http://';
+	$qr_image_path = QRCODES_DIR.DIRECTORY_SEPARATOR.$app['id'].".png";
 	if (USE_QRCODE) { //{{{
 		include_once('phpqrcode/phpqrcode.php');
-		$qrcode = QRCODES_DIR.DIRECTORY_SEPARATOR.$app['id'].".png";
-		if (!is_file($qrcode)) {
-			QRCode::png("{$scheme}{$_SERVER['SERVER_NAME']}/{$app['packages'][0]['apkname']}", $qrcode);
+		if (!is_file($qr_image_path)) {
+			QRCode::png("{$scheme}{$_SERVER['SERVER_NAME']}/{$app['packages'][0]['apkname']}", $qr_image_path);
 		};
-		$dl_label = translate('iface', 'download', $lang);
-		$tag_qrcode = "
-		<aside id=\"download\">
-			<img src=\"{$qrcode}\" alt=\"QR-Code {$app['name']}\" title=\"QR-Code: {$dl_label} {$app['name']}\" />
-			<a href=\"{$app['packages'][0]['apkname']}\" title=\"{$dl_label} {$app['name']}\">{$dl_label}</a></aside>";
-	} else {
-		$tag_qrcode = "<aside id=\"download\"><a title=\"{$dl_label} {$app['name']}\" href=\"{$app['packages'][0]['apkname']}\">{$dl_label}</a></aside>";
 	};//}}}
-	$icon = ICONS_DIR."/{$app['icon']}";
-	if ($app['updated'] != $app['added']) { //{{{
-		$label = translate('iface', 'updated', $lang);
-		$date = $app['updated'];
-	} else {
-		$label = translate('iface', 'added', $lang);
-		$date = $app['added'];
-	};
-	$vers_label = translate('iface', 'version', $lang);
-	$version = "
-	<div title=\"{$vers_label}\">
-		<span>{$vers_label}: </span>
-		<span>{$app['packages'][0]['version']}</span> - <span>{$label}</span>: 
-		<span>{$date}</span>
-	</div>";//}}}
-	$lic_label = translate('iface', 'license', $lang);
-	$license = "<div title=\"{$lic_label}\"><span>{$lic_label}: </span><span>".translate('lic', $app['license'], $lang)."</span></div>";
-	$sum_label = translate('iface', 'summary', $lang);
-	$summary = "<div title=\"{$sum_label}\">{$app['summary']}</div>";
-	$desc_label = translate('iface', 'desc', $lang);
-	$desc = "<div title=\"{$desc_label}\" id=\"description\">{$app['desc']}</div>";
-	$hash_label = translate('iface', 'hash', $lang);
-	$hash = "<div title=\"{$hash_label}\" id=\"hash\">
-		<span>{$hash_label} [{$app['packages'][0]['hash']['type']}]: </span>
-		<span>{$app['packages'][0]['hash']['value']}</span>
-	</div>";
-	$reqs_label = translate('iface', 'requirements', $lang);
-	$requirements = (strlen($app['requirements']) > 0) ? 
-		"<div title=\"{$reqs_label}\"><span>{$reqs_label}: </span><span>{$app['requirements']}</span></div>" : '';
-	$size = $app['packages'][0]['size']; //{{{
-	$size_label = translate('iface', 'size', $lang);
-	if (($size / 1048572) > 1) {
-		$size /= 1048572;
-		$size = "<div title=\"{$size_label}\"><span>{$size_label}: </span><span>".round($size, 2)." MB</span></div>";
-	} else {
-		$size /= 1024;
-		$size = "<div title=\"{$size_label}\"><span>{$size_label}: </span><span>".round($size, 2)." kB</span></div>";
-	};//}}}
-	$categories = $app['categories']; //{{{
 	$translate_cat = translator('cat', $lang);
-	$cats = (strlen($categories) > 0 && $categories != 'None') ? "<ul><li>".implode('</li><li>', array_map($translate_cat, explode(',', $categories)))."</li></ul>" : '';
-	$cats_span = translate('iface', 'categories', $lang);
-	$categories = "<aside id=\"used_categories\" title=\"{$cats_span}\"><span>{$cats_span}: </span>{$cats}</aside>";//}}}
-	$permissions = $app['packages'][0]['permissions']; //{{{
-	$translate_perm = translator('perms', $lang);
-	$perms_span = translate('iface', 'permissions', $lang);
-	$perms = '';
-	if (strlen($permissions) > 0) {
-		$permissions = explode(',', $permissions);
-		reset($permissions);
-		while ($perm = current($permissions)) {
-			$perms .= "
-		<li>
-			<a title=\"{$perms_span}: {$perm}\" href=\"http://developer.android.com/reference/android/Manifest.permission.html#".$perm."\">".
-			$translate_perm($perm).
-			"</a></li>";
-			next($permissions);
-		};
-		$perms = "<ul>{$perms}</ul>";
-		$permissions = "<aside id=\"perms\" title=\"{$perms_span}\"><span>{$perms_span}: </span>{$perms}</aside>";
-	} else {
-		$permissions = '';//}}}
+	$categories_list = '';
+	if (strlen($app['categories']) > 0 && $app['categories'] != 'None') {
+		foreach(explode(',', $app['categories']) as $category) {
+			$categories_list .= parse_template(
+				'app_details_category',
+				array(
+					'Category:Id' => $category,
+					'Category:Name' => $translate_cat($category),
+				)
+			);
+		}
+	}
+
+	$process_permissions_template = function($package) use ($lang) {
+		$translate_perm = translator('perms', $lang);
+		$permissions_list = '';
+		if (strlen($package['permissions']) > 0) {
+			foreach(explode(',', $package['permissions']) as $permission) {
+				$permissions_list .= parse_template(
+					'app_details_permission',
+					array(
+						'Package:Version' => $package['version'],
+						'Permission:Id' => $permission,
+						'Permission:Name' => $translate_perm($permission),
+						'Permission:Link:Description' => 'http://developer.android.com/reference/android/Manifest.permission.html#' . $permission,
+					)
+				);
+			}
+		}
+		return $permissions_list;
 	};
-	$afeatures = $app['antifeatures']; //{{{
-	$translate_feat = translator('afeat', $lang);
-	$afeat = (strlen($afeatures) > 0) ? "<ul><li>".implode('</li><li>', array_map($translate_feat, explode(',', $afeatures)))."</li></ul>" : '';
-	$afeat_span = translate('iface', 'antifeatures', $lang);
-	$afeatures = "<aside id=\"antifeatures\" title=\"{$afeat_span}\"><span>{$afeat_span}: </span>{$afeat}</aside>";//}}}
-	$donate = ""; //{{{
-	$don_label = translate('iface', 'donate', $lang);
-	$flattr_label = translate('iface', 'flattr', $lang);
-	$bc_label = translate('iface', 'bitcoin', $lang);
-	if ($app['donate'] != '') 
-		$donate .= "<a title=\"{$don_label}\" href=\"{$app['donate']}\">{$don_label}</a>";
-	if ($app['flattr'] != '') 
-		$donate .= "<a title=\"{$don_label}: {$flattr_label}\" href=\"".FLATTR_SCHEME."{$app['flattr']}\">{$flattr_label}</a>";
-	if ($app['bitcoin'] != '') 
-		$donate .= "<div title=\"{$don_label}: {$bc_label}\"><span>{$bc_label}</span><span>{$app['bitcoin']}</span></div>";
-	if ($donate != '') $donate = "<aside id=\"donate_app\">{$donate}</aside>"; //}}}
-	$dev_span = translate('iface', 'devfeatures', $lang);
-	$sdk_span = translate('iface', 'sdkver', $lang);
-	$dev_body = "<div><span>{$sdk_span}: </span><span>v{$app['packages'][0]['sdkver']}</span></div>";
-	if ($app['web'] != '') $dev_body .= "<a href=\"{$app['web']}\">".translate('iface', 'web', $lang)."</a>";
-	if ($app['tracker'] != '') $dev_body .= "<a href=\"{$app['tracker']}\">".translate('iface', 'tracker', $lang)."</a>";
-	if ($app['source'] != '') $dev_body .= "<a href=\"{$app['source']}\">".translate('iface', 'sources', $lang)."</a>";
-	$blockdev = "<aside id=\"block_dev\">{$dev_body}</aside>";
-	if (USE_SOCIAL) { //{{{
-		$social_msg = urlencode("{$app['name']}: {$app['summary']}");
-		$social_alt = translate('iface', 'share', $lang);
-		$social_url = "{$scheme}{$_SERVER['SERVER_NAME']}/?sheet={$app['id']}";
-		$social = "
-	<aside id=\"social_links\">
-		<a title=\"{$social_alt} Diaspora\" href=\"http://sharetodiaspora.github.io/?title={$social_msg}&amp;url={$social_url}\">
-			<img alt=\"{$social_alt} Diaspora\" src=\"".SOCIAL_DIR."Diaspora.ico\" />
-		</a>
-		<a title=\"{$social_alt} Facebook\" href=\"https://www.facebook.com/sharer.php?u={$social_msg}&amp;t={$social_url}\">
-			<img alt=\"{$social_alt} Facebook\" src=\"".SOCIAL_DIR."Facebook.ico\" />
-		</a>
-		<a title=\"{$social_alt} Google+\" href=\"https://plus.google.com/share?url={$social_url}\">
-			<img alt=\"{$social_alt} Google+\" src=\"".SOCIAL_DIR."GooglePlus.ico\" />
-		</a>
-		<a title=\"{$social_alt} Twitter\" href=\"https://twitter.com/intent/tweet?text={$social_msg}&amp;url={$social_url}\">
-			<img alt=\"{$social_alt} Twitter\" src=\"".SOCIAL_DIR."Twitter.ico\" />
-		</a>
-		</aside>";
-	} else {
-		$social = '';
-	};//}}}
-	$nb_ver = count($app['packages']);
-	$oldversion = '';
-	if ($nb_ver > 1) {
-		$oldlist = '';
-		reset($app['packages']);
-		next($app['packages']);
-		while ($pkg = current($app['packages'])) {
-			$size_pkg = $pkg['size']; //{{{
-			if (($size_pkg / 1048572) > 1) {
-				$size_pkg /= 1048572;
-				$size_pkg = "<div title=\"{$size_label}\"><span>{$size_label}: </span><span>".round($size_pkg, 2)." MB</span></div>";
-			} else {
-				$size_pkg /= 1024;
-				$size_pkg = "<div title=\"{$size_label}\"><span>{$size_label}: </span><span>".round($size_pkg, 2)." kB</span></div>";
-			};//}}}
-			$perm_pkg = $pkg['permissions']; //{{{
-			$perms_sdk = '';
-			if (strlen($perm_pkg) > 0) {
-				$perm_pkg = explode(',', $perm_pkg);
-				reset($perm_pkg);
-				while ($perm = current($perm_pkg)) {
-					$perms_sdk .= "
-					<li>
-						<a aria-describedby=\"perms_{$pkg['version']}\" title=\"{$perms_span}: {$perm}\" href=\"http://developer.android.com/reference/android/Manifest.permission.html#".$perm."\">".
-						$translate_perm($perm).
-						"</a></li>";
-					next($perm_pkg);
-				};
-				$perms_sdk = "<ul>{$perms_sdk}</ul>";
-				$perm_pkg = "<div id=\"perms_{$pkg['version']}\" title=\"{$perms_span}\"><span>{$perms_span}: </span>{$perms_sdk}</div>";
-			} else {
-				$perm_pkg ='';
-			};//}}}
-			$label = translate('iface', 'added', $lang);
-			$date_pkg = $pkg['added'];
-			$tag_dl_pkg = "<a title=\"{$dl_label} {$app['name']}\" href=\"{$pkg['apkname']}\" aria-describedby=\"{$pkg['version']}\">{$dl_label}</a>";
-			$version_pkg = "
-			<div title=\"{$vers_label}\">
-				<span>{$vers_label}: </span>
-				<span>{$pkg['version']}</span> - <span>{$label}</span>: 
-				<span>{$date_pkg}</span>
-			</div>";
-			$hash_pkg = "
-			<div title=\"{$hash_label} {$pkg['apkname']}\">
-				<span>{$hash_label} [{$pkg['hash']['type']}]: </span>
-				<span>{$pkg['hash']['value']}</span>
-			</div>";
-			$sdk_pkg = "<div><span>{$sdk_span}: </span><span>v{$pkg['sdkver']}</span></div>";
-			$oldlist .= "
-				<div id=\"{$pkg['version']}\">
-					{$tag_dl_pkg}
-					{$version_pkg}
-					{$sdk_pkg}
-					{$size_pkg}
-					{$hash_pkg}
-					{$perm_pkg}
-				</div>";
-			next($app['packages']);
-		};
-		$oldversion = "
-		<aside id=\"oldversions\">
-			{$oldlist}
-		</aside>
-		";
+
+	$permissions_list = $process_permissions_template($app['packages'][0]);
+
+	$social_msg = "{$app['name']}: {$app['summary']}";
+
+	$antifeatures_list = '';
+	if (strlen($app['antifeatures']) > 0) {
+		foreach(explode(',', $app['antifeatures']) as $antifeature) {
+			$antifeatures_list .= parse_template(
+				'app_details_antifeature',
+				array('Antifeature:Name' => $antifeature)
+			);
+		}
+	}
+
+	$old_versions_list = '';
+	if (count($app['packages']) > 1) {
+		for ($i = 1; $i < count($app['packages']); $i++) {
+			$pkg = $app['packages'][$i];
+
+			$placeholders = array_merge(
+				app_package_placeholders($pkg),
+				array(
+					'Text:Hash' => translate('iface', 'hash', $lang),
+					'Text:Permissions' => translate('iface', 'permissions', $lang),
+					"Text:Size" => translate('iface', 'size', $lang),
+					'Text:SdkVersion' => translate('iface', 'sdkver', $lang),
+					'Text:Download' => translate('iface', 'download', $lang),
+					'Text:Version' => translate('iface', 'version', $lang),
+					"Text:DateAdded" => translate('iface', 'added', $lang),
+
+					'Subtemplate:Permissions' => $process_permissions_template($pkg),
+				)
+			);
+
+			$old_versions_list .= parse_template('app_details_package', $placeholders);
+		}
 	};
-	return "
-<article id=\"appsheet\">
-	<header>
-		<h2>
-			<img src=\"{$icon}\" alt=\"icone {$app['name']}\" />
-			<span>{$app['name']}</span>
-			<a href=\"index.php\">".translate('iface', 'back', $lang)."</a>
-		</h2>
-		{$summary}
-		{$social}
-	</header>
-	<div id=\"details\">
-	{$tag_qrcode}
-	{$size}
-	{$version}
-	{$license}
-	{$requirements}
-	</div>
-	{$desc}
-	<div id=\"misc\">
-	".(($cats != '') ? $categories : '')."
-	".(($perms != '') ? $permissions : '')."
-	</div>
-	".(($afeat != '') ? $afeatures : '')."
-	{$hash}
-	<div>
-	{$donate}
-	{$blockdev}
-	{$oldversion}
-	</div>
-</article>";
+
+	$params = array(
+
+		"Config:UseSocial" => USE_SOCIAL,
+		'Config:UseQrCode' => USE_QRCODE,
+
+		"Social:Message" => $social_msg,
+		"Social:Message:UrlEncoded" => urlencode($social_msg),
+		"Social:Url" => "{$scheme}{$_SERVER['SERVER_NAME']}/?sheet={$app['id']}",
+		"Social:Icon:Diaspora" => SOCIAL_DIR.'Diaspora.ico',
+		"Social:Icon:Facebook" => SOCIAL_DIR.'Facebook.ico',
+		"Social:Icon:GooglePlus" => SOCIAL_DIR.'GooglePlus.ico',
+		"Social:Icon:Twitter" => SOCIAL_DIR.'Twitter.ico',
+
+		'QrCode:ImagePath' => $qr_image_path,
+
+		'Subtemplate:Antifeatures' => $antifeatures_list,
+		'Subtemplate:Permissions' => $permissions_list,
+		'Subtemplate:Categories' => $categories_list,
+		'Subtemplate:Versions' => $old_versions_list,
+
+	);
+
+	$all_params = array_merge($params, app_placeholders($app, $lang));
+
+	return parse_template("app_details", $all_params);
+
 };
 //}}}
 function decore_app_json($app_id, $light=false) { //{{{
@@ -686,6 +614,92 @@ function decore_app_json($app_id, $light=false) { //{{{
 	};
 	return $app;
 }//}}}
+function app_package_placeholders($package, $prefix = '') {//{{{
+
+	return array(
+		$prefix . "Package:Version" => $package['version'],
+		$prefix . "Package:SdkVersion" => $package['sdkver'],
+		$prefix . "Package:Name" => $package['apkname'],
+		$prefix . "Package:SizeBytes" => $package['size'],
+		$prefix . "Package:SizeReadable" => util_readable_size($package['size']),
+		$prefix . "Package:Hash:Type" => $package['hash']['type'],
+		$prefix . "Package:Hash:Value" => $package['hash']['value'],
+		$prefix . "Package:DateAdded" => $package['added'],
+	);
+
+};//}}}
+function util_readable_size($size_bytes) {//{{{
+	return $size_bytes / 1048572 > 1
+		? round(($size_bytes / 1048572), 2) . " MB"
+		: round(($size_bytes / 1024), 2) . " kB";
+};//}}}
+function app_placeholders($app, $lang) {//{{{
+
+	$app_params = array(
+
+		"App:Id" => $app['id'],
+		"App:Id:Safe" => str_replace(array('.', ' '), '_', $app['id']),
+		"App:Name" => $app['name'],
+		"App:License" => translate('lic', $app['license'], $lang),
+		"App:Icon" => ICONS_DIR_ABSTRACT.DIRECTORY_SEPARATOR.$app['icon'],
+		"App:Summary"  => $app['summary'],
+		"App:IconPath" => ICONS_DIR.DIRECTORY_SEPARATOR.$app['icon'],
+		"App:DateUpdated" => $app['updated'],
+		"App:DateAdded" => $app['added'],
+		"App:Date" => $app['updated'] != $app['added'] ? $app['updated'] : $app['added'],
+		"App:Requirements" => $app['requirements'],
+		"App:Description" => $app['desc'],
+		"App:AntiFeaturesCommaSeparated" => $app['antifeatures'],
+		"App:Link" => '?sheet=' . $app['id'],
+
+		"App:Link:Website" => $app['web'],
+		"App:Link:IssueTracker" => $app['tracker'],
+		"App:Link:SourceCode" => $app['source'],
+
+		"App:Donate:HasDonationOptions" => $app['donate'] || $app['flattr'] || $app['bitcoin'],
+		"App:Donate:Link" => $app['donate'],
+		"App:Donate:FlattrLink" => $app['flattr'] ? FLATTR_SCHEME.$app['flattr'] : '',
+		"App:Donate:BitcoinAddress" => $app['bitcoin'],
+
+	);
+
+	$text_params = array(
+
+		"Text:Back" => translate('iface', 'back', $lang),
+		"Text:Summary" => translate('iface', 'summary', $lang),
+		"Text:Version" => translate('iface', 'version', $lang),
+		"Text:DateUpdated" => translate('iface', 'updated', $lang),
+		"Text:DateAdded" => translate('iface', 'added', $lang),
+		"Text:Date" => $app['updated'] != $app['added'] ? translate('iface', 'updated', $lang) : translate('iface', 'added', $lang),
+		"Text:License" => translate('iface', 'license', $lang),
+		"Text:Size" => translate('iface', 'size', $lang),
+		"Text:Requirements" => translate('iface', 'requirements', $lang),
+		"Text:Description" => translate('iface', 'desc', $lang),
+		"Text:Donate" => translate('iface', 'donate', $lang),
+		"Text:Flattr" => translate('iface', 'flattr', $lang),
+		"Text:Bitcoin" => translate('iface', 'bitcoin', $lang),
+		"Text:SdkVersion" => translate('iface', 'sdkver', $lang),
+		"Text:Website" => translate('iface', 'web', $lang),
+		"Text:IssueTracker" => translate('iface', 'tracker', $lang),
+		"Text:SourceCode" => translate('iface', 'sources', $lang),
+		"Text:AntiFeatures" => translate('iface', 'antifeatures', $lang),
+		"Text:Share" => translate('iface', 'share', $lang),
+		'Text:Download' => translate('iface', 'download', $lang),
+		'Text:Permissions' => translate('iface', 'permissions', $lang),
+		'Text:Categories' => translate('iface', 'categories', $lang),
+		"Text:Sheet" => translate('iface', 'sheet', $lang),
+		"Text:Hash" => translate('iface', 'hash', $lang),
+
+	);
+
+	return array_merge(
+		$app_params,
+		$text_params,
+		app_package_placeholders($app['packages'][0], "App:")
+	);
+
+}
+//}}}
 function decore_app_light($app_id, $lang) { //{{{
 	if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app_id) && is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app_id)) {
 		$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app_id));
@@ -765,21 +779,9 @@ function decore_app_abstract($app_id, $lang) { //{{{
 			return false;
 		};
 	};
-	$icon = ICONS_DIR_ABSTRACT.DIRECTORY_SEPARATOR.$app['icon'];
-	$license = "
-	<div title=\"".translate('iface', 'license', $lang).": ".translate('lic', $app['license'], $lang)."\">
-		<span>".translate('iface', 'license', $lang).": </span>
-		<span>".translate('lic', $app['license'], $lang)."</span>
-	</div>";
-	return "
-	<div id=\"last_".str_replace(array('.', ' '), '_', $app['id'])."\">
-		<img src=\"{$icon}\" alt=\"icone {$app['name']}\" />
-		<div>
-			<a aria-describedby=\"lastapplist\" href=\"?sheet={$app['id']}\" title=\"".
-			translate('iface', 'sheet', $lang).": {$app['name']}\">{$app['name']}</a>
-			{$license}
-		</div>
-	</div>";
+
+	return parse_template("app_abstract", app_placeholders($app, $lang));
+
 };
 //}}}
 function decore_applist($tampon, $lang, $nbr_app, $page) { //{{{
@@ -1248,4 +1250,3 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 		echo json_encode($result);
 	};
 };
-?>
