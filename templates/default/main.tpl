@@ -44,7 +44,12 @@
 
     [Subtemplate:MainContent]
 
-    [Subtemplate:Tools]
+    <aside id="tools" role="search">
+        [Subtemplate:Tools:Reset]
+        [Subtemplate:Tools:KeywordSearch]
+        [Subtemplate:Tools:Categories]
+        [Subtemplate:Tools:Licenses]
+    </aside>
 
     [Subtemplate:LastApp]
 

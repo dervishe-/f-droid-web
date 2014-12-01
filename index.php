@@ -193,28 +193,26 @@ function build_pager($current_page, $number_page, $lang) { //{{{
 	return $bloc;
 };//}}}
 function build_form_search($lang, $value='') { //{{{
-	return "
-<article id=\"search\">
-	<header>
-		<h2>".translate('iface', 'form_val', $lang)."</h2> 
-	</header>
-	<form method=\"POST\" action=\"?search\">
-		<label for=\"word_search\">".translate('iface', 'word_search', $lang)."</label>
-		<input id=\"word_search\" type=\"search\" name=\"val\" title=\"".translate('iface', 'form_field', $lang)."\" value=\"{$value}\" />
-		<input type=\"submit\" value=\"".translate('iface', 'form_val', $lang)."\" title=\"".translate('iface', 'form_val', $lang)."\" />
-	</form>
-	</article>";
+	return parse_template(
+		'search_keyword',
+		array(
+			'Text:FormValue' => translate('iface', 'form_val', $lang),
+			'Text:KeywordSearch' => translate('iface', 'word_search', $lang),
+			'Text:FormField' => translate('iface', 'form_field', $lang),
+			'Search:Keyword:Link' => '?search',
+			'Search:Keyword:Value' => $value, // TODO: Escape this value when neccessary - i.e. when it contains double quotes.
+		)
+	);
 };//}}}
 function build_reset($lang, $value='') { //{{{
-	return "
-<article id=\"reset\">
-	<header>
-		<h2>".translate('iface', 'reset', $lang)."</h2> 
-	</header>
-	<form method=\"POST\" action=\"?reset\">
-		<input type=\"submit\" value=\"".translate('iface', 'reset', $lang)."\" title=\"".translate('iface', 'form_reset', $lang)."\" />
-	</form>
-	</article>";
+	return parse_template(
+		'search_reset',
+		array(
+			'Text:Reset' => translate('iface', 'reset', $lang),
+			'Text:FormReset' => translate('iface', 'form_reset', $lang),
+			'Reset:Link' => '?reset',
+		)
+	);
 };//}}}
 function build_cache_data($hash) { //{{{
 	$dh = opendir(CACHE);
@@ -232,16 +230,6 @@ function build_cache_data($hash) { //{{{
 	$lic = cache_licenses($repos['list']);
 	$lst = cache_lastapps($repos);
 	return array('repos'=>$repos, 'cat'=>$cat, 'rel'=>$rel, 'lic'=>$lic, 'wrd'=>$words, 'lst'=>$lst);
-};
-//}}}
-function build_tools($relations, $licenses, $lang, $nbr) { //{{{
-	$value = (isset($_SESSION['words'])) ? implode('+', $_SESSION['words']) : '';
-	return "<aside id=\"tools\" role=\"search\">".
-			build_reset($lang).
-			build_form_search($lang, $value).
-			decore_categories($relations, $lang, $nbr).
-			decore_licenses($licenses, $lang, $nbr).
-			"</aside>";
 };
 //}}}
 function build_atom($repos, $list) { //{{{
@@ -827,106 +815,90 @@ function decore_lastapplist($list, $lang) { //{{{
 };
 //}}}
 function decore_categories($relations, $lang, $nbr_apps) { //{{{
-	$bloc = "";
-	if (count($relations) > 0) {
-		$bloc .= "
-		<article id=\"categories\">
-			<header>
-				<h2>".translate('iface', 'categories', $lang)."</h2>
-			</header>
-			<form method=\"POST\" action=\"index.php?search\">
-			<fieldset>
-				<legend>".translate('iface', 'categories_list', $lang)."</legend>
-				<ul>";
-		$lab_all_cat = translate('iface', 'all_categories', $lang);
-		$flagCheck = (!isset($_SESSION['categories'])) ? "checked=\"checked\"" : '';
-		$bloc .= "
-		<li>
-			<input type=\"checkbox\" id=\"all_cat\" name=\"cat[]\" value=\"all\" {$flagCheck} title=\"".
-				translate('iface', 'alt_cat_link', $lang).": {$lab_all_cat}\" />
-			<label for=\"all_cat\">{$lab_all_cat} ({$nbr_apps})</label>
-		</li>";
-		$tab_relations = array();
-		$recorded_cats = (isset($_SESSION['categories'])) ? array_flip($_SESSION['categories']) : array();
-		reset($relations);
-		$i = 0;
-		while (false !== ($cat = current($relations))) {
-			$name_cat = translate('cat', key($relations), $lang);
-			$flagCheck = (isset($recorded_cats[key($relations)])) ? "checked=\"checked\"" : '';
-			$str = "
-			<li>
-				<input type=\"checkbox\" id=\"cat_{$i}\" name=\"cat[]\" value=\"".
-					key($relations)."\" {$flagCheck} title=\"".
-					translate('iface', 'alt_cat_link', $lang).": {$name_cat}\" />
-				<label for=\"cat_{$i}\">{$name_cat} (".count($cat).")</label>
-			</li>
-			";
-			$tab_relations[$name_cat] = $str;
-			$i++;
-			next($relations);
-		};
-		ksort($tab_relations);
-		$bloc .= implode('', $tab_relations);
-		$bloc .= "
-		<li>
-			<input type=\"submit\" value=\"".translate('iface', 'form_val', $lang).
-				"\" title=\"".translate('iface', 'form_val', $lang).
-				": ".translate('iface', 'categories', $lang).
-				"\" name=\"".translate('iface', 'categories', $lang)."\" />
-		</li>
-		</ul></fieldset></form></article>";
-		return $bloc;
+	if (!is_array($relations) || count($relations) <= 0) {
+		return '';
+	}
+
+	$recorded_cats = (isset($_SESSION['categories'])) ? array_flip($_SESSION['categories']) : array();
+	$i = 1;
+	$category_list = array();
+	foreach ($relations as $category => $apps) {
+		$category_list[$category] = parse_template(
+			'search_categories_category',
+			array(
+				'Text:AltCategoryLink' => translate('iface', 'alt_cat_link', $lang),
+				'Category:Index' => $i++,
+				'Category:Id' => $category,
+				'Category:Name' => translate('cat', $category, $lang),
+				'Category:AppCount' => count($apps),
+				'Category:Selected' => isset($recorded_cats[$category]) ? '1' : '0',
+			)
+		);
 	};
+	ksort($category_list);
+	$category_list_template = implode('', $category_list);
+
+	return parse_template(
+		'search_categories',
+		array(
+			'Text:FormValue' => translate('iface', 'form_val', $lang),
+			'Text:Categories' => translate('iface', 'categories', $lang),
+			'Text:CategoriesList' => translate('iface', 'categories_list', $lang),
+			'Text:AllCategoriesLink' => translate('iface', 'alt_cat_link', $lang),
+			'Text:AllCategoriesLabel' => translate('iface', 'all_categories', $lang),
+
+			'Search:Categories:TotalAppCount' => $nbr_apps,
+			'Search:Categories:AllCategoriesSelected' => !isset($_SESSION['categories']) ? '1' : '0',
+			'Search:Categories:Link' => 'index.php?search',
+
+			'Subtemplate:CategoryItems' => $category_list_template,
+		)
+	);
 };	
 //}}}
 function decore_licenses($licenses, $lang, $nbr_apps) { //{{{
-	$bloc = "";
-	if (count($licenses) > 0) {
-		$bloc .= "
-		<article id=\"licenses\">
-			<header>
-				<h2>".translate('iface', 'license', $lang)."</h2>
-			</header>
-			<form method=\"POST\" action=\"index.php?search\">
-			<fieldset>
-				<legend>".translate('iface', 'license_list', $lang)."</legend>
-		<ul>";
-		$lab_all_lic = translate('iface', 'all_licenses', $lang);
-		$flagCheck = (!isset($_SESSION['licenses'])) ? "checked=\"checked\"" : '';
-		$bloc .= "
-		<li>
-			<input type=\"checkbox\" id=\"all_lic\" name=\"lic[]\" value=\"all\" {$flagCheck} title=\"".translate('iface', 'alt_lic_link', $lang).": {$lab_all_lic}\" />
-			<label for=\"all_lic\">{$lab_all_lic} ({$nbr_apps})</label>
-		</li>";
-		$tab_licenses = array();
-		$recorded_lics = (isset($_SESSION['licenses'])) ? array_flip($_SESSION['licenses']) : array();
-		reset($licenses);
-		$i = 0;
-		while (false !== ($lic = current($licenses))) {
-			$name_lic = translate('lic', key($licenses), $lang);
-			$flagCheck = (isset($recorded_lics[key($licenses)])) ? "checked=\"checked\"" : '';
-			$str = "
-			<li>
-				<input type=\"checkbox\" id=\"lic_{$i}\" name=\"lic[]\" value=\"".key($licenses)."\" {$flagCheck} title=\"".translate('iface', 'alt_lic_link', $lang).": {$name_lic}\" />
-				<label for=\"lic_{$i}\">{$name_lic} (".count($lic).")</label>
-			</li>
-			";
-			$tab_licenses[$name_lic] = $str;
-			$i++;
-			next($licenses);
-		};
-		ksort($tab_licenses);
-		$bloc .= implode('', $tab_licenses);
-		$bloc .= "
-		<li>
-			<input type=\"submit\" value=\"".
-				translate('iface', 'form_val', $lang).
-				"\" title=\"".translate('iface', 'form_val', $lang).
-				": ".translate('iface', 'license', $lang).
-				"\" name=\"".translate('iface', 'license', $lang)."\" />
-		</li></ul></fieldset></form></article>";
-		return $bloc;
+	if (!is_array($licenses) || count($licenses) <= 0) {
+		return '';
+	}
+
+	$license_list = array();
+	$recorded_lics = (isset($_SESSION['licenses'])) ? array_flip($_SESSION['licenses']) : array();
+	$i = 1;
+	foreach ($licenses as $license => $apps) {
+		$name_lic = translate('lic', $license, $lang);
+		$license_list[$name_lic] = parse_template(
+			'search_licenses_license',
+			array(
+				'Text:AltLicenseLink' => translate('iface', 'alt_lic_link', $lang),
+
+				'License:Name' => $name_lic,
+				'License:Id' => $license,
+				'License:Index' => $i++,
+				'License:AppCount' => count($apps),
+				'License:Selected' => isset($recorded_lics[$license]) ? '1' : '0',
+			)
+		);
 	};
+
+	ksort($license_list);
+	$license_list_template = implode('', $license_list);
+
+	return parse_template(
+		'search_licenses',
+		array(
+			'Text:License' => translate('iface', 'license', $lang),
+			'Text:LicenseList' => translate('iface', 'license_list', $lang),
+			'Text:AllLicenses' => translate('iface', 'all_licenses', $lang),
+			'Text:AltLicenseLink' => translate('iface', 'alt_lic_link', $lang),
+			'Text:FormValue' => translate('iface', 'form_val', $lang),
+
+			'Search:Licenses:Link' => 'index.php?search',
+			'Search:Licenses:TotalAppCount' => $nbr_apps,
+			'Search:Licenses:AllLicensesSelected' => !isset($_SESSION['licenses']) ? '1' : '0',
+
+			'Subtemplate:LicenseItems' => $license_list_template,
+		)
+	);
 };	
 //}}}
 function decore_headers($repos, $lang_label, $lang) { //{{{
@@ -1220,8 +1192,11 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 
 		'Subtemplate:Headers' => decore_headers($repos, $lang_label, $lang),
 		'Subtemplate:MainContent' => $main,
-		'Subtemplate:Tools' => build_tools($relations, $licenses, $lang, $repos['nbr']),
 		'Subtemplate:LastApp' => $lastapp,
+		'Subtemplate:Tools:KeywordSearch' => build_form_search($lang, (isset($_SESSION['words'])) ? implode('+', $_SESSION['words']) : ''),
+		'Subtemplate:Tools:Categories' => decore_categories($relations, $lang, $repos['nbr']),
+		'Subtemplate:Tools:Reset' => build_reset($lang),
+		'Subtemplate:Tools:Licenses' => decore_licenses($licenses, $lang, $repos['nbr']),
 	);
 
 	echo parse_template('main', $placeholders);
