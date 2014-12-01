@@ -138,7 +138,6 @@ function build_lang_selector($lang_label, $lang) { //{{{
 	return $bloc;
 };//}}}
 function build_pager($current_page, $number_page, $lang) { //{{{
-	$bloc = "<div><span>".translate('iface', 'page', $lang).":</span><ul>";
 	$nb = NUMBER_PAGES - 1;
 	if ($number_page <= NUMBER_PAGES) {
 		$page_init = 1;
@@ -154,42 +153,36 @@ function build_pager($current_page, $number_page, $lang) { //{{{
 	} else {
 		$page_end = min(array($current_page + floor($nb / 2) + ($nb % 2), $number_page));
 	};
+
+	$render_pager_item = function($page_num, $selected = false, $spacer = false) use ($lang) {
+		return parse_template(
+			'applist_pageritem',
+			array(
+				'Pager:Link' => '?page=' . $page_num,
+				'Pager:Number' => $page_num,
+				'Text:GoToPage' => translate('iface', 'go_to_page', $lang),
+				'Pager:IsSelected' => $selected ? '1' : '0',
+				'Pager:IsSpacer' => $spacer ? '1' : '0',
+				'Pager:IsButton' => !$selected && !$spacer,
+			)
+		);
+	};
+
 	if ($current_page > floor($nb / 2) + 1) {
-		$bloc .= "
-		<li>
-			<a href=\"?page=1\" title=\"".translate('iface', 'go_to_page', $lang)." 1\">
-				1
-			</a>
-		</li>";
+		$bloc .= $render_pager_item(1);
 	};
-	if ($page_init > 2) $bloc .= "<li> .. </li>";
+	if ($page_init > 2) $bloc .= $render_pager_item(0, false, true);
 	for ($i = $page_init; $i < $current_page; $i++) { 
-		$bloc .= "
-		<li>
-			<a href=\"?page={$i}\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">
-				{$i}
-			</a>
-		</li>";
+		$bloc .= $render_pager_item($i);;
 	};
-	$bloc .= "<li><span>{$current_page}</span></li>";
+	$bloc .= $render_pager_item($current_page, true);
 	for ($i = $current_page + 1; $i <= $page_end; $i++) { 
-		$bloc .= "
-			<li>
-				<a href=\"?page={$i}\" title=\"".translate('iface', 'go_to_page', $lang)." {$i}\">
-				{$i}
-				</a>
-			</li>";
+		$bloc .= $render_pager_item($i);
 	};
-	if ($page_end < $number_page - 1) $bloc .= "<li> .. </li>";
+	if ($page_end < $number_page - 1) $bloc .= $render_pager_item(0, false, true);
 	if ($current_page < $number_page - ceil($nb / 2)) {
-		$bloc .= "
-		<li>
-			<a href=\"?page={$number_page}\" title=\"".translate('iface', 'go_to_page', $lang)." {$number_page}\">
-				{$number_page}
-			</a>
-		</li>";
+		$bloc .= $render_pager_item($number_page);
 	};
-	$bloc .= "</ul></div>";
 	return $bloc;
 };//}}}
 function build_form_search($lang, $value='') { //{{{
@@ -700,61 +693,11 @@ function decore_app_light($app_id, $lang) { //{{{
 			return false;
 		};
 	};
-	$icon = ICONS_DIR_ABSTRACT.DIRECTORY_SEPARATOR.$app['icon'];
-	if ($app['updated'] == $app['added']) {
-		$version = "
-		<li>
-			<span>".translate('iface', 'version', $lang).":</span>
-			<span>{$app['packages'][0]['version']}</span> - <span>".
-			translate('iface', 'added', $lang).":</span> 
-			<span>{$app['added']}</span>
-		</li>";
-	} else {
-		$version = "
-		<li>
-			<span>".translate('iface', 'version', $lang).":</span>
-			<span>{$app['packages'][0]['version']}</span> - <span>".
-			translate('iface', 'updated', $lang).":</span> 
-			<span>{$app['updated']}</span>
-		</li>";
-	};
-	$sum_label = translate('iface', 'summary', $lang);
-	$summary = "<span id=\"desc_{$app['id']}\" title=\"{$sum_label}\">{$app['summary']}</span>";
-	$size = $app['packages'][0]['size'];
-	if (($size / 1048572) > 1) {
-		$size /= 1048572;
-		$size = "<li><span>".translate('iface', 'size', $lang).":</span><span>".round($size, 2)." MB</span></li>";
-	} else {
-		$size /= 1024;
-		$size = "<li><span>".translate('iface', 'size', $lang).":</span><span>".round($size, 2)." kB</span></li>";
-	};
-	$block = "
-<article id=\"".str_replace(array('.', ' ', '_'), '-', $app['id'])."\">
-	<header>
-		<h3>
-			<img src=\"{$icon}\" alt=\"icone {$app['name']}\" />
-			<span>{$app['name']}</span>
-		</h3>
-		{$summary}
-	</header>
-	<div>
-		<a href=\"{$app['packages'][0]['apkname']}\" title=\"".
-		translate('iface', 'download', $lang).
-		": {$app['name']}\" aria-describedby=\"desc_{$app['id']}\">".
-		translate('iface', 'download', $lang).
-		"</a>
-		<a href=\"?sheet={$app['id']}\" title=\"".
-		translate('iface', 'sheet', $lang).
-		": {$app['name']}\" aria-describedby=\"desc_{$app['id']}\">".
-		translate('iface', 'sheet', $lang).
-		"</a>
-	</div>
-	<ul>
-	{$size}
-	{$version}
-	</ul>
-</article>";
-	return $block;
+
+	return parse_template(
+		'applist_app',
+		app_placeholders($app, $lang)
+	);
 };
 //}}}
 function decore_app_abstract($app_id, $lang) { //{{{
@@ -769,49 +712,52 @@ function decore_app_abstract($app_id, $lang) { //{{{
 		};
 	};
 
-	return parse_template("app_abstract", app_placeholders($app, $lang));
+	return parse_template("latestapps_app", app_placeholders($app, $lang));
 
 };
 //}}}
 function decore_applist($tampon, $lang, $nbr_app, $page) { //{{{
-	$pager = build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang);
-	$block = "
-<section id=\"applist\">
-	<header>
-		<h2>".translate('iface', 'applist', $lang).": 
-			<span title=\"".translate('iface', 'nbr_result', $lang).
-			": {$nbr_app}\">({$nbr_app})</span>
-		</h2>
-	</header>";
-	if ($nbr_app > 0) {
-		foreach($tampon as $app) { $block .= decore_app_light($app, $lang); };
-		$block .= "<footer>";
-		$block .= build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang);
-		$block .= "</footer>";
-	} else {
-		$block .= '<p>'.translate('iface', 'no_result', $lang).'</p>';
-	};
-	$block .= "
-</section>
-";
-	return $block;
+	$app_list = '';
+	foreach($tampon as $app) {
+		$app_list .= decore_app_light($app, $lang);
+	}
+
+	return parse_template(
+		'applist',
+		array(
+			'Text:AppList' => translate('iface', 'applist', $lang),
+			'Text:NumResults' => translate('iface', 'nbr_result', $lang),
+			'Text:NoResults' => translate('iface', 'no_result', $lang),
+			'Text:Page' => translate('iface', 'page', $lang),
+
+			'AppList:NumResults' => $nbr_app,
+			'AppList:HasNoResults' => $nbr_app <= 0,
+			'AppList:HasResults' => $nbr_app > 0,
+
+			'Subtemplate:AppItems' => $app_list,
+			'Subtemplate:PagerItems' => build_pager($page, ceil($nbr_app / RECORDS_PER_PAGE), $lang),
+		)
+	);
 };
 //}}}
 function decore_lastapplist($list, $lang) { //{{{
-	$content = '';
+	$app_list = '';
 	if (count($list) > 0) {
-		foreach($list as $app) { $content .= decore_app_abstract($app, $lang); };
-	} else {
-		$content .= '<p>'.translate('iface', 'no_apps', $lang).'</p>';
-	};
-	return "
-<aside id=\"lastapplist\" role=\"complementary\">
-	<header>
-		<h2>".translate('iface', 'lastapplist', $lang)."</h2>
-	</header>
-	{$content}
-</aside>
-";
+		foreach($list as $app) {
+			$app_list .= decore_app_abstract($app, $lang);
+		}
+	}
+
+	return parse_template(
+		'latestapps',
+		array(
+			'Text:LatestAppList' => translate('iface', 'lastapplist', $lang),
+			'Text:NoApps' => translate('iface', 'no_apps', $lang),
+			'AppList:HasNoResults' => count($list) <= 0,
+			'AppList:HasResults' => count($list) > 0,
+			'Subtemplate:AppItems' => $app_list,
+		)
+	);
 };
 //}}}
 function decore_categories($relations, $lang, $nbr_apps) { //{{{
