@@ -246,17 +246,17 @@ function build_atom($repos, $list) { //{{{
 	$date = date('c', $repos['timestamp']);
 	$feed = "";
 	$i = 0;
-	$_xml = simplexml_load_file(DATA);
-	foreach ($list as $app) {
-		if (!is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app) || !is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app)) {
-			$app = build_app($_xml, $app);
-		} else {
-			$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
-		};
-		$time_comp = explode('-', $app['updated']);
-		$date_app = date('c', mktime(0, $i, 0, $time_comp[1], $time_comp[2], $time_comp[0]));
-		$i++;
-		$feed .= "
+	if (is_file(DATA) && is_readable(DATA) && ($_xml = simplexml_load_file(DATA)) !== false) {
+		foreach ($list as $app) {
+			if (!is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app) || !is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app)) {
+				$app = build_app($_xml, $app);
+			} else {
+				$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
+			};
+			$time_comp = explode('-', $app['updated']);
+			$date_app = date('c', mktime(0, $i, 0, $time_comp[1], $time_comp[2], $time_comp[0]));
+			$i++;
+			$feed .= "
 <entry>
 	<title>{$app['name']}</title>
 	<link href=\"{$scheme}{$_SERVER['SERVER_NAME']}/?sheet={$app['id']}\" />
@@ -264,6 +264,24 @@ function build_atom($repos, $list) { //{{{
 	<updated>{$date_app}</updated>
 	<summary>{$app['summary']}</summary>
 </entry>";
+		};
+	} else {
+		foreach ($list as $app) {
+			if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app)) {
+				$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
+				$time_comp = explode('-', $app['updated']);
+				$date_app = date('c', mktime(0, $i, 0, $time_comp[1], $time_comp[2], $time_comp[0]));
+				$i++;
+				$feed .= "
+<entry>
+	<title>{$app['name']}</title>
+	<link href=\"{$scheme}{$_SERVER['SERVER_NAME']}/?sheet={$app['id']}\" />
+	<id>{$scheme}{$_SERVER['SERVER_NAME']}/{$app['packages'][0]['apkname']}</id>
+	<updated>{$date_app}</updated>
+	<summary>{$app['summary']}</summary>
+</entry>";
+			};
+		};
 	};
 	$bloc = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
 <feed xmlns=\"http://www.w3.org/2005/Atom\">
@@ -364,8 +382,8 @@ function cache_lastapps($repos) { //{{{
 		};
 	} elseif (count($repos['list']) > 0) {		// Fallback: if DATA is not present, then we use app file stored in cache
 		foreach ($repos['list'] as $app) {
-			if (is_file(CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app)) {
-				$app = unserialize(file_get_contents($app));
+			if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app)) {
+				$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
 				$idx = $app['updated'];
 				if (!isset($last[$idx])) $last[$idx] = array();
 				$last[$idx][] = $app['id'];
@@ -376,7 +394,7 @@ function cache_lastapps($repos) { //{{{
 	if (count($last) > 0) {
 		krsort($last);
 		reset($last);
-		while (count($result) <= 10 && current($last)) {
+		while (current($last)) {
 			$result = array_merge($result, current($last));
 			next($last);
 		};
