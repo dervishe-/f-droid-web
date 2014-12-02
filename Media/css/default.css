@@ -34,7 +34,7 @@
 	padding: 0.2em;
 }
 
-#lang li span {
+#lang li.selected {
 	opacity: 0.4;
 }
 /*}}}*/
