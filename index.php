@@ -138,6 +138,7 @@ function build_lang_selector($lang_label, $lang) { //{{{
 	return $bloc;
 };//}}}
 function build_pager($current_page, $number_page, $lang) { //{{{
+	$bloc = '';
 	$nb = NUMBER_PAGES - 1;
 	if ($number_page <= NUMBER_PAGES) {
 		$page_init = 1;
@@ -1144,7 +1145,6 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {//{{{
 		$label_menu = translate('iface', 'applist', $lang);
 		$main = $applist;
 	}; //}}}
-
 	//}}}
 
 	$placeholders = array(
