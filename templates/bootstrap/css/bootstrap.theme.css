@@ -1,0 +1,184 @@
+img {
+    font-size: 0; /* During development, the icons are often not available. This ensures that although the images
+    have a meaningful 'alt' attribute for accessibility, they are not shown largely on screen. */
+}
+
+img#repo-qr, #lang {
+    float: right;
+}
+
+ul.lang-selector, ul.lang-selector li {
+    list-style: none;
+    margin: 0;
+    display: inline;
+}
+
+.hidden {
+    display: none;
+}
+
+.widget-panel .accordian.collapsed .up {
+    display:none;
+}
+
+.widget-panel .accordian:not(.collapsed) .down {
+    display:none;
+}
+
+body {
+    padding-top: 40px; /* http://getbootstrap.com/components/#navbar-fixed-top */
+}
+
+#clear-search {
+    margin-top: 0.5em;
+    float: right;
+}
+
+#categories, #licenses {
+    clear: both;
+}
+
+#categories legend,
+#licenses   legend {
+    margin-top: 0.5em;
+}
+
+ul.filter-items {
+    list-style: none;
+    margin-left: 0;
+    padding-left: 0.5em;
+}
+
+#categories label, #licenses label {
+    font-weight: normal;
+}
+
+#licenses   .accordian .glyphicon,
+#categories .accordian .glyphicon {
+    font-size: 0.75em;
+    line-height: 1.5em;
+}
+
+.app-abstract .panel-body {
+    padding: 0.7em;
+}
+
+ul.app-details {
+    list-style: none;
+    margin-left: 0;
+    padding-left: 0.5em;
+    padding-top: 0.7em;
+    font-size: 0.8em;
+}
+
+.app-summary {
+    font-size: 0.8em;
+}
+
+ul.anti-features {
+    margin-top: 0.5em;
+}
+
+ul.anti-features li {
+    margin-top: 0.5em;
+}
+
+.permission-container a {
+    color: #8A6D3B;
+}
+
+#appsheet h2 small {
+    margin-left: 0.5em;
+}
+
+#appsheet .summary {
+    font-size: 1.2em;
+}
+
+#social_links {
+    margin-bottom: 0.5em;
+}
+
+#social_links a {
+    margin: 0.8em 0.2em;
+}
+
+#appsheet #details .info {
+    font-size: 0.8em;
+    width: 100%;
+}
+
+#appsheet #details .info .btn {
+    width: 100%;
+}
+
+#appsheet #details {
+    float: right;
+    margin-left: 1em;
+}
+
+#download, #social_links {
+    text-align: center;
+}
+
+#hash.hash-container .hash-value {
+    margin: auto;
+    max-width: 10em;
+}
+
+.hash-container .hash-value {
+    display: block;
+    word-wrap: break-word;
+    font-family: "Courier New", "DejaVu Sans Mono", monospace;
+}
+
+#block_dev a.btn {
+    width: 100%;
+    margin: 0.3em 0.5em;
+}
+
+#used_categories, #perms, #antifeatures {
+    display: inline-block;
+    min-width: 50%;
+}
+
+.package .info {
+    margin: 0.5em 0;
+}
+
+@media screen and (max-width: 768px) {
+    #appsheet #details {
+        float: none;
+        display: inline-block;
+    }
+
+    #appsheet h2 > small {
+        display: block;
+        margin-top: 0.5em;
+    }
+}
+
+#latest-apps .icon {
+    float: left;
+}
+
+#latest-apps .app .details {
+    margin-left: 60px;
+}
+
+#latest-apps .app {
+    clear: both;
+    margin: 2em 0;
+}
+
+#latest-apps .app:first-of-type {
+    margin-top: 0;
+}
+
+#applist .app h3 > .text {
+    word-wrap: break-word;
+}
+
+#repo-icon {
+    float: left;
+}

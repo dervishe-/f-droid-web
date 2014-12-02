@@ -68,11 +68,13 @@ function build_structure($_xml) { //{{{
 	file_put_contents(REPOS_FILE, serialize($repos));
 	if (USE_QRCODE) {
 		include_once('phpqrcode/phpqrcode.php');
-		$url = "{$repos['url']}?fingerprint=".hash(HASH_REPOS_PUBKEY, hex2bin($repos['pubkey']));
-		QRCode::png($url, REPOS_QRCODE);
+		QRCode::png(repo_qr_url($repos), REPOS_QRCODE);
 	};
 	return $repos;
 };//}}}
+function repo_qr_url($repos) {//{{{
+	return "{$repos['url']}?fingerprint=".hash(HASH_REPOS_PUBKEY, hex2bin($repos['pubkey']));
+}//}}}
 function build_app($_xml, $id_app) { //{{{
 	$app = $_xml->xpath("application[@id='$id_app']");
 	$app = $app[0];
@@ -689,6 +691,7 @@ function app_placeholders($app, $lang) {//{{{
 		"Text:Back" => translate('iface', 'back', $lang),
 		"Text:Summary" => translate('iface', 'summary', $lang),
 		"Text:Version" => translate('iface', 'version', $lang),
+		"Text:PastVersions" => translate('iface', 'past_versions', $lang),
 		"Text:DateUpdated" => translate('iface', 'updated', $lang),
 		"Text:DateAdded" => translate('iface', 'added', $lang),
 		"Text:Date" => $app['updated'] != $app['added'] ? translate('iface', 'updated', $lang) : translate('iface', 'added', $lang),
@@ -895,6 +898,8 @@ function decore_headers($repos, $lang_label, $lang) { //{{{
 		'Text:RepoQrCode' => translate('iface', 'qrcode_repo', $lang),
 
 		'Repo:Name' => $repos['name'],
+		'Repo:Url' => repo_qr_url($repos),
+		'Repo:Link:Home' => 'index.php',
 		'Repo:Description' => $repos['desc'],
 		'Repo:LastModified' => date('Y-m-d', $repos['timestamp']),
 		'Repo:IconPath' => 'Media/images/' . $repos['icon'],
@@ -1152,6 +1157,7 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {//{{{
 
 		'Text:Warning' => translate('iface', 'warning_label', $lang),
 		'Text:Menu' => translate('iface', 'menu', $lang),
+		'Text:Search' => translate('iface', 'form_val', $lang),
 
 		'Text:Nav:AccessFormVal' => translate('iface', 'access_form_val', $lang),
 		'Text:Nav:FormVal' => translate('iface', 'form_val', $lang),
