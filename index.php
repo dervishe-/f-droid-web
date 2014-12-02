@@ -43,15 +43,15 @@ define('HASH_REPOS_PUBKEY', 'sha256');
 define('USE_QRCODE', true);
 define('USE_FEEDS', true);
 define('USE_SOCIAL', true);
-define('FEED_AUTHOR', "The Atom feed's author");
+define('FEED_AUTHOR', 'Les Petits Débrouillards');
 define('NUMBER_LAST_APP', 10);
 define('RECORDS_PER_PAGE', 12);
 define('NUMBER_PAGES', 9);		// Fixe the number of appearing page numbers in the pager
 define('DEFAULT_LANG', 'fr');	// Fixe the localization of the UI
-define('LOCALIZATION', 'fr');	// Fixe the localization of the search (mainly related to the languages in which the apps are describes)
-define('MSG_FOOTER', "You're footer's message");//}}}
+define('LOCALIZATION', 'en');	// Fixe the localization of the search (mainly related to the languages in which the apps are describes)
+define('MSG_FOOTER', '(C) Association Française des Petits Débrouillards - Licence: LGPL');//}}}
 // ALLOWED VALUES
-$formats = array('json' => 1);
+$formats = array('json' => 1, 'atom' => 2);
 //}}}
 //{{{ Library
 function build_structure($_xml) { //{{{
@@ -225,23 +225,23 @@ function build_cache_data($hash) { //{{{
 	return array('repos'=>$repos, 'cat'=>$cat, 'rel'=>$rel, 'lic'=>$lic, 'wrd'=>$words, 'lst'=>$lst);
 };
 //}}}
-function build_atom($repos, $list) { //{{{
+function build_atom($repos, $list, $url=null) { //{{{
 	$scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != '') ? 'https://' : 'http://';
 	$icon = "{$_SERVER['SERVER_NAME']}/Media/images/{$repos['icon']}";
 	$date = date('c', $repos['timestamp']);
 	$feed = "";
 	$i = 0;
-	$_xml = simplexml_load_file(DATA);
-	foreach ($list as $app) {
-		if (!is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app) || !is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app)) {
-			$app = build_app($_xml, $app);
-		} else {
-			$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
-		};
-		$time_comp = explode('-', $app['updated']);
-		$date_app = date('c', mktime(0, $i, 0, $time_comp[1], $time_comp[2], $time_comp[0]));
-		$i++;
-		$feed .= "
+	if (is_file(DATA) && is_readable(DATA) && ($_xml = simplexml_load_file(DATA)) !== false) {
+		foreach ($list as $app) {
+			if (!is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app) || !is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app)) {
+				$app = build_app($_xml, $app);
+			} else {
+				$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
+			};
+			$time_comp = explode('-', $app['updated']);
+			$date_app = date('c', mktime(0, $i, 0, $time_comp[1], $time_comp[2], $time_comp[0]));
+			$i++;
+			$feed .= "
 <entry>
 	<title>{$app['name']}</title>
 	<link href=\"{$scheme}{$_SERVER['SERVER_NAME']}/?sheet={$app['id']}\" />
@@ -249,12 +249,32 @@ function build_atom($repos, $list) { //{{{
 	<updated>{$date_app}</updated>
 	<summary>{$app['summary']}</summary>
 </entry>";
+		};
+	} else {
+		foreach ($list as $app) {
+			if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app)) {
+				$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
+				$time_comp = explode('-', $app['updated']);
+				$date_app = date('c', mktime(0, $i, 0, $time_comp[1], $time_comp[2], $time_comp[0]));
+				$i++;
+				$feed .= "
+<entry>
+	<title>{$app['name']}</title>
+	<link href=\"{$scheme}{$_SERVER['SERVER_NAME']}/?sheet={$app['id']}\" />
+	<id>{$scheme}{$_SERVER['SERVER_NAME']}/{$app['packages'][0]['apkname']}</id>
+	<updated>{$date_app}</updated>
+	<summary>{$app['summary']}</summary>
+</entry>";
+			};
+		};
 	};
+	$url = (is_null($url)) ? '/'.FEED_NAME : $url;
+	$url = "{$scheme}{$_SERVER['SERVER_NAME']}".$url;
 	$bloc = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
 <feed xmlns=\"http://www.w3.org/2005/Atom\">
 	<title>{$repos['name']}</title>
 	<subtitle>{$repos['desc']}</subtitle>
-	<link rel=\"self\" href=\"{$scheme}{$_SERVER['SERVER_NAME']}/".FEED_NAME."\" />
+	<link rel=\"self\" href=\"{$url}\" />
 	<updated>{$date}</updated>
 	<id>{$scheme}{$_SERVER['SERVER_NAME']}/</id>
 	<logo>{$icon}</logo>
@@ -263,7 +283,24 @@ function build_atom($repos, $list) { //{{{
 	</author>
 	{$feed}
 </feed>";
-	file_put_contents(FEED_NAME, $bloc);
+	return $bloc;
+};
+//}}}
+function build_list($relations, $licenses, $words, $list) { //{{{
+	if (isset($_REQUEST['reset'])) {
+		unset($_SESSION['licenses']);
+		unset($_SESSION['categories']);
+		unset($_SESSION['words']);
+		unset($_SESSION['list']);
+		unset($_SESSION['page']);
+	} elseif (isset($_REQUEST['search'])) {
+		unset($_SESSION['list']);
+		unset($_SESSION['page']);
+		$list = apply_filters($relations, $licenses, $words, $list);
+	} elseif (isset($_SESSION['list'])) {
+		$list = $_SESSION['list'];
+	};
+	return $list;
 };
 //}}}
 function cache_categories($repos) { //{{{
@@ -349,8 +386,8 @@ function cache_lastapps($repos) { //{{{
 		};
 	} elseif (count($repos['list']) > 0) {		// Fallback: if DATA is not present, then we use app file stored in cache
 		foreach ($repos['list'] as $app) {
-			if (is_file(CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app)) {
-				$app = unserialize(file_get_contents($app));
+			if (is_file(APP_CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(APP_CACHE.DIRECTORY_SEPARATOR.$app)) {
+				$app = unserialize(file_get_contents(APP_CACHE.DIRECTORY_SEPARATOR.$app));
 				$idx = $app['updated'];
 				if (!isset($last[$idx])) $last[$idx] = array();
 				$last[$idx][] = $app['id'];
@@ -361,13 +398,13 @@ function cache_lastapps($repos) { //{{{
 	if (count($last) > 0) {
 		krsort($last);
 		reset($last);
-		while (count($result) <= 10 && current($last)) {
+		while (current($last)) {
 			$result = array_merge($result, current($last));
 			next($last);
 		};
 		$result = array_slice($result, 0, NUMBER_LAST_APP);
 	};
-	if (USE_FEEDS) build_atom($repos, $result);
+	if (USE_FEEDS) file_put_contents(FEED_NAME, build_atom($repos, $result));
 	if (count($result) > 0) file_put_contents(LAST_FILE, serialize($result));
 	return $result;
 };
@@ -716,9 +753,9 @@ function decore_app_abstract($app_id, $lang) { //{{{
 
 };
 //}}}
-function decore_applist($tampon, $lang, $nbr_app, $page) { //{{{
+function decore_applist($buffer, $lang, $nbr_app, $page) { //{{{
 	$app_list = '';
-	foreach($tampon as $app) {
+	foreach($buffer as $app) {
 		$app_list .= decore_app_light($app, $lang);
 	}
 
@@ -865,6 +902,19 @@ function decore_headers($repos, $lang_label, $lang) { //{{{
 	);
 	return parse_template('main_headers', $placeholders);
 };//}}}
+function sanitize($text, $stopwords) { //{{{
+	$pattern_markup = "/<\/?[^>]*>/";
+	$quote_list = "\"“”’«";
+	$pattern_split = "/[{$quote_list}{}\[\]{}\(\)+=_*<>!?.,;:\/\s]+/";
+	$pattern_surround = "/[{$quote_list}']?([^{$quote_list}']*)[{$quote_list}']?/";
+	$buffer = preg_split($pattern_split, preg_replace($pattern_markup, ' ', trim(strtolower($text))));
+	$result = array();
+	foreach ($buffer as $key) {
+		$tmp = preg_replace($pattern_surround, '\1', $key);
+		if (strlen($tmp) > 2) $result[] = $tmp;
+	};
+	return array_unique(array_diff($result, $stopwords));
+};//}}}
 function sanitize_entry($words) { //{{{
 	$buffer = array();
 	foreach ($words as $item) $buffer[] = htmlentities($item);
@@ -948,6 +998,20 @@ function apply_filters($relations, $licenses, $words, $repos) { //{{{
 	} else {
 		return $repos;
 	};
+};
+//}}}
+function select_page($nbr_app) { //{{{
+	if (isset($_REQUEST['page'])) {
+		$page = filter_var($_REQUEST['page'], FILTER_VALIDATE_INT);
+		if ($page === false || ((int) $page - 1) * RECORDS_PER_PAGE > $nbr_app || $page < 1) $page = 1;
+		$_SESSION['page'] = $page;
+	} elseif (isset($_SESSION['page'])) {
+		$page = $_SESSION['page'];
+	} else {
+		unset($_SESSION['page']);
+		$page = 1;
+	};
+	return $page;
 };
 //}}}
 //}}}
@@ -1049,37 +1113,11 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 	};
 };
 //}}}
-if (isset($_REQUEST['reset'])) {
-	unset($_SESSION['licenses']);
-	unset($_SESSION['categories']);
-	unset($_SESSION['words']);
-	unset($_SESSION['list']);
-	unset($_SESSION['page']);
-	$list = $repos['list'];
-} elseif (isset($_REQUEST['search'])) {
-	unset($_SESSION['list']);
-	unset($_SESSION['page']);
-	$list = apply_filters($relations, $licenses, $words, $repos['list']);
-} elseif (isset($_SESSION['list'])) {
-	$list = $_SESSION['list'];
-} else {
-	$list = $repos['list'];
-};
-$nbr_app = count($list);
-//{{{Select page
-if (isset($_REQUEST['page'])) {
-	$page = filter_var($_REQUEST['page'], FILTER_VALIDATE_INT);
-	if ($page === false || ((int) $page - 1) * RECORDS_PER_PAGE > $nbr_app || $page < 1) $page = 1;
-	$_SESSION['page'] = $page;
-} elseif (isset($_SESSION['page'])) {
-	$page = $_SESSION['page'];
-} else {
-	unset($_SESSION['page']);
-	$page = 1;
-};
-$buffer = array_slice($list, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
-//}}}
-if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// HTML case
+if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {//{{{ HTML case
+	$list = build_list($relations, $licenses, $words, $repos['list']);
+	$nbr_app = count($list);
+	$page = select_page($nbr_app);
+	$buffer = array_slice($list, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 	//{{{ Building content
 	$applist = decore_applist($buffer, $lang, $nbr_app, $page);
 	$lastapp = decore_lastapplist($last_apps, $lang);
@@ -1105,6 +1143,7 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 		$label_menu = translate('iface', 'applist', $lang);
 		$main = $applist;
 	}; //}}}
+
 	//}}}
 
 	$placeholders = array(
@@ -1129,7 +1168,7 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 
 		'Page:Favicon' => (is_file('favicon.ico') && is_readable('favicon.ico')) ? 'favicon.ico' : '',
 		'Page:Feed:Link' => FEED_NAME,
-		'Page:Feed:Name' => '',
+		'Page:Feed:Name' => $repos['name'] . ': ' . translate('iface', 'lastapplist', $lang),
 		'Page:Nav:AnchorMenu' => $anchor_menu,
 		'Page:WarningMessage' => $warning,
 		'Page:FooterText' => MSG_FOOTER,
@@ -1147,7 +1186,11 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 
 	echo parse_template('main', $placeholders);
 
-} elseif ($_REQUEST['format'] == 'json') {
+} elseif ($_REQUEST['format'] == 'json') {//{{{
+	$list = build_list($relations, $licenses, $words, $repos['list']);
+	$nbr_app = count($list);
+	$page = select_page($nbr_app);
+	$buffer = array_slice($list, ($page - 1) * RECORDS_PER_PAGE, RECORDS_PER_PAGE);
 	if (isset($_REQUEST['categories'])) {
 		echo json_encode(array_keys($categories));
 	} elseif (isset($_REQUEST['licenses'])) {
@@ -1165,5 +1208,35 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {	// H
 			$result['list'][] = decore_app_json($app, true);
 		};
 		echo json_encode($result);
+	};//}}}
+} elseif ($_REQUEST['format'] == 'atom') { //{{{
+	unset($_SESSION['licenses']);
+	unset($_SESSION['categories']);
+	unset($_SESSION['words']);
+	unset($_SESSION['list']);
+	unset($_SESSION['page']);
+	$request = explode('?', $_SERVER['REQUEST_URI']);
+	$request_tab = explode('&', $request[1]);
+	$req_tab = array();
+	foreach ($request_tab as $req) {
+		if (stripos($req, 'format') === false && 
+			stripos($req, 'page') === false && 
+			stripos($req, 'reset') === false) 
+					$req_tab[] = strtolower($req);
 	};
-};
+	if (count($req_tab) > 0) {
+		header('Content-type: application/atom+xml');
+		sort($req_tab);
+		$new_query = implode('&', $req_tab);
+		$hash_req = hash(HASH_ALGO, $new_query);
+		if (is_file(CACHE.DIRECTORY_SEPARATOR.$hash_req) && is_readable(CACHE.DIRECTORY_SEPARATOR.$hash_req)) {
+			echo file_get_contents(CACHE.DIRECTORY_SEPARATOR.$hash_req);
+		} else {
+			$list = build_list($relations, $licenses, $words, $repos['list']);
+			$url = str_replace(array('[', ']'), array('%5B', '%5D'), htmlentities($_SERVER['REQUEST_URI']));
+			$feed = build_atom($repos, $list, $url);
+			file_put_contents(CACHE.DIRECTORY_SEPARATOR.$hash_req, $feed);
+			echo $feed;
+		};
+	};
+};//}}}
