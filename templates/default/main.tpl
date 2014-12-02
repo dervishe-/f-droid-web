@@ -12,7 +12,7 @@
     </if>
 
     <if placeholder="Config:UseFeeds">
-        <link rel="alternate" type="application/atom+xml" title="[Page:Feed:Title]" href="[Page:Feed:Link]" />
+        <link rel="alternate" type="application/atom+xml" title="[Page:Feed:Name]" href="[Page:Feed:Link]" />
     </if>
 
     <link type="text/css" rel="stylesheet" href="Media/css/default.css" />

@@ -533,6 +533,7 @@ function decore_app($app_id, $lang) { //{{{
 				$permissions_list .= parse_template(
 					'app_details_permission',
 					array(
+						'Text:Permissions' => translate('iface', 'permissions', $lang),
 						'Package:Version' => $package['version'],
 						'Permission:Id' => $permission,
 						'Permission:Name' => $translate_perm($permission),

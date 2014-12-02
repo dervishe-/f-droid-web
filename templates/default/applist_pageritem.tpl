@@ -1,6 +1,6 @@
 <li>
     <if placeholder="Pager:IsButton">
-        <a href="[Pager:Link]" title="[Text:GoToPage [Pager:Number]">
+        <a href="[Pager:Link]" title="[Text:GoToPage] [Pager:Number]">
             [Pager:Number]
         </a>
     </if>
