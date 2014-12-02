@@ -12,6 +12,11 @@ __F-droid-web__ is a simple and lightweight web interface to [f-droid server] (h
 
 For the installation and configurations information, go to the [wiki](https://github.com/dervishe-/f-droid-web/wiki)
 
+THANKS TO:
+
+* [azrdev](https://github.com/azrdev) we now have a mostly complete german language pack
+* [Peter Serwylo](https://github.com/pserwylo) we will soon have a complete templating system in order to personnalize the UI
+
 MISC:
 
 * This website don't use cookies (except the session cookie). It's tracker free. For the moment, it didn't use database or nosql things just plaintext files or files storing serialized PHP structures.
@@ -23,9 +28,9 @@ word1 + word2 will gather apps matching the 2 words (or n words).
 * The last apps list is available via an atom feed.
 * You can make your queries both by GET and POST method.
 * You can retrieve informations in JSON format.
+* You can make your search available via a personnalize Atom feed
 
 TODO:
 
-* UI dynamization (JS)
-* Add other languages (german, portugese, ...)
+* Add other languages (italian, portugese, polish, ...)
 * WCAG2.0 AAA
