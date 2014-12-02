@@ -28,9 +28,10 @@ word1 + word2 will gather apps matching the 2 words (or n words).
 * The last apps list is available via an atom feed.
 * You can make your queries both by GET and POST method.
 * You can retrieve informations in JSON format.
-* You can make your search available via a personnalize Atom feed
+* You can make your search available via a personnalized Atom feed
 
 TODO:
 
 * Add other languages (italian, portugese, polish, ...)
 * WCAG2.0 AAA
+* Translating the android permissions in several languages
