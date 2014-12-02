@@ -15,7 +15,7 @@ For the installation and configurations information, go to the [wiki](https://gi
 THANKS TO:
 
 * [azrdev](https://github.com/azrdev) we now have a mostly complete german language pack
-* [Peter Serwylo](https://github.com/pserwylo) we will soon have a complete templating system in order to personnalize the UI
+* [Peter Serwylo](https://github.com/pserwylo) we now have a complete templating system
 
 MISC:
 
