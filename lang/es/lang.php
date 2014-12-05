@@ -8,6 +8,7 @@ $lang = array(
 	'iface' => array( //{{{
 		'language' => 'Idioma',
 		'version' => 'Versión',
+		'past_versions' => 'Versiones Anteriores',
 		'added' => 'Añadido el',
 		'size' => 'Peso',
 		'desc' => 'Descripción',

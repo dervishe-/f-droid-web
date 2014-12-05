@@ -2,6 +2,12 @@
 	Header unset ETag
 	FileETag none
 </FilesMatch>
+
+<FilesMatch "\.(tpl)$">
+	Order Allow,Deny
+	Deny from all
+</FilesMatch>
+
 # Expires
 AddType image/x-icon .ico
 ExpiresActive on
