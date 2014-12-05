@@ -1,4 +1,5 @@
 <article id="search">
+	<h2 style="position:absolute; top:-10000px">[Text:Search]</h2>
     <form method="POST" action="[Search:Keyword:Link]">
         <div class="input-group">
             <input

@@ -192,6 +192,7 @@ function build_form_search($lang, $value='') { //{{{
 	return parse_template(
 		'search_keyword',
 		array(
+			'Text:Search' => translate('iface', 'form_val', $lang),
 			'Text:FormValue' => translate('iface', 'form_val', $lang),
 			'Text:KeywordSearch' => translate('iface', 'word_search', $lang),
 			'Text:FormField' => translate('iface', 'form_field', $lang),

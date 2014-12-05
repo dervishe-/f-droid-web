@@ -25,16 +25,16 @@
 
             <if placeholder="Config:UseSocial">
                 <aside id="social_links">
-                    <a title="[Text:Share] Diaspora" href="http://sharetodiaspora.github.io/?title=[Social:Message:UrlEncoded]&amp;url=[Social:Url]\">
+                    <a title="[Text:Share] Diaspora" href="http://sharetodiaspora.github.io/?title=[Social:Message:UrlEncoded]&amp;url=[Social:Url]">
                         <img alt="[Text:Share] Diaspora" src="[Social:Icon:Diaspora]" />
                     </a>
-                    <a title="[Text:Share] Facebook" href="https://www.facebook.com/sharer.php?u=[Social:Message:UrlEncoded]&amp;t=[Social:Url]\">
+                    <a title="[Text:Share] Facebook" href="https://www.facebook.com/sharer.php?u=[Social:Message:UrlEncoded]&amp;t=[Social:Url]">
                         <img alt="[Text:Share] Facebook" src="[Social:Icon:Facebook]" />
                     </a>
-                    <a title="[Text:Share] Google+" href="https://plus.google.com/share?url=[Social:Url]\">
+                    <a title="[Text:Share] Google+" href="https://plus.google.com/share?url=[Social:Url]">
                         <img alt="[Text:Share] Google+" src="[Social:Icon:GooglePlus]" />
                     </a>
-                    <a title="[Text:Share] Twitter" href="https://twitter.com/intent/tweet?text=[Social:Message:UrlEncoded]&amp;url=[Social:Url]\">
+                    <a title="[Text:Share] Twitter" href="https://twitter.com/intent/tweet?text=[Social:Message:UrlEncoded]&amp;url=[Social:Url]">
                         <img alt="[Text:Share] Twitter" src="[Social:Icon:Twitter]" />
                     </a>
                 </aside>
@@ -134,7 +134,7 @@
     </if>
 
     <if placeholder="Subtemplate:Permissions">
-        <aside id="perms" title="[Text:Permissions]" class="permission-container alert alert-warning">
+        <aside id="perms_[App:Package:Version]" title="[Text:Permissions]" class="permission-container alert alert-warning">
             <strong>[Text:Permissions]</strong>
             <ul>
                 [Subtemplate:Permissions]

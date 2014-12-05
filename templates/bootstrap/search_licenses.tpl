@@ -1,5 +1,6 @@
 <article id="licenses">
     <form method="POST" action="[Search:Licenses:Link]">
+		<h2 style="position:absolute; top:-10000px">[Text:License]</h2>
         <fieldset>
             <legend>
                 <a class="accordian collapsed"

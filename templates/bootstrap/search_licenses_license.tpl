@@ -6,5 +6,5 @@
         value="[License:Id]"
         <if placeholder="License:Selected">checked="checked"</if>
         title="[Text:AltLicenseLink]: [License:Name]" />
-    <label for="cat_[License:Index]">[License:Name] ([License:AppCount])</label>
+    <label for="lic_[License:Index]">[License:Name] ([License:AppCount])</label>
 </li>

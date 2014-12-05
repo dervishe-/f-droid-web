@@ -54,10 +54,10 @@
             <div id="navigation-items" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
                     <li><a href="[Page:Nav:AnchorMenu]" title="[Text:Nav:AccessMenu]">[Text:Nav:Menu]</a></li>
-                    <li><a href="#search" title="[Text:Nav:AccessFormVal]">[Text:Nav:FormVal]</a></li>
+                    <li><a href="#search_head" title="[Text:Nav:AccessFormVal]">[Text:Nav:FormVal]</a></li>
                     <li><a href="#lastapplist" title="[Text:Nav:AccessLastAppList]">[Text:Nav:LastAppList]</a></li>
-                    <li><a href="#categories" title="[Text:Nav:BrowseCategories]">[Text:Nav:Categories]</a></li>
-                    <li><a href="#licenses" title="[Text:Nav:BrowseLicenses]">[Text:Nav:Licenses]</a></li>
+                    <li><a href="#categories_head" title="[Text:Nav:BrowseCategories]">[Text:Nav:Categories]</a></li>
+                    <li><a href="#licenses_head" title="[Text:Nav:BrowseLicenses]">[Text:Nav:Licenses]</a></li>
                 </ul>
             </div>
         </div>
@@ -86,21 +86,21 @@
                         </a>
                     </div>
                     <div class="panel-body collapse in" id="filter-widgets">
-                        <a name="search"></a>
+                        <a id="search_head"></a>
                         [Subtemplate:Tools:KeywordSearch]
                         [Subtemplate:Tools:Reset]
 
-                        <a name="categories"></a>
+                        <a id="categories_head"></a>
                         [Subtemplate:Tools:Categories]
 
-                        <a name="licenses"></a>
+                        <a id="licenses_head"></a>
                         [Subtemplate:Tools:Licenses]
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-3">
-                <a name="lastapplist"></a>
+                <a id="lastapplist"></a>
                 [Subtemplate:LastApp]
             </div>
 

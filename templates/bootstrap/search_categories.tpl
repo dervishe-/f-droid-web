@@ -1,5 +1,6 @@
 <article id="categories">
     <form method="POST" action="[Search:Categories:Link]">
+		<h2 style="position:absolute; top:-10000px">[Text:Categories]</h2>
         <fieldset>
             <legend>
                 <a class="accordian"
