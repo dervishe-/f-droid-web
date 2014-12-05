@@ -428,7 +428,7 @@ function cache_words($repos) { //{{{	Fields to search: name, summary, descriptio
 			};
 		};
 	} elseif (count($repos) > 0) {		// Fallback: if DATA is not present, then we use app file stored in cache
-		include_once(LANG.DIRECTORY_SEPARATOR.LOCALIZATION."stopwords.php"); // $stopwords loading
+		include_once(LANG.DIRECTORY_SEPARATOR.LOCALIZATION.DIRECTORY_SEPARATOR."stopwords.php"); // $stopwords loading
 		foreach ($repos as $app) {
 			if (is_file(CACHE.DIRECTORY_SEPARATOR.$app) && is_readable(CACHE.DIRECTORY_SEPARATOR.$app)) {
 				$app = unserialize(file_get_contents($app));
