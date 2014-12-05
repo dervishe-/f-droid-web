@@ -15,7 +15,7 @@
         <link rel="alternate" type="application/atom+xml" title="[Page:Feed:Name]" href="[Page:Feed:Link]" />
     </if>
 
-    <link type="text/css" rel="stylesheet" href="Media/css/default.css" />
+    <link type="text/css" rel="stylesheet" href="templates/default/css/default.css" />
 
 </head>
 
