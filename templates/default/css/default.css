@@ -4,6 +4,7 @@
 	padding: 0em;
 	font-family: arial,tahoma,sans-serif;
 }
+
 #warning {
 	border: 0.3em solid #B00000;
 	padding: 0.5em;
@@ -11,6 +12,17 @@
 	text-align: center;
 	font-weight: bold;
 	font-size: 1.2em;
+	color: #B00000;
+}
+
+#missing_sheet {
+	border: 0.1em solid #B00000;
+	padding: 0.5em;
+	margin: 0.3em;
+	border-radius: 0.5em;
+	text-align: center;
+	font-weight: bold;
+	font-size: 1em;
 	color: #B00000;
 }
 /*}}}*/
@@ -34,7 +46,7 @@
 	padding: 0.2em;
 }
 
-#lang li.selected {
+#lang li span {
 	opacity: 0.4;
 }
 /*}}}*/

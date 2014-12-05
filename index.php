@@ -19,7 +19,7 @@ define('ICONS_DIR', 'icons-320');
 define('ICONS_DIR_ABSTRACT', 'icons-160');
 define('TEMPLATE_DIR', ROOT.DIRECTORY_SEPARATOR.'templates');
 define('DEFAULT_THEME', 'default');
-define('THEME', 'default');
+define('THEME', 'default');//'bootstrap');
 define('QRCODES_DIR', 'Media/images/qrcodes');
 define('LANG', 'lang');
 define('CACHE', ROOT.DIRECTORY_SEPARATOR.'cache');
@@ -1137,10 +1137,11 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {//{{{
 			$main = decore_app($sheet, $lang);
 		} else {
 			$placeholders = array(
+				"Text:Back" => translate('iface', 'back', $lang),
 				'Text:WarnLabel' => translate('iface', 'error_label', $lang),
-				'Text:WarnMessage' => translate('iface', 'error_message', $lang)
+				'Text:WarnMessage' => translate('iface', 'error_message_sheet', $lang)
 			);
-			$main = parse_template("warn_fallback", $placeholders);
+			$main = parse_template("warn_missing_sheet", $placeholders);
 		};
 		$anchor_menu = "#appsheet";
 		$label_access_menu = translate('iface', 'access_appsheet', $lang);
