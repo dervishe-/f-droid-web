@@ -1136,11 +1136,11 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {//{{{
 			$_SESSION['sheet'] = $sheet;
 			$main = decore_app($sheet, $lang);
 		} else {
-			$main = "
-			<fieldset>
-				<legend>".translate('iface', 'error_label', $lang)."</legend>".
-				translate('iface', 'error_message', $lang).
-			"</fieldset>";
+			$placeholders = array(
+				'Text:WarnLabel' => translate('iface', 'error_label', $lang),
+				'Text:WarnMessage' => translate('iface', 'error_message', $lang)
+			);
+			$main = parse_template("warn_fallback", $placeholders);
 		};
 		$anchor_menu = "#appsheet";
 		$label_access_menu = translate('iface', 'access_appsheet', $lang);
@@ -1193,7 +1193,7 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {//{{{
 	);
 
 	echo parse_template('main', $placeholders);
-
+//}}}
 } elseif ($_REQUEST['format'] == 'json') {//{{{
 	$list = build_list($relations, $licenses, $words, $repos['list']);
 	$nbr_app = count($list);
@@ -1248,3 +1248,4 @@ if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {//{{{
 		};
 	};
 };//}}}
+?>
