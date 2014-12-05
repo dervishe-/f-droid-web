@@ -43,13 +43,13 @@ define('HASH_REPOS_PUBKEY', 'sha256');
 define('USE_QRCODE', true);
 define('USE_FEEDS', true);
 define('USE_SOCIAL', true);
-define('FEED_AUTHOR', 'Les Petits Débrouillards');
+define('FEED_AUTHOR', "Your feed's author");
 define('NUMBER_LAST_APP', 10);
 define('RECORDS_PER_PAGE', 12);
 define('NUMBER_PAGES', 9);		// Fixe the number of appearing page numbers in the pager
 define('DEFAULT_LANG', 'fr');	// Fixe the localization of the UI
 define('LOCALIZATION', 'en');	// Fixe the localization of the search (mainly related to the languages in which the apps are describes)
-define('MSG_FOOTER', '(C) Association Française des Petits Débrouillards - Licence: LGPL');//}}}
+define('MSG_FOOTER', "Your footer's text");//}}}
 // ALLOWED VALUES
 $formats = array('json' => 1, 'atom' => 2);
 //}}}

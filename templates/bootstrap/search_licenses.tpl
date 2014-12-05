@@ -6,8 +6,8 @@
                    data-toggle="collapse"
                    data-target="#license-items"
                    aria-controls="license-items">
-                    <span class="glyphicon glyphicon-collapse-up up" style="float: right"></span>
-                    <span class="glyphicon glyphicon-collapse-down down" style="float: right"></span>
+                    <span class="glyphicon glyphicon-collapse-up up" style="float: right; cursor: pointer"></span>
+                    <span class="glyphicon glyphicon-collapse-down down" style="float: right; cursor: pointer"></span>
                     [Text:License]
                 </a>
             </legend>
