@@ -57,19 +57,19 @@ body > header {
 	padding: 0.5em;
 }
 
-body > header > div:first-child {
+body > header > div div:first-child {
 	display: flex;
 	justify-content: space-around;
 	align-items: center;
 }
 
-body > header div:nth-child(3) {
+body > header > div div:nth-child(3) {
 	float: right;
 	font-weight: bold;
 	font-size: 0.8em;
 }
 
-body > header div:nth-child(2) {
+body > header > div div:nth-child(2) {
 	padding: 0.5em;
 }
 /*}}}*/
