@@ -837,7 +837,7 @@ function decore_categories($relations, $lang, $nbr_apps) { //{{{
 			'Text:AllCategoriesLabel' => translate('iface', 'all_categories', $lang),
 
 			'Search:Categories:TotalAppCount' => $nbr_apps,
-			'Search:Categories:AllCategoriesSelected' => !isset($_SESSION['categories']) ? '1' : '0',
+			'Search:Categories:AllCategoriesSelected' => isset($_SESSION['categories']) ? '0' : '1',
 			'Search:Categories:Link' => 'index.php?search',
 
 			'Subtemplate:CategoryItems' => $category_list_template,
@@ -883,7 +883,7 @@ function decore_licenses($licenses, $lang, $nbr_apps) { //{{{
 
 			'Search:Licenses:Link' => 'index.php?search',
 			'Search:Licenses:TotalAppCount' => $nbr_apps,
-			'Search:Licenses:AllLicensesSelected' => !isset($_SESSION['licenses']) ? '1' : '0',
+			'Search:Licenses:AllLicensesSelected' => isset($_SESSION['licenses']) ? '0' : '1',
 
 			'Subtemplate:LicenseItems' => $license_list_template,
 		)

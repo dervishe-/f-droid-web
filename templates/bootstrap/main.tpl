@@ -80,7 +80,7 @@
                             aria-controls="filter-widgets">
                             <span class="glyphicon glyphicon-collapse-up up" style="float: right; cursor: pointer"></span>
                             <span class="glyphicon glyphicon-collapse-down down" style="float: right; cursor: pointer"></span>
-                            <h2 class="panel-title">
+                            <h2 class="panel-title" style="cursor: pointer">
                                 [Text:Search]
                             </h2>
                         </a>

@@ -9,7 +9,7 @@
                    aria-controls="license-items">
                     <span class="glyphicon glyphicon-collapse-up up" style="float: right; cursor: pointer"></span>
                     <span class="glyphicon glyphicon-collapse-down down" style="float: right; cursor: pointer"></span>
-                    [Text:License]
+                    <span style="cursor: pointer">[Text:License]</span>
                 </a>
             </legend>
             <ul id="license-items" class="filter-items collapse up">

@@ -7,7 +7,7 @@
             aria-controls="latest-apps">
             <span class="glyphicon glyphicon-collapse-up up" style="float: right; cursor: pointer"></span>
             <span class="glyphicon glyphicon-collapse-down down" style="float: right; cursor: pointer"></span>
-            <h2 class="panel-title">[Text:LatestAppList]</h2>
+            <h2 class="panel-title" style="cursor: pointer">[Text:LatestAppList]</h2>
         </a>
     </div>
     <div class="panel-body collapse in" id="latest-apps">
