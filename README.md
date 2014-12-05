@@ -15,7 +15,7 @@ For the installation and configurations information, go to the [wiki](https://gi
 THANKS TO:
 
 * [azrdev](https://github.com/azrdev) we now have a mostly complete german language pack
-* [Peter Serwylo](https://github.com/pserwylo) we now have a complete templating system
+* [Peter Serwylo](https://github.com/pserwylo) we now have a complete templating system and a beautiful bootstrap theme :)
 
 MISC:
 
@@ -29,6 +29,7 @@ word1 + word2 will gather apps matching the 2 words (or n words).
 * You can make your queries both by GET and POST method.
 * You can retrieve informations in JSON format.
 * You can make your search available via a personnalized Atom feed
+* You can choose your website's theme
 
 TODO:
 
