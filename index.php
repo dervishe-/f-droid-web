@@ -19,7 +19,7 @@ define('ICONS_DIR', 'icons-320');
 define('ICONS_DIR_ABSTRACT', 'icons-160');
 define('TEMPLATE_DIR', ROOT.DIRECTORY_SEPARATOR.'templates');
 define('DEFAULT_THEME', 'default');
-define('THEME', 'default');//'bootstrap');
+define('THEME', 'default');
 define('QRCODES_DIR', 'Media/images/qrcodes');
 define('LANG', 'lang');
 define('CACHE', ROOT.DIRECTORY_SEPARATOR.'cache');

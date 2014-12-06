@@ -7,9 +7,9 @@
                    data-toggle="collapse"
                    data-target="#category-items"
                    aria-controls="category-items">
-                    <span class="glyphicon glyphicon-collapse-up up" style="float: right; cursor: pointer"></span>
-                    <span class="glyphicon glyphicon-collapse-down down" style="float: right; cursor: pointer"></span>
-                    <span style="cursor: pointer">[Text:Categories]</span>
+                    <span class="glyphicon glyphicon-collapse-up up link-cursor" style="float: right"></span>
+                    <span class="glyphicon glyphicon-collapse-down down link-cursor" style="float: right"></span>
+                    <span class="link-cursor">[Text:Categories]</span>
                 </a>
             </legend>
             <ul id="category-items" class="filter-items collapse in">
