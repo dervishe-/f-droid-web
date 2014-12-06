@@ -43,6 +43,14 @@ body {
     margin-top: 0.5em;
 }
 
+.link-cursor {
+    cursor: pointer;
+}
+
+.collapse-icon {
+    float: right;
+}
+
 ul.filter-items {
     list-style: none;
     margin-left: 0;
@@ -108,13 +116,8 @@ ul.anti-features li {
     width: 100%;
 }
 
-#appsheet #details .info .btn {
-    width: 100%;
-}
-
-#appsheet #details {
-    float: right;
-    margin-left: 1em;
+#appsheet .info-label {
+    font-weight: bold;
 }
 
 #download, #social_links {
@@ -132,14 +135,12 @@ ul.anti-features li {
     font-family: "Courier New", "DejaVu Sans Mono", monospace;
 }
 
-#block_dev a.btn {
-    width: 100%;
-    margin: 0.3em 0.5em;
+#appsheet #details .btn {
+    min-width: 120px; /* Slightly bigger than the QR code which is generated */
+    margin: 0.3em 0;
 }
 
-#used_categories, #perms, #antifeatures {
-    display: inline-block;
-    min-width: 50%;
+#appsheet, .info-box {
 }
 
 .package .info {
@@ -147,15 +148,17 @@ ul.anti-features li {
 }
 
 @media screen and (max-width: 768px) {
-    #appsheet #details {
-        float: none;
-        display: inline-block;
-    }
 
+    /* The "Back to List" link - should be below the app name on small screens */
     #appsheet h2 > small {
         display: block;
         margin-top: 0.5em;
     }
+
+    #appsheet #details {
+        text-align: center;
+    }
+
 }
 
 #latest-apps .icon {

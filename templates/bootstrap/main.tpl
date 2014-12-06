@@ -78,9 +78,9 @@
                             data-target="#filter-widgets"
                             aria-expanded="true"
                             aria-controls="filter-widgets">
-                            <span class="glyphicon glyphicon-collapse-up up" style="float: right; cursor: pointer"></span>
-                            <span class="glyphicon glyphicon-collapse-down down" style="float: right; cursor: pointer"></span>
-                            <h2 class="panel-title" style="cursor: pointer">
+                            <span class="collapse-icon glyphicon glyphicon-collapse-up up link-cursor"></span>
+                            <span class="collapse-icon glyphicon glyphicon-collapse-down down link-cursor"></span>
+                            <h2 class="panel-title link-cursor">
                                 [Text:Search]
                             </h2>
                         </a>
