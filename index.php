@@ -101,6 +101,7 @@ function build_app($_xml, $id_app) { //{{{
 	foreach ($app->package as $pkg) {
 		$package = array();
 		$package['version'] = (string) $pkg->version;
+		$package['version_code'] = (string) $pkg->versioncode;
 		$package['apkname'] = (string) $pkg->apkname;
 		$package['size'] = (int) $pkg->size;
 		$package['added'] = (string) $pkg->added;
@@ -642,6 +643,7 @@ function app_package_placeholders($package, $prefix = '') {//{{{
 
 	return array(
 		$prefix . "Package:Version" => $package['version'],
+		$prefix . "Package:VersionCode" => $package['version_code'],
 		$prefix . "Package:SdkVersion" => $package['sdkver'],
 		$prefix . "Package:Name" => $package['apkname'],
 		$prefix . "Package:SizeBytes" => $package['size'],
