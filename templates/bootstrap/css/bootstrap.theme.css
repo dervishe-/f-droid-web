@@ -43,6 +43,10 @@ body {
     margin-top: 0.5em;
 }
 
+#latest-apps .details {
+    word-wrap: break-word;
+}
+
 .link-cursor {
     cursor: pointer;
 }
