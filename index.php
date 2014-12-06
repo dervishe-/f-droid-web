@@ -1039,46 +1039,23 @@ include_once("lang/{$lang_label}".DIRECTORY_SEPARATOR."lang.php");
 //{{{ Retrieve data from cache
 libxml_use_internal_errors(true);
 if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false) {
-	if (!is_file(REPOS_FILE)) {//{{{
-		$favicon = (is_file('favicon.ico') && is_readable('favicon.ico')) ? 
-			"<link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\" />" : '';
-		$headers = "<header role=\"banner\">
-			<div>
-				<h1>".translate('iface', 'error_label', $lang)."</h1>
-			</div>";
-		$headers .= build_lang_selector($lang_label, $lang);
-		$headers .= "</header>";
-		$main = "<article><h2>".translate('iface', 'error_label', $lang)."</h2><div id=\"warning\">".translate('iface', 'error_message', $lang)."<div></article>";
-		$footer = "<footer role=\"contentinfo\"><span>".MSG_FOOTER."</span></footer>";
-		$menu = "
-<nav id=\"menu\" role=\"navigation\">
-	<h2>".translate('iface', 'menu', $lang).":</h2>
-	<ul>
-		<li><a href=\"#warning\" title=\"".translate('iface', 'access_error_mess', $lang)."\">".translate('iface', 'error_label', $lang)."</a></li>
-	</ul>
-</nav>
-";
-		echo "
-<!DOCTYPE html>
-<html lang=\"{$_SESSION['lang']}\">
-	<head>
-		<meta charset=\"UTF-8\">
-		<title>".translate('iface', 'error_label', $lang)."</title>
-		{$favicon}
-		<link type=\"text/css\" rel=\"stylesheet\" href=\"Media/css/default.css\" />
-	</head>
-	<body>
-		{$headers}
-		<main role=\"main\">
-			{$menu}
-			{$main}
-		</main>
-		{$footer}
-	</body>
-</html>
-";
+	if (!is_file(REPOS_FILE)) {//{{{ Error mode
+		$placeholders = array(
+			'Page:Favicon' => (is_file('favicon.ico') && is_readable('favicon.ico')) ? 'favicon.ico' : '',
+			'Page:Title' => translate('iface', 'error_label', $lang),
+
+			'Text:Menu' => translate('iface', 'menu', $lang),
+			'Text:ErrorMessage' => translate('iface', 'error_message', $lang),
+			'Text:AccessErrorMessage' => translate('iface', 'access_error_mess', $lang),
+			'Text:Footer' => MSG_FOOTER,
+
+			'Lang:Current' => $lang_label,
+
+			'Subtemplate:LangSelector' => build_lang_selector($lang_label, $lang)
+		);
+		echo parse_template('main_warning', $placeholders);
 		exit;//}}}
-	} else {
+	} else { //{{{Fallabck mode
 		$warning = translate('iface', 'warning_msg', $lang);
 		$repos = unserialize(file_get_contents(REPOS_FILE));
 		$categories = (is_file(CAT_FILE)) ? unserialize(file_get_contents(CAT_FILE)) : cache_categories($repos['list']);
@@ -1098,8 +1075,8 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 			closedir($dh);
 		};
 		$repos['list'] = $buffered_list;
-	};
-} else {
+	};//}}}
+} else { //{{{All is OK
 	$warning = '';
 	$hash = hash_file(HASH_ALGO, DATA);
 	if ((is_file(MANIFEST) && $hash != file_get_contents(MANIFEST)) || !is_file(REPOS_FILE)) {
@@ -1119,7 +1096,7 @@ if (!is_file(DATA) || !is_readable(DATA) || simplexml_load_file(DATA) === false)
 		$words = (is_file(WORD_FILE)) ? unserialize(file_get_contents(WORD_FILE)) : cache_words($repos['list']);
 		$last_apps = (is_file(LAST_FILE)) ? unserialize(file_get_contents(LAST_FILE)) : cache_lastapps($repos);
 	};
-};
+};//}}}
 //}}}
 if (!isset($_REQUEST['format']) || !isset($formats[$_REQUEST['format']])) {//{{{ HTML case
 	$list = build_list($relations, $licenses, $words, $repos['list']);
