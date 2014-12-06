@@ -7,9 +7,9 @@
                    data-toggle="collapse"
                    data-target="#license-items"
                    aria-controls="license-items">
-                    <span class="glyphicon glyphicon-collapse-up up" style="float: right; cursor: pointer"></span>
-                    <span class="glyphicon glyphicon-collapse-down down" style="float: right; cursor: pointer"></span>
-                    <span style="cursor: pointer">[Text:License]</span>
+                    <span class="collapse-icon glyphicon glyphicon-collapse-up up link-cursor"></span>
+                    <span class="collapse-icon glyphicon glyphicon-collapse-down down link-cursor"></span>
+                    <span class="link-cursor">[Text:License]</span>
                 </a>
             </legend>
             <ul id="license-items" class="filter-items collapse up">

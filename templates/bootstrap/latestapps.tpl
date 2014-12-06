@@ -5,9 +5,9 @@
             data-target="#latest-apps"
             aria-expanded="true"
             aria-controls="latest-apps">
-            <span class="glyphicon glyphicon-collapse-up up" style="float: right; cursor: pointer"></span>
-            <span class="glyphicon glyphicon-collapse-down down" style="float: right; cursor: pointer"></span>
-            <h2 class="panel-title" style="cursor: pointer">[Text:LatestAppList]</h2>
+            <span class="link-cursor collapse-icon glyphicon glyphicon-collapse-up up"></span>
+            <span class="link-cursor collapse-icon glyphicon glyphicon-collapse-down down"></span>
+            <h2 class="panel-title link-cursor">[Text:LatestAppList]</h2>
         </a>
     </div>
     <div class="panel-body collapse in" id="latest-apps">
