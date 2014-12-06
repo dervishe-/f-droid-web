@@ -18,7 +18,7 @@
     </if>
 
     <link type="text/css" rel="stylesheet" href="templates/bootstrap/css/bootstrap.min.css" />
-    <link type="text/css" rel="stylesheet" href="templates/bootstrap/css/bootstrap.theme.css" />
+    <link type="text/css" rel="stylesheet" href="templates/bootstrap/css/theme.css" />
 
 </head>
 
