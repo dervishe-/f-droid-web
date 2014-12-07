@@ -26,6 +26,7 @@
 
                 <if placeholder="App:Donate:HasDonationOptions">
                     <aside id="donate_app" class="info">
+                </if>
                         <if placeholder="App:Donate:Link">
                             <a title="[Text:Donate]" href="[App:Donate:Link]">[Text:Donate]</a>
                         </if>
@@ -38,6 +39,7 @@
                                 <span>[App:Donate:BitcoinAddress]</span>
                             </div>
                         </if>
+                <if placeholder="App:Donate:HasDonationOptions">
                     </aside>
                 </if>
 
